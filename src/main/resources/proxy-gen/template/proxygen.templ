@@ -1,81 +1,64 @@
 
 @declare{'methodBody'}
-	@code{lastParam = method.params.get(method.params.size() - 1)}
-	@code{hasResultHandler=(lastParam.type.kind == CLASS_HANDLER) && (lastParam.type.args[0].kind == CLASS_ASYNC_RESULT)}
     JsonObject json = new JsonObject();\n
+	@code{hasParams = !method.params.isEmpty()}
+	@code{lastParam = hasParams ? method.params.get(method.params.size() - 1) : null}
+	@code{hasResultHandler=(lastParam != null) && (lastParam.type.kind == CLASS_HANDLER) && (lastParam.type.args[0].kind == CLASS_ASYNC_RESULT)}
 	@code{count=0}
 	@foreach{param: method.params}
-		@if{count++ != method.params.size() - 1}
+		@if{!hasResultHandler || (count++ != method.params.size() - 1)}
+			@if{param.type.name == 'char' || param.type.name == 'java.lang.Character'}
+    json.putValue("@{param.name}", (int)@{param.name});\n
+			@else{param.type.kind == CLASS_ENUM}
+    json.putValue("@{param.name}", @{param.name}.toString());\n
+			@else{param.type.kind == CLASS_LIST}
+    json.putValue("@{param.name}", new JsonArray(@{param.name}));\n
+			@else{}
     json.putValue("@{param.name}", @{param.name});\n
+			@end{}
 		@end{}
 	@end{}
+
     DeliveryOptions options = new DeliveryOptions();\n
     options.addHeader("action", "@{method.name}");\n
-		@if{hasResultHandler}
+	@if{hasResultHandler}
 		@code{resultType=lastParam.type.args[0].args[0]}
 		@code{resultKind=resultType.kind}
-    vertx.eventBus().<@{resultType.simpleName}>send(address, json, options, res -> {\n
+    vertx.eventBus().
+@if{resultKind == CLASS_LIST}
+<JsonArray>
+@else{}
+<@{resultType.simpleName}>
+@end{}
+send(address, json, options, res -> {\n
       if (res.failed()) {\n
         @{lastParam.name}.handle(Future.completedFuture(res.cause()));\n
       } else {\n
+				@if{resultKind == CLASS_LIST && resultType.args[0].kind == CLASS_JSON_OBJECT}
+        @{lastParam.name}.handle(Future.completedFuture(convertToListJsonObject(res.result().body())));\n
+				@else{resultKind == CLASS_LIST && resultType.args[0].kind == CLASS_JSON_ARRAY}
+        @{lastParam.name}.handle(Future.completedFuture(convertToListJsonArray(res.result().body())));\n
+				@else{resultKind == CLASS_LIST && resultType.args[0].name == 'java.lang.Character'}
+        @{lastParam.name}.handle(Future.completedFuture(convertToListChar(res.result().body())));\n
+				@else{resultKind == CLASS_LIST}
+        @{lastParam.name}.handle(Future.completedFuture(res.result().body().toList()));\n
+				@else{}
         @{lastParam.name}.handle(Future.completedFuture(res.result().body()));\n
+				@end{}
       }\n
     });\n
-		@else{}
-    vertx.eventBus().send(address, json, options);\n
-		@end{}
-
-@end{}
-
-
-@declare{'paramTemplate'}
-	@{param.type.simpleName} @{param.name}
-@end{}
-
-@declare{'paramArgument'}
-	@if{param.type.kind == CLASS_HANDLER}
-		@code{eventType=param.type.args[0]}
-		@code{eventKind=eventType.kind}
-		@if{eventKind.basic || eventKind == CLASS_VOID || eventKind.json}
-			@{param.name}
-		@else{eventKind == CLASS_LIST || eventKind == CLASS_SET}
-			@code{elementType=eventType.args[0]}
-			@code{elementKind=elementType.kind}
-			@if{elementKind == CLASS_PRIMITIVE || elementKind == CLASS_BOXED_PRIMITIVE || elementKind == CLASS_STRING}
-				@{param.name}
-			@else{}
-				@{param.name}
-			@end{}
-		@else{eventKind == CLASS_ASYNC_RESULT}
-			@code{resultType=eventType.args[0]}
-			@code{resultKind=resultType.kind}
-			@if{resultKind.basic || resultKind == CLASS_VOID || resultKind.json}
-				@{param.name}
-			@else{resultKind == CLASS_LIST || resultKind == CLASS_SET}
-				@code{elementType=resultType.args[0]}
-				@code{elementKind=elementType.kind}
-				@if{elementKind == CLASS_PRIMITIVE || elementKind == CLASS_BOXED_PRIMITIVE || elementKind == CLASS_STRING}
-					@{param.name}
-				@else{}
-					@{param.name}
-				@end{}
-			@else{}
-				null /* Handler<AsyncResult<@{resultType.name}>> with kind @{resultKind} not yet implemented */
-			@end{}
-		@else{}
-			null /* Handler<@{eventType.name}> with kind @{eventKind} not yet implemented */
-		@end{}
 	@else{}
-		@{param.name}
+    vertx.eventBus().send(address, json, options);\n
 	@end{}
+
 @end{}
 
-@declare{'returnTypeTemplate'}
-	@{type.simpleName}
-@end{}
 
 @declare{'startMethodTemplate'}
-public @if{method.staticMethod}static @end{}@if{method.typeParams.size() > 0}<@foreach{typeVar:method.typeParams}@{typeVar}@end{', '}> @end{}@includeNamed{'returnTypeTemplate';type=method.returnType} @{method.name}(@foreach{param: method.params}@includeNamed{'paramTemplate';param=param}@end{', '}) {
+public @if{method.staticMethod}static @end{}
+	@if{method.typeParams.size() > 0}
+		<@foreach{typeVar:method.typeParams}@{typeVar}@end{', '}>
+	 @end{}@{method.returnType.simpleName} @{method.name}(@foreach{param: method.params}@{param.type.simpleName} @{param.name}@end{', '}) {
 @end{}
 
 /*\n
@@ -98,6 +81,7 @@ package @{ifacePackageName.replace('io.vertx.ext', 'io.vertx.ext.proxy')};\n
 import @{ifaceFQCN};\n
 import io.vertx.core.eventbus.DeliveryOptions;\n
 import io.vertx.core.Future;\n
+import java.util.ArrayList;
 @foreach{importedType:importedTypes}
 	@if{!importedType.packageName.equals("java.lang")}
 		import @{importedType};\n
@@ -107,12 +91,12 @@ import io.vertx.core.Future;\n
 /*\n
   Generated Proxy code - DO NOT EDIT\n
 */\n
-public class @{ifaceSimpleName}Proxy implements @{ifaceSimpleName} {\n
+public class @{ifaceSimpleName}VertxEBProxy implements @{ifaceSimpleName} {\n
 \n
   private Vertx vertx;\n
   private String address;\n
 \n
-  public @{ifaceSimpleName}Proxy(Vertx vertx, String address) {\n
+  public @{ifaceSimpleName}VertxEBProxy(Vertx vertx, String address) {\n
     this.vertx = vertx;\n
     this.address = address;\n
   }\n
@@ -139,6 +123,34 @@ public class @{ifaceSimpleName}Proxy implements @{ifaceSimpleName} {\n
     throw new UnsupportedOperationException("Can't call stop() on a service proxy");\n
   }\n
 \n
+  // This is clunky, but will disappear once we refactor JsonObject to be a map\n
+  private List<JsonObject> convertToListJsonObject(JsonArray arr) {\n
+    List<JsonObject> list = new ArrayList<>();\n
+    for (Object obj: arr) {\n
+      JsonObject jobj = (JsonObject)obj;\n
+      list.add(jobj);\n
+    }\n
+    return list;\n
+  }\n
+
+  // This is clunky, but will disappear once we refactor Json stuff\n
+  private List<JsonArray> convertToListJsonArray(JsonArray arr) {\n
+    List<JsonArray> list = new ArrayList<>();\n
+    for (Object obj: arr) {\n
+      JsonArray jobj = (JsonArray)obj;\n
+      list.add(jobj);\n
+    }\n
+    return list;\n
+  }\n
+
+  private List<Character> convertToListChar(JsonArray arr) {\n
+    List<Character> list = new ArrayList<>();\n
+    for (Object obj: arr) {\n
+      Integer jobj = (Integer)obj;\n
+      list.add((char)jobj.intValue());\n
+    }\n
+    return list;\n
+  }\n
 
 }
 

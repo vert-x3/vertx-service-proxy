@@ -3,13 +3,13 @@
   "generators": [
     {
       "kind": "proxy",
-      "fileName": "ifacePackageName.replace('io.vertx.ext', 'io.vertx.ext.proxy') + '.' + ifaceSimpleName + 'Proxy.java'",
+      "fileName": "ifacePackageName.replace('io.vertx.ext', 'io.vertx.ext.proxy') + '.' + ifaceSimpleName + 'VertxEBProxy.java'",
       "templateFileName": "proxy-gen/template/proxygen.templ"
     }
     ,
     {
       "kind": "proxy",
-      "fileName": "ifacePackageName.replace('io.vertx.ext', 'io.vertx.ext.proxy') + '.' + ifaceSimpleName + 'Handler.java'",
+      "fileName": "ifacePackageName.replace('io.vertx.ext', 'io.vertx.ext.proxy') + '.' + ifaceSimpleName + 'VertxProxyHandler.java'",
       "templateFileName": "proxy-gen/template/handlergen.templ"
     }
   ]

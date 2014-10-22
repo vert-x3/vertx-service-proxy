@@ -18,6 +18,7 @@ package @{ifacePackageName.replace('io.vertx.ext', 'io.vertx.ext.proxy')};\n
 import @{ifaceFQCN};\n
 import io.vertx.core.Handler;\n
 import io.vertx.core.eventbus.Message;\n
+import io.vertx.core.eventbus.ReplyException;\n
 @foreach{importedType:importedTypes}
 	@if{!importedType.packageName.equals("java.lang")}
 		import @{importedType};\n
@@ -27,12 +28,12 @@ import io.vertx.core.eventbus.Message;\n
 /*\n
   Generated Proxy code - DO NOT EDIT\n
 */\n
-public class @{ifaceSimpleName}Handler implements Handler<Message<JsonObject>> {\n
+public class @{ifaceSimpleName}VertxProxyHandler implements Handler<Message<JsonObject>> {\n
 \n
   private Vertx vertx;\n
   private TestService service;\n
 \n
-  public @{ifaceSimpleName}Handler(Vertx vertx, TestService service) {\n
+  public @{ifaceSimpleName}VertxProxyHandler(Vertx vertx, TestService service) {\n
     this.vertx = vertx;\n
     this.service = service;\n
   }\n
@@ -48,16 +49,34 @@ public class @{ifaceSimpleName}Handler implements Handler<Message<JsonObject>> {
 	@if{!method.staticMethod}
       case "@{method.name}": {\n
         service.@{method.name}(
-		@code{lastParam = method.params.get(method.params.size() - 1)}
-		@code{hasResultHandler=(lastParam.type.kind == CLASS_HANDLER) && (lastParam.type.args[0].kind == CLASS_ASYNC_RESULT)}
+		@code{hasParams = !method.params.isEmpty()}
+		@code{lastParam = hasParams? method.params.get(method.params.size() - 1) : null}
+		@code{hasResultHandler=(lastParam != null) && (lastParam.type.kind == CLASS_HANDLER) && (lastParam.type.args[0].kind==CLASS_ASYNC_RESULT)}
 		@code{count=0}
 		@foreach{param: method.params}
 			@if{!hasResultHandler || (count++ != method.params.size() - 1)}
+				@if{param.type.name == 'char' || param.type.name == 'java.lang.Character'}
+(char)(json.getInteger("@{param.name}").intValue())
+				@else{param.type.kind == CLASS_ENUM}
+@{param.type.name}.valueOf(json.getString("@{param.name}"))
+				@else{param.type.kind == CLASS_LIST}
+json.getArray("@{param.name}").toList()
+				@else{}
 json.getValue("@{param.name}")
+				@end{}
+			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_LIST && lastParam.type.args[0].args[0].args[0].kind==CLASS_JSON_OBJECT}
+createListJsonObjectHandler(msg)
+			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_LIST && lastParam.type.args[0].args[0].args[0].kind==CLASS_JSON_ARRAY}
+createListJsonArrayHandler(msg)
+			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_LIST && lastParam.type.args[0].args[0].args[0].name=='java.lang.Character'}
+createListCharHandler(msg)
+			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_LIST}
+createListHandler(msg)
 			@else{}
 createHandler(msg)
 			@end{}
 		@end{", "});\n
+        break;\n
       }
 	@end{}
 \n
@@ -72,9 +91,63 @@ createHandler(msg)
   private <T> Handler<AsyncResult<T>> createHandler(Message msg) {\n
     return res -> {\n
       if (res.failed()) {\n
-        msg.fail(123, res.cause().getMessage());\n
+        msg.fail(-1, res.cause().getMessage());\n
       } else {\n
         msg.reply(res.result());\n
+      }\n
+    };\n
+  }\n
+
+  private <T> Handler<AsyncResult<List<T>>> createListHandler(Message msg) {\n
+    return res -> {\n
+      if (res.failed()) {\n
+        msg.fail(-1, res.cause().getMessage());\n
+      } else {\n
+        msg.reply(new JsonArray(res.result()));\n
+      }\n
+    };\n
+  }\n
+
+  // This is clunky, but will disappear once we refactor JsonObject to be a map\n
+  private Handler<AsyncResult<List<JsonObject>>> createListJsonObjectHandler(Message msg) {\n
+    return res -> {\n
+      if (res.failed()) {\n
+        msg.fail(-1, res.cause().getMessage());\n
+      } else {\n
+        JsonArray arr = new JsonArray();\n
+        for (JsonObject obj: res.result()) {\n
+          arr.add(obj);\n
+        }\n
+        msg.reply(arr);\n
+      }\n
+    };\n
+  }\n
+
+  // This is clunky, but will disappear once we refactor JsonArray to be a list\n
+  private Handler<AsyncResult<List<JsonArray>>> createListJsonArrayHandler(Message msg) {\n
+    return res -> {\n
+      if (res.failed()) {\n
+        msg.fail(-1, res.cause().getMessage());\n
+      } else {\n
+        JsonArray arr = new JsonArray();\n
+        for (JsonArray obj: res.result()) {\n
+          arr.add(obj);\n
+        }\n
+        msg.reply(arr);\n
+      }\n
+    };\n
+  }\n
+
+  private Handler<AsyncResult<List<Character>>> createListCharHandler(Message msg) {\n
+    return res -> {\n
+      if (res.failed()) {\n
+        msg.fail(-1, res.cause().getMessage());\n
+      } else {\n
+        JsonArray arr = new JsonArray();\n
+        for (Character chr: res.result()) {\n
+          arr.add((int)chr);\n
+        }\n
+        msg.reply(arr);\n
       }\n
     };\n
   }\n
