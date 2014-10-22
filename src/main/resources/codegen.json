@@ -1,0 +1,8 @@
+{
+  "name": "Proxy",
+  "generators": [ {
+    "kind": "proxy",
+    "fileName": "ifacePackageName.replace('io.vertx.ext', 'io.vertx.ext.proxy') + '.' + ifaceSimpleName + 'Proxy.java'",
+    "templateFileName": "proxy-gen/template/proxygen.templ"
+  } ]
+}
