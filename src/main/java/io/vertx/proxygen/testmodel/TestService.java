@@ -38,6 +38,8 @@ public interface TestService {
 
   void foo(String bar, int wibble, JsonObject coll, Handler<AsyncResult<JsonObject>> resHandler);
 
+  void foo2(String bar, int wibble, JsonObject coll, Handler<AsyncResult<Integer>> resHandler);
+
   void bar(String bar, int wibble, JsonObject coll);
 
   @Fluent
