@@ -75,6 +75,7 @@
                 <annotationProcessors>
                   <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
                 </annotationProcessors>
+                <generatedSourcesDirectory>${project.basedir}/src/main/java</generatedSourcesDirectory>
                 <compilerArgs>
                   <arg>-AoutputDirectory=${project.basedir}/src/main</arg>
                 </compilerArgs>
