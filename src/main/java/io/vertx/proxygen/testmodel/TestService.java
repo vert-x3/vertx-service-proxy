@@ -36,6 +36,10 @@ public interface TestService {
     return new TestServiceImpl();
   }
 
+  static TestService createProxy(Vertx vertx, String address) {
+    return new TestServiceImpl();
+  }
+
   void foo(String bar, int wibble, JsonObject coll, Handler<AsyncResult<JsonObject>> resHandler);
 
   void foo2(String bar, int wibble, JsonObject coll, Handler<AsyncResult<Integer>> resHandler);

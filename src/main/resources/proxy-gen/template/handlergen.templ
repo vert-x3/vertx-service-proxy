@@ -1,83 +1,3 @@
-
-@declare{'methodBody'}
-	@code{lastParam = method.params.get(method.params.size() - 1)}
-	@code{hasResultHandler=(lastParam.type.kind == CLASS_HANDLER) && (lastParam.type.args[0].kind == CLASS_ASYNC_RESULT)}
-    JsonObject json = new JsonObject();\n
-	@code{count=0}
-	@foreach{param: method.params}
-		@if{count++ != method.params.size() - 1}
-    json.putValue("@{param.name}", @{param.name});\n
-		@end{}
-	@end{}
-    DeliveryOptions options = new DeliveryOptions();\n
-    options.addHeader("action", "@{method.name}");\n
-		@if{hasResultHandler}
-		@code{resultType=lastParam.type.args[0].args[0]}
-		@code{resultKind=resultType.kind}
-    vertx.eventBus().<@{resultType.simpleName}>send(address, json, options, res -> {\n
-      if (res.failed()) {\n
-        @{lastParam.name}.handle(Future.completedFuture(res.cause()));\n
-      } else {\n
-        @{lastParam.name}.handle(Future.completedFuture(res.result().body()));\n
-      }\n
-    });\n
-		@else{}
-    vertx.eventBus().send(address, json, options);\n
-		@end{}
-
-@end{}
-
-
-@declare{'paramTemplate'}
-	@{param.type.simpleName} @{param.name}
-@end{}
-
-@declare{'paramArgument'}
-	@if{param.type.kind == CLASS_HANDLER}
-		@code{eventType=param.type.args[0]}
-		@code{eventKind=eventType.kind}
-		@if{eventKind.basic || eventKind == CLASS_VOID || eventKind.json}
-			@{param.name}
-		@else{eventKind == CLASS_LIST || eventKind == CLASS_SET}
-			@code{elementType=eventType.args[0]}
-			@code{elementKind=elementType.kind}
-			@if{elementKind == CLASS_PRIMITIVE || elementKind == CLASS_BOXED_PRIMITIVE || elementKind == CLASS_STRING}
-				@{param.name}
-			@else{}
-				@{param.name}
-			@end{}
-		@else{eventKind == CLASS_ASYNC_RESULT}
-			@code{resultType=eventType.args[0]}
-			@code{resultKind=resultType.kind}
-			@if{resultKind.basic || resultKind == CLASS_VOID || resultKind.json}
-				@{param.name}
-			@else{resultKind == CLASS_LIST || resultKind == CLASS_SET}
-				@code{elementType=resultType.args[0]}
-				@code{elementKind=elementType.kind}
-				@if{elementKind == CLASS_PRIMITIVE || elementKind == CLASS_BOXED_PRIMITIVE || elementKind == CLASS_STRING}
-					@{param.name}
-				@else{}
-					@{param.name}
-				@end{}
-			@else{}
-				null /* Handler<AsyncResult<@{resultType.name}>> with kind @{resultKind} not yet implemented */
-			@end{}
-		@else{}
-			null /* Handler<@{eventType.name}> with kind @{eventKind} not yet implemented */
-		@end{}
-	@else{}
-		@{param.name}
-	@end{}
-@end{}
-
-@declare{'returnTypeTemplate'}
-	@{type.simpleName}
-@end{}
-
-@declare{'startMethodTemplate'}
-public @if{method.staticMethod}static @end{}@if{method.typeParams.size() > 0}<@foreach{typeVar:method.typeParams}@{typeVar}@end{', '}> @end{}@includeNamed{'returnTypeTemplate';type=method.returnType} @{method.name}(@foreach{param: method.params}@includeNamed{'paramTemplate';param=param}@end{', '}) {
-@end{}
-
 /*\n
 * Copyright 2014 Red Hat, Inc.\n
 *\n
@@ -110,40 +30,53 @@ import io.vertx.core.eventbus.Message;\n
 public class @{ifaceSimpleName}Handler implements Handler<Message<JsonObject>> {\n
 \n
   private Vertx vertx;\n
-  private String address;\n
+  private TestService service;\n
 \n
-  public @{ifaceSimpleName}Handler(Vertx vertx, String address) {\n
+  public @{ifaceSimpleName}Handler(Vertx vertx, TestService service) {\n
     this.vertx = vertx;\n
-    this.address = address;\n
+    this.service = service;\n
   }\n
 \n
   public void handle(Message<JsonObject> msg) {\n
     JsonObject json = msg.body();\n
-  }\n
-}\n
-
+    String action = msg.headers().get("action");\n
+    if (action == null) {\n
+      throw new IllegalStateException("action not specified");\n
+    }\n
+    switch (action) {\n
 @foreach{method:methods}
 	@if{!method.staticMethod}
-  @includeNamed{'startMethodTemplate';method:method}\n
-		@if{method.fluent}
-				@includeNamed{'methodBody';method:method}
-    return this;\n
-		@else{method.returnType.name.equals('void')}
-				@includeNamed{'methodBody';method:method}
-		@end{}
-  }\n\n
+      case "@{method.name}": {\n
+        service.@{method.name}(
+		@code{lastParam = method.params.get(method.params.size() - 1)}
+		@code{hasResultHandler=(lastParam.type.kind == CLASS_HANDLER) && (lastParam.type.args[0].kind == CLASS_ASYNC_RESULT)}
+		@code{count=0}
+		@foreach{param: method.params}
+			@if{!hasResultHandler || (count++ != method.params.size() - 1)}
+json.getValue("@{param.name}")
+			@else{}
+createHandler(msg)
+			@end{}
+		@end{", "});\n
+      }
 	@end{}
+\n
 @end{}
+      default: {\n
+        throw new IllegalStateException("Invalid action: " + action);\n
+      }\n
+    }\n
 
-\n
-  public void start() {\n
-    throw new UnsupportedOperationException("Can't call start() on a service proxy");\n
   }\n
-\n
-  public void stop() {\n
-    throw new UnsupportedOperationException("Can't call stop() on a service proxy");\n
-  }\n
-\n
 
+  private <T> Handler<AsyncResult<T>> createHandler(Message msg) {\n
+    return res -> {\n
+      if (res.failed()) {\n
+        msg.fail(123, res.cause().getMessage());\n
+      } else {\n
+        msg.reply(res.result());\n
+      }\n
+    };\n
+  }\n
 }
 

@@ -31,4 +31,19 @@ public class TestServiceImpl implements TestService{
   public void foo(String bar, int wibble, JsonObject coll, Handler<AsyncResult<JsonObject>> resHandler) {
 
   }
+
+  @Override
+  public void foo2(String bar, int wibble, JsonObject coll, Handler<AsyncResult<Integer>> resHandler) {
+
+  }
+
+  @Override
+  public void bar(String bar, int wibble, JsonObject coll) {
+
+  }
+
+  @Override
+  public TestService wibble(String bar, int wibble, JsonObject coll, Handler<AsyncResult<JsonObject>> resHandler) {
+    return null;
+  }
 }
