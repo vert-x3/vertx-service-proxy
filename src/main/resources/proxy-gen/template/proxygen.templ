@@ -55,8 +55,7 @@ send(address, json, options, res -> {\n
 
 
 @declare{'startMethodTemplate'}
-public @if{method.staticMethod}static @end{}
-	@if{method.typeParams.size() > 0}
+public @if{method.typeParams.size() > 0}
 		<@foreach{typeVar:method.typeParams}@{typeVar}@end{', '}>
 	 @end{}@{method.returnType.simpleName} @{method.name}(@foreach{param: method.params}@{param.type.simpleName} @{param.name}@end{', '}) {
 @end{}
@@ -76,11 +75,13 @@ public @if{method.staticMethod}static @end{}
 * License for the specific language governing permissions and limitations\n
 * under the License.\n
 */\n\n
-package @{ifacePackageName.replace('io.vertx.ext', 'io.vertx.ext.proxy')};\n
+package @{ifacePackageName};\n
 \n
 import @{ifaceFQCN};\n
 import io.vertx.core.eventbus.DeliveryOptions;\n
 import io.vertx.core.Future;\n
+import io.vertx.core.json.JsonObject;\n
+import io.vertx.core.json.JsonArray;\n
 import java.util.ArrayList;
 @foreach{importedType:importedTypes}
 	@if{!importedType.packageName.equals("java.lang")}
@@ -90,6 +91,7 @@ import java.util.ArrayList;
 \n
 /*\n
   Generated Proxy code - DO NOT EDIT\n
+  @author Roger the Robot\n
 */\n
 public class @{ifaceSimpleName}VertxEBProxy implements @{ifaceSimpleName} {\n
 \n
@@ -105,23 +107,15 @@ public class @{ifaceSimpleName}VertxEBProxy implements @{ifaceSimpleName} {\n
 	@if{!method.staticMethod}
   @includeNamed{'startMethodTemplate';method:method}\n
 		@if{method.fluent}
-				@includeNamed{'methodBody';method:method}
+				@if{!method.proxyIgnore}@includeNamed{'methodBody';method:method}@end{}
     return this;\n
 		@else{method.returnType.name.equals('void')}
-				@includeNamed{'methodBody';method:method}
+				@if{!method.proxyIgnore}@includeNamed{'methodBody';method:method}@end{}
 		@end{}
   }\n\n
 	@end{}
 @end{}
 
-\n
-  public void start() {\n
-    throw new UnsupportedOperationException("Can't call start() on a service proxy");\n
-  }\n
-\n
-  public void stop() {\n
-    throw new UnsupportedOperationException("Can't call stop() on a service proxy");\n
-  }\n
 \n
   // This is clunky, but will disappear once we refactor JsonObject to be a map\n
   private List<JsonObject> convertToListJsonObject(JsonArray arr) {\n

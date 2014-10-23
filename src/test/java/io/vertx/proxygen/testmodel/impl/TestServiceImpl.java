@@ -23,6 +23,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.proxygen.test.ProxyGenTest;
 import io.vertx.proxygen.testmodel.SomeEnum;
 import io.vertx.proxygen.testmodel.TestService;
 
@@ -44,7 +45,7 @@ public class TestServiceImpl implements TestService {
 
   @Override
   public void noParams() {
-    vertx.eventBus().send("testaddress", "ok");
+    vertx.eventBus().send(ProxyGenTest.TEST_ADDRESS, "ok");
   }
 
   @Override
@@ -59,7 +60,7 @@ public class TestServiceImpl implements TestService {
     assertEquals(12.3456d, d, 0);
     assertEquals('X', c);
     assertEquals(true, bool);
-    vertx.eventBus().send("testaddress", "ok");
+    vertx.eventBus().send(ProxyGenTest.TEST_ADDRESS, "ok");
   }
 
   @Override
@@ -72,13 +73,13 @@ public class TestServiceImpl implements TestService {
   public void jsonTypes(JsonObject jsonObject, JsonArray jsonArray) {
     assertEquals("bar", jsonObject.getString("foo"));
     assertEquals("wibble", jsonArray.get(0));
-    vertx.eventBus().send("testaddress", "ok");
+    vertx.eventBus().send(ProxyGenTest.TEST_ADDRESS, "ok");
   }
 
   @Override
   public void enumType(SomeEnum someEnum) {
     assertEquals(SomeEnum.WIBBLE, someEnum);
-    vertx.eventBus().send("testaddress", "ok");
+    vertx.eventBus().send(ProxyGenTest.TEST_ADDRESS, "ok");
   }
 
   @Override
@@ -150,7 +151,7 @@ public class TestServiceImpl implements TestService {
 
   @Override
   public TestService fluentNoParams() {
-    vertx.eventBus().send("testaddress", "ok");
+    vertx.eventBus().send(ProxyGenTest.TEST_ADDRESS, "ok");
     return this;
   }
 
@@ -168,16 +169,6 @@ public class TestServiceImpl implements TestService {
     assertEquals(SomeEnum.BAR, senum);
     resultHandler.handle(Future.completedFuture("goats"));
   }
-
-//  @Override
-//  public void listString(List<String> list) {
-//    assertEquals(3, list.size());
-//    assertEquals("foo", list.get(0));
-//    assertEquals("bar", list.get(1));
-//    assertEquals("wibble", list.get(2));
-//    vertx.eventBus().send("testaddress", "ok");
-//  }
-
 
   @Override
   public void listStringHandler(Handler<AsyncResult<List<String>>> resultHandler) {
@@ -247,5 +238,9 @@ public class TestServiceImpl implements TestService {
     resultHandler.handle(Future.completedFuture(list));
   }
 
+  @Override
+  public void ignoredMethod() {
+    vertx.eventBus().send(ProxyGenTest.TEST_ADDRESS, "called");
+  }
 }
 

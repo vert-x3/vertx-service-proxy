@@ -19,6 +19,7 @@ package io.vertx.proxygen;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 
 import java.lang.reflect.Constructor;
@@ -26,7 +27,7 @@ import java.lang.reflect.Constructor;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class ServiceHelper {
+public class ProxyHelper {
 
   public static <T> T createProxy(Class<T> clazz, Vertx vertx, String address) {
     String proxyClassName = clazz.getName() + "VertxEBProxy";
@@ -36,12 +37,14 @@ public class ServiceHelper {
     return (T)instance;
   }
 
-  public static <T> Handler<Message<JsonObject>> createHandler(Class<T> clazz, Vertx vertx, T service) {
+  public static <T> MessageConsumer<JsonObject> registerService(Class<T> clazz, Vertx vertx, T service, String address) {
     String handlerClassName = clazz.getName() + "VertxProxyHandler";
     Class<?> handlerClass = loadClass(handlerClassName);
     Constructor constructor = getConstructor(handlerClass, Vertx.class, clazz);
     Object instance = createInstance(constructor, vertx, service);
-    return (Handler<Message<JsonObject>>)instance;
+    Handler<Message<JsonObject>> handler = (Handler<Message<JsonObject>>)instance;
+    MessageConsumer<JsonObject> consumer = vertx.eventBus().<JsonObject>consumer(address).handler(handler);
+    return consumer;
   }
 
   private static Class<?> loadClass(String name) {

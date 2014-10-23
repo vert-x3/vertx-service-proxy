@@ -18,14 +18,14 @@ package io.vertx.proxygen.testmodel;
 
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.ProxyGen;
+import io.vertx.codegen.annotations.ProxyIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.proxygen.ServiceHelper;
+import io.vertx.proxygen.ProxyHelper;
 import io.vertx.proxygen.testmodel.impl.TestServiceImpl;
 
 import java.util.List;
@@ -42,13 +42,7 @@ public interface TestService {
   }
 
   static TestService createProxy(Vertx vertx, String address) {
-    return ServiceHelper.createProxy(TestService.class, vertx, address);
-  }
-
-  default <T> MessageConsumer<JsonObject> register(Vertx vertx, String address) {
-    MessageConsumer<JsonObject> consumer = vertx.eventBus().consumer(address);
-    consumer.handler(ServiceHelper.createHandler(TestService.class, vertx, this));
-    return consumer;
+    return ProxyHelper.createProxy(TestService.class, vertx, address);
   }
 
   void noParams();
@@ -96,8 +90,6 @@ public interface TestService {
 
   void invokeWithMessage(JsonObject object, String str, int i, char chr, SomeEnum senum, Handler<AsyncResult<String>> resultHandler);
 
-//  void listString(List<String> list);
-
   void listStringHandler(Handler<AsyncResult<List<String>>> resultHandler);
 
   void listByteHandler(Handler<AsyncResult<List<Byte>>> resultHandler);
@@ -119,4 +111,7 @@ public interface TestService {
   void listJsonObjectHandler(Handler<AsyncResult<List<JsonObject>>> resultHandler);
 
   void listJsonArrayHandler(Handler<AsyncResult<List<JsonArray>>> resultHandler);
+
+  @ProxyIgnore
+  void ignoredMethod();
 }

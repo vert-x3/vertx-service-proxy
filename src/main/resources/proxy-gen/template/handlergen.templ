@@ -13,12 +13,14 @@
 * License for the specific language governing permissions and limitations\n
 * under the License.\n
 */\n\n
-package @{ifacePackageName.replace('io.vertx.ext', 'io.vertx.ext.proxy')};\n
+package @{ifacePackageName};\n
 \n
 import @{ifaceFQCN};\n
 import io.vertx.core.Handler;\n
 import io.vertx.core.eventbus.Message;\n
 import io.vertx.core.eventbus.ReplyException;\n
+import io.vertx.core.json.JsonObject;\n
+import io.vertx.core.json.JsonArray;\n
 @foreach{importedType:importedTypes}
 	@if{!importedType.packageName.equals("java.lang")}
 		import @{importedType};\n
@@ -27,13 +29,14 @@ import io.vertx.core.eventbus.ReplyException;\n
 \n
 /*\n
   Generated Proxy code - DO NOT EDIT\n
+  @author Roger the Robot\n
 */\n
 public class @{ifaceSimpleName}VertxProxyHandler implements Handler<Message<JsonObject>> {\n
 \n
   private Vertx vertx;\n
-  private TestService service;\n
+  private @{ifaceSimpleName} service;\n
 \n
-  public @{ifaceSimpleName}VertxProxyHandler(Vertx vertx, TestService service) {\n
+  public @{ifaceSimpleName}VertxProxyHandler(Vertx vertx, @{ifaceSimpleName} service) {\n
     this.vertx = vertx;\n
     this.service = service;\n
   }\n

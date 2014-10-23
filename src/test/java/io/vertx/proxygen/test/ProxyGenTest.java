@@ -17,24 +17,26 @@
 package io.vertx.proxygen.test;
 
 import io.vertx.core.eventbus.DeliveryOptions;
+import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.proxygen.ProxyHelper;
 import io.vertx.proxygen.testmodel.SomeEnum;
 import io.vertx.proxygen.testmodel.TestService;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 public class ProxyGenTest extends VertxTestBase {
 
+  public final static String SERVICE_ADDRESS = "someaddress";
+  public final static String TEST_ADDRESS = "testaddress";
+
+  MessageConsumer<JsonObject> consumer;
   TestService service;
   TestService proxy;
 
@@ -42,9 +44,9 @@ public class ProxyGenTest extends VertxTestBase {
   public void setUp() throws Exception {
     super.setUp();
     service = TestService.testService(vertx);
-    service.register(vertx, "someaddress");
-    proxy = TestService.createProxy(vertx, "someaddress");
-    vertx.eventBus().<String>consumer("testaddress").handler(msg -> {
+    consumer = ProxyHelper.registerService(TestService.class, vertx, service, SERVICE_ADDRESS);
+    proxy = TestService.createProxy(vertx, SERVICE_ADDRESS);
+    vertx.eventBus().<String>consumer(TEST_ADDRESS).handler(msg -> {
       assertEquals("ok", msg.body());
       testComplete();
     });
@@ -52,6 +54,7 @@ public class ProxyGenTest extends VertxTestBase {
 
   @Override
   public void tearDown() throws Exception {
+    consumer.unregister();
     super.tearDown();
   }
 
@@ -387,8 +390,15 @@ public class ProxyGenTest extends VertxTestBase {
       testComplete();
     }));
     await();
-    List<String> foo = new ArrayList<>();
-    foo.stream().filter(str -> str.contains("foo")).collect(Collectors.toList());
   }
+
+  @Test
+  public void testProxyIgnore() {
+    proxy.ignoredMethod();
+    vertx.setTimer(500, id -> testComplete());
+    await();
+  }
+
+
 
 }
