@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class ProxyGenTest extends VertxTestBase {
+public class ServiceProxyTest extends VertxTestBase {
 
   public final static String SERVICE_ADDRESS = "someaddress";
   public final static String TEST_ADDRESS = "testaddress";
@@ -43,7 +43,7 @@ public class ProxyGenTest extends VertxTestBase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    service = TestService.testService(vertx);
+    service = TestService.create(vertx);
     consumer = ProxyHelper.registerService(TestService.class, vertx, service, SERVICE_ADDRESS);
     proxy = TestService.createProxy(vertx, SERVICE_ADDRESS);
     vertx.eventBus().<String>consumer(TEST_ADDRESS).handler(msg -> {

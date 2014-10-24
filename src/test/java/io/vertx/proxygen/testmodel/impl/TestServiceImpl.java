@@ -23,7 +23,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.proxygen.test.ProxyGenTest;
+import io.vertx.proxygen.test.ServiceProxyTest;
 import io.vertx.proxygen.testmodel.SomeEnum;
 import io.vertx.proxygen.testmodel.TestService;
 
@@ -45,7 +45,7 @@ public class TestServiceImpl implements TestService {
 
   @Override
   public void noParams() {
-    vertx.eventBus().send(ProxyGenTest.TEST_ADDRESS, "ok");
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
 
   @Override
@@ -60,7 +60,7 @@ public class TestServiceImpl implements TestService {
     assertEquals(12.3456d, d, 0);
     assertEquals('X', c);
     assertEquals(true, bool);
-    vertx.eventBus().send(ProxyGenTest.TEST_ADDRESS, "ok");
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
 
   @Override
@@ -73,13 +73,13 @@ public class TestServiceImpl implements TestService {
   public void jsonTypes(JsonObject jsonObject, JsonArray jsonArray) {
     assertEquals("bar", jsonObject.getString("foo"));
     assertEquals("wibble", jsonArray.get(0));
-    vertx.eventBus().send(ProxyGenTest.TEST_ADDRESS, "ok");
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
 
   @Override
   public void enumType(SomeEnum someEnum) {
     assertEquals(SomeEnum.WIBBLE, someEnum);
-    vertx.eventBus().send(ProxyGenTest.TEST_ADDRESS, "ok");
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
 
   @Override
@@ -139,7 +139,7 @@ public class TestServiceImpl implements TestService {
 
   @Override
   public void voidHandler(Handler<AsyncResult<Void>> resultHandler) {
-    resultHandler.handle(Future.completedFuture((Void)null));
+    resultHandler.handle(Future.completedFuture((Void) null));
   }
 
   @Override
@@ -151,7 +151,7 @@ public class TestServiceImpl implements TestService {
 
   @Override
   public TestService fluentNoParams() {
-    vertx.eventBus().send(ProxyGenTest.TEST_ADDRESS, "ok");
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
     return this;
   }
 
@@ -240,7 +240,7 @@ public class TestServiceImpl implements TestService {
 
   @Override
   public void ignoredMethod() {
-    vertx.eventBus().send(ProxyGenTest.TEST_ADDRESS, "called");
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "called");
   }
 }
 

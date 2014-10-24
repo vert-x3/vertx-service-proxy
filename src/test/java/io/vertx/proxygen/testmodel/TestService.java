@@ -37,7 +37,7 @@ import java.util.List;
 @VertxGen
 public interface TestService {
 
-  static TestService testService(Vertx vertx) {
+  static TestService create(Vertx vertx) {
     return new TestServiceImpl(vertx);
   }
 
