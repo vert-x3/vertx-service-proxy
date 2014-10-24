@@ -105,7 +105,10 @@ to be interacted with consistently.
 In the case where service proxies are used the "action" value should map to the name of an action method in the 
 service interface and each `[key, value]` in the body should map to a `[arg_name, arg_value]` in the action method.
 
-Asynchronous return values are sent as replies over the event bus as messages of the return value type.
+For return values the service should use the `message.reply(...)` method to send back a return value - this can be of
+any type supported by the event bus. To signal a failure the method `message.fail(...)` should be used.
+
+If you are using service proxies the generated code will handle this for you automatically.
 
 ### Restrictions for service methods
 
