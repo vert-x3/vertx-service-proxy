@@ -56,6 +56,8 @@ public interface TestService {
 
   void enumType(SomeEnum someEnum);
 
+  void optionType(TestOptions options);
+
   void stringHandler(Handler<AsyncResult<String>> resultHandler);
 
   void byteHandler(Handler<AsyncResult<Byte>> resultHandler);

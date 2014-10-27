@@ -24,6 +24,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.proxygen.ProxyHelper;
 import io.vertx.proxygen.testmodel.SomeEnum;
+import io.vertx.proxygen.testmodel.TestOptions;
 import io.vertx.proxygen.testmodel.TestService;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
@@ -85,6 +86,12 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testEnumType() {
     proxy.enumType(SomeEnum.WIBBLE);
+    await();
+  }
+
+  @Test
+  public void testOptionsType() {
+    proxy.optionType(new TestOptions().setString("foo").setNumber(123).setBool(true));
     await();
   }
 

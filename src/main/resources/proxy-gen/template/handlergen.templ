@@ -64,6 +64,8 @@ public class @{ifaceSimpleName}VertxProxyHandler implements Handler<Message<Json
 @{param.type.name}.valueOf(json.getString("@{param.name}"))
 				@else{param.type.kind == CLASS_LIST}
 json.getArray("@{param.name}").toList()
+				@else{param.type.kind == CLASS_OPTIONS}
+new @{param.type.name}(json.getObject("@{param.name}"))
 				@else{}
 json.getValue("@{param.name}")
 				@end{}

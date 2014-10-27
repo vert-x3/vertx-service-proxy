@@ -25,6 +25,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.proxygen.test.ServiceProxyTest;
 import io.vertx.proxygen.testmodel.SomeEnum;
+import io.vertx.proxygen.testmodel.TestOptions;
 import io.vertx.proxygen.testmodel.TestService;
 
 import java.util.Arrays;
@@ -79,6 +80,12 @@ public class TestServiceImpl implements TestService {
   @Override
   public void enumType(SomeEnum someEnum) {
     assertEquals(SomeEnum.WIBBLE, someEnum);
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
+  public void optionType(TestOptions options) {
+    assertEquals(new TestOptions().setString("foo").setNumber(123).setBool(true), options);
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
 
