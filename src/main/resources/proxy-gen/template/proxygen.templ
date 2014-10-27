@@ -1,6 +1,6 @@
 
 @declare{'methodBody'}
-    JsonObject json = new JsonObject();\n
+    JsonObject _json = new JsonObject();\n
 	@code{hasParams = !method.params.isEmpty()}
 	@code{lastParam = hasParams ? method.params.get(method.params.size() - 1) : null}
 	@code{hasResultHandler=(lastParam != null) && (lastParam.type.kind == CLASS_HANDLER) && (lastParam.type.args[0].kind == CLASS_ASYNC_RESULT)}
@@ -8,29 +8,31 @@
 	@foreach{param: method.params}
 		@if{!hasResultHandler || (count++ != method.params.size() - 1)}
 			@if{param.type.name == 'char' || param.type.name == 'java.lang.Character'}
-    json.putValue("@{param.name}", (int)@{param.name});\n
+    _json.putValue("@{param.name}", (int)@{param.name});\n
 			@else{param.type.kind == CLASS_ENUM}
-    json.putValue("@{param.name}", @{param.name}.toString());\n
+    _json.putValue("@{param.name}", @{param.name}.toString());\n
 			@else{param.type.kind == CLASS_LIST}
-    json.putValue("@{param.name}", new JsonArray(@{param.name}));\n
+    _json.putValue("@{param.name}", new JsonArray(@{param.name}));\n
+			@else{param.type.kind == CLASS_OPTIONS}
+    _json.putObject("@{param.name}", @{param.name}.toJson());\n
 			@else{}
-    json.putValue("@{param.name}", @{param.name});\n
+    _json.putValue("@{param.name}", @{param.name});\n
 			@end{}
 		@end{}
 	@end{}
 
-    DeliveryOptions options = new DeliveryOptions();\n
-    options.addHeader("action", "@{method.name}");\n
+    DeliveryOptions _deilveryOptions = new DeliveryOptions();\n
+    _deilveryOptions.addHeader("action", "@{method.name}");\n
 	@if{hasResultHandler}
 		@code{resultType=lastParam.type.args[0].args[0]}
 		@code{resultKind=resultType.kind}
-    vertx.eventBus().
+    _vertx.eventBus().
 @if{resultKind == CLASS_LIST}
 <JsonArray>
 @else{}
 <@{resultType.simpleName}>
 @end{}
-send(address, json, options, res -> {\n
+send(_address, _json, _deilveryOptions, res -> {\n
       if (res.failed()) {\n
         @{lastParam.name}.handle(Future.completedFuture(res.cause()));\n
       } else {\n
@@ -48,7 +50,7 @@ send(address, json, options, res -> {\n
       }\n
     });\n
 	@else{}
-    vertx.eventBus().send(address, json, options);\n
+    _vertx.eventBus().send(_address, _json, _deilveryOptions);\n
 	@end{}
 
 @end{}
@@ -95,12 +97,12 @@ import java.util.ArrayList;
 */\n
 public class @{ifaceSimpleName}VertxEBProxy implements @{ifaceSimpleName} {\n
 \n
-  private Vertx vertx;\n
-  private String address;\n
+  private Vertx _vertx;\n
+  private String _address;\n
 \n
   public @{ifaceSimpleName}VertxEBProxy(Vertx vertx, String address) {\n
-    this.vertx = vertx;\n
-    this.address = address;\n
+    this._vertx = vertx;\n
+    this._address = address;\n
   }\n
 \n
 @foreach{method:methods}
