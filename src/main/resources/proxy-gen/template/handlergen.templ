@@ -63,11 +63,11 @@ public class @{ifaceSimpleName}VertxProxyHandler implements Handler<Message<Json
 				@else{param.type.kind == CLASS_ENUM}
 @{param.type.name}.valueOf(json.getString("@{param.name}"))
 				@else{param.type.kind == CLASS_LIST}
-json.getArray("@{param.name}").toList()
+json.getJsonArray("@{param.name}").toList()
 				@else{param.type.kind == CLASS_OPTIONS}
-new @{param.type.name}(json.getObject("@{param.name}"))
+new @{param.type.name}(json.getJsonObject("@{param.name}"))
 				@else{}
-json.getValue("@{param.name}")
+(@{param.type.name})json.getValue("@{param.name}")
 				@end{}
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_LIST && lastParam.type.args[0].args[0].args[0].kind==CLASS_JSON_OBJECT}
 createListJsonObjectHandler(msg)

@@ -46,9 +46,9 @@ public class TestOptions {
 
   public JsonObject toJson() {
     return new JsonObject()
-      .putNumber("number", number)
-      .putString("string", string)
-      .putBoolean("bool", bool);
+      .put("number", number)
+      .put("string", string)
+      .put("bool", bool);
   }
 
   public int getNumber() {

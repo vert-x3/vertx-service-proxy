@@ -79,7 +79,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testJsonTypes() {
-    proxy.jsonTypes(new JsonObject().putString("foo", "bar"), new JsonArray().add("wibble"));
+    proxy.jsonTypes(new JsonObject().put("foo", "bar"), new JsonArray().add("wibble"));
     await();
   }
 
@@ -188,7 +188,7 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testJsonArrayHandler() {
     proxy.jsonArrayHandler(onSuccess(res -> {
-      assertEquals("blurrg", res.get(0));
+      assertEquals("blurrg", res.getString(0));
       testComplete();
     }));
     await();
@@ -233,11 +233,11 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testCallWithMessage() {
     JsonObject message = new JsonObject();
-    message.putObject("object", new JsonObject().putString("foo", "bar"));
-    message.putString("str", "blah");
-    message.putNumber("i", 1234);
-    message.putNumber("chr", (int)'X'); // chars are mapped to ints
-    message.putString("senum", SomeEnum.BAR.toString()); // enums are mapped to strings
+    message.put("object", new JsonObject().put("foo", "bar"));
+    message.put("str", "blah");
+    message.put("i", 1234);
+    message.put("chr", (int)'X'); // chars are mapped to ints
+    message.put("senum", SomeEnum.BAR.toString()); // enums are mapped to strings
     vertx.eventBus().<String>send("someaddress", message, new DeliveryOptions().addHeader("action", "invokeWithMessage"), onSuccess(res -> {
       assertEquals("goats", res.body());
       testComplete();
@@ -248,9 +248,9 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testCallWithMessageInvalidAction() {
     JsonObject message = new JsonObject();
-    message.putObject("object", new JsonObject().putString("foo", "bar"));
-    message.putString("str", "blah");
-    message.putNumber("i", 1234);
+    message.put("object", new JsonObject().put("foo", "bar"));
+    message.put("str", "blah");
+    message.put("i", 1234);
     vertx.eventBus().send("someaddress", message, new DeliveryOptions().addHeader("action", "yourmum").setSendTimeout(500), onFailure(t -> {
       assertTrue(t instanceof ReplyException);
       ReplyException re = (ReplyException)t;
@@ -264,11 +264,11 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testCallWithMessageParamWrongType() {
     JsonObject message = new JsonObject();
-    message.putObject("object", new JsonObject().putString("foo", "bar"));
-    message.putNumber("str", 76523);
-    message.putNumber("i", 1234);
-    message.putNumber("char", (int)'X'); // chars are mapped to ints
-    message.putString("enum", SomeEnum.BAR.toString()); // enums are mapped to strings
+    message.put("object", new JsonObject().put("foo", "bar"));
+    message.put("str", 76523);
+    message.put("i", 1234);
+    message.put("char", (int)'X'); // chars are mapped to ints
+    message.put("enum", SomeEnum.BAR.toString()); // enums are mapped to strings
     vertx.eventBus().send("someaddress", message, new DeliveryOptions().addHeader("action", "invokeWithMessage").setSendTimeout(500), onFailure(t -> {
       assertTrue(t instanceof ReplyException);
       ReplyException re = (ReplyException) t;
@@ -391,9 +391,9 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testListJsonArrayHandler() {
     proxy.listJsonArrayHandler(onSuccess(list -> {
-      assertEquals("foo", list.get(0).get(0));
-      assertEquals("bar", list.get(1).get(0));
-      assertEquals("wibble", list.get(2).get(0));
+      assertEquals("foo", list.get(0).getString(0));
+      assertEquals("bar", list.get(1).getString(0));
+      assertEquals("wibble", list.get(2).getString(0));
       testComplete();
     }));
     await();

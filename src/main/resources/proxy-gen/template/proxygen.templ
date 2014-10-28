@@ -8,21 +8,21 @@
 	@foreach{param: method.params}
 		@if{!hasResultHandler || (count++ != method.params.size() - 1)}
 			@if{param.type.name == 'char' || param.type.name == 'java.lang.Character'}
-    _json.putValue("@{param.name}", (int)@{param.name});\n
+    _json.put("@{param.name}", (int)@{param.name});\n
 			@else{param.type.kind == CLASS_ENUM}
-    _json.putValue("@{param.name}", @{param.name}.toString());\n
+    _json.put("@{param.name}", @{param.name}.toString());\n
 			@else{param.type.kind == CLASS_LIST}
-    _json.putValue("@{param.name}", new JsonArray(@{param.name}));\n
+    _json.put("@{param.name}", new JsonArray(@{param.name}));\n
 			@else{param.type.kind == CLASS_OPTIONS}
-    _json.putObject("@{param.name}", @{param.name}.toJson());\n
+    _json.put("@{param.name}", @{param.name}.toJson());\n
 			@else{}
-    _json.putValue("@{param.name}", @{param.name});\n
+    _json.put("@{param.name}", @{param.name});\n
 			@end{}
 		@end{}
 	@end{}
 
-    DeliveryOptions _deilveryOptions = new DeliveryOptions();\n
-    _deilveryOptions.addHeader("action", "@{method.name}");\n
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();\n
+    _deliveryOptions.addHeader("action", "@{method.name}");\n
 	@if{hasResultHandler}
 		@code{resultType=lastParam.type.args[0].args[0]}
 		@code{resultKind=resultType.kind}
@@ -32,7 +32,7 @@
 @else{}
 <@{resultType.simpleName}>
 @end{}
-send(_address, _json, _deilveryOptions, res -> {\n
+send(_address, _json, _deliveryOptions, res -> {\n
       if (res.failed()) {\n
         @{lastParam.name}.handle(Future.completedFuture(res.cause()));\n
       } else {\n
@@ -43,14 +43,14 @@ send(_address, _json, _deilveryOptions, res -> {\n
 				@else{resultKind == CLASS_LIST && resultType.args[0].name == 'java.lang.Character'}
         @{lastParam.name}.handle(Future.completedFuture(convertToListChar(res.result().body())));\n
 				@else{resultKind == CLASS_LIST}
-        @{lastParam.name}.handle(Future.completedFuture(res.result().body().toList()));\n
+        @{lastParam.name}.handle(Future.completedFuture(res.result().body().getList()));\n
 				@else{}
         @{lastParam.name}.handle(Future.completedFuture(res.result().body()));\n
 				@end{}
       }\n
     });\n
 	@else{}
-    _vertx.eventBus().send(_address, _json, _deilveryOptions);\n
+    _vertx.eventBus().send(_address, _json, _deliveryOptions);\n
 	@end{}
 
 @end{}

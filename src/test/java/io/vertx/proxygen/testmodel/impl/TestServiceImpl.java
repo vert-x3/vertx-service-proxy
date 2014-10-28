@@ -73,7 +73,7 @@ public class TestServiceImpl implements TestService {
   @Override
   public void jsonTypes(JsonObject jsonObject, JsonArray jsonArray) {
     assertEquals("bar", jsonObject.getString("foo"));
-    assertEquals("wibble", jsonArray.get(0));
+    assertEquals("wibble", jsonArray.getString(0));
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
 
@@ -136,7 +136,7 @@ public class TestServiceImpl implements TestService {
 
   @Override
   public void jsonObjectHandler(Handler<AsyncResult<JsonObject>> resultHandler) {
-    resultHandler.handle(Future.completedFuture(new JsonObject().putString("blah", "wibble")));
+    resultHandler.handle(Future.completedFuture(new JsonObject().put("blah", "wibble")));
   }
 
   @Override
@@ -233,8 +233,8 @@ public class TestServiceImpl implements TestService {
 
   @Override
   public void listJsonObjectHandler(Handler<AsyncResult<List<JsonObject>>> resultHandler) {
-    List<JsonObject> list = Arrays.asList(new JsonObject().putString("a", "foo"),
-      new JsonObject().putString("b", "bar"), new JsonObject().putString("c", "wibble"));
+    List<JsonObject> list = Arrays.asList(new JsonObject().put("a", "foo"),
+      new JsonObject().put("b", "bar"), new JsonObject().put("c", "wibble"));
     resultHandler.handle(Future.completedFuture(list));
   }
 
