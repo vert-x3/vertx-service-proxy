@@ -122,5 +122,5 @@ asynchronously with the result when it is ready. This must be the last parameter
 * The type `R` above includes any primitive type (or boxed equivalent), `String`, `JsonObject`, `JsonArray` or any enum type,
 or any `List` containing the above types.
 * Other than the return handler valid parameter types include any primitive type (or boxed equivalent), `String`, `JsonObject`,
- `JsonArray` or any enum type.
+ `JsonArray`, any enum type or any Options class.
 * There must be no overloaded service methods. (I.e. more than one with the same name)
