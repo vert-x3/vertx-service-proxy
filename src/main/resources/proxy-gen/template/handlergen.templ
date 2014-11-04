@@ -16,11 +16,14 @@
 package @{ifacePackageName};\n
 \n
 import @{ifaceFQCN};\n
+import io.vertx.core.Vertx;\n
 import io.vertx.core.Handler;\n
+import io.vertx.core.AsyncResult;\n
 import io.vertx.core.eventbus.Message;\n
 import io.vertx.core.eventbus.ReplyException;\n
 import io.vertx.core.json.JsonObject;\n
 import io.vertx.core.json.JsonArray;\n
+import java.util.List;\n
 @foreach{importedType:importedTypes}
 	@if{!importedType.packageName.equals("java.lang")}
 		import @{importedType};\n
