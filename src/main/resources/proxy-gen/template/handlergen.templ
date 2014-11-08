@@ -72,10 +72,6 @@ new @{param.type.name}(json.getJsonObject("@{param.name}"))
 				@else{}
 (@{param.type.name})json.getValue("@{param.name}")
 				@end{}
-			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_LIST && lastParam.type.args[0].args[0].args[0].kind==CLASS_JSON_OBJECT}
-createListJsonObjectHandler(msg)
-			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_LIST && lastParam.type.args[0].args[0].args[0].kind==CLASS_JSON_ARRAY}
-createListJsonArrayHandler(msg)
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_LIST && lastParam.type.args[0].args[0].args[0].name=='java.lang.Character'}
 createListCharHandler(msg)
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_LIST}
@@ -112,36 +108,6 @@ createHandler(msg)
         msg.fail(-1, res.cause().getMessage());\n
       } else {\n
         msg.reply(new JsonArray(res.result()));\n
-      }\n
-    };\n
-  }\n
-
-  // This is clunky, but will disappear once we refactor JsonObject to be a map\n
-  private Handler<AsyncResult<List<JsonObject>>> createListJsonObjectHandler(Message msg) {\n
-    return res -> {\n
-      if (res.failed()) {\n
-        msg.fail(-1, res.cause().getMessage());\n
-      } else {\n
-        JsonArray arr = new JsonArray();\n
-        for (JsonObject obj: res.result()) {\n
-          arr.add(obj);\n
-        }\n
-        msg.reply(arr);\n
-      }\n
-    };\n
-  }\n
-
-  // This is clunky, but will disappear once we refactor JsonArray to be a list\n
-  private Handler<AsyncResult<List<JsonArray>>> createListJsonArrayHandler(Message msg) {\n
-    return res -> {\n
-      if (res.failed()) {\n
-        msg.fail(-1, res.cause().getMessage());\n
-      } else {\n
-        JsonArray arr = new JsonArray();\n
-        for (JsonArray obj: res.result()) {\n
-          arr.add(obj);\n
-        }\n
-        msg.reply(arr);\n
       }\n
     };\n
   }\n

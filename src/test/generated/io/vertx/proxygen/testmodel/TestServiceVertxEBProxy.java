@@ -447,7 +447,7 @@ public class TestServiceVertxEBProxy implements TestService {
       if (res.failed()) {
         resultHandler.handle(Future.completedFuture(res.cause()));
       } else {
-        resultHandler.handle(Future.completedFuture(convertToListJsonObject(res.result().body())));
+        resultHandler.handle(Future.completedFuture(res.result().body().getList()));
       }
     });
   }
@@ -460,7 +460,7 @@ public class TestServiceVertxEBProxy implements TestService {
       if (res.failed()) {
         resultHandler.handle(Future.completedFuture(res.cause()));
       } else {
-        resultHandler.handle(Future.completedFuture(convertToListJsonArray(res.result().body())));
+        resultHandler.handle(Future.completedFuture(res.result().body().getList()));
       }
     });
   }
@@ -469,24 +469,6 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
 
-  // This is clunky, but will disappear once we refactor JsonObject to be a map
-  private List<JsonObject> convertToListJsonObject(JsonArray arr) {
-    List<JsonObject> list = new ArrayList<>();
-    for (Object obj: arr) {
-      JsonObject jobj = (JsonObject)obj;
-      list.add(jobj);
-    }
-    return list;
-  }
-  // This is clunky, but will disappear once we refactor Json stuff
-  private List<JsonArray> convertToListJsonArray(JsonArray arr) {
-    List<JsonArray> list = new ArrayList<>();
-    for (Object obj: arr) {
-      JsonArray jobj = (JsonArray)obj;
-      list.add(jobj);
-    }
-    return list;
-  }
   private List<Character> convertToListChar(JsonArray arr) {
     List<Character> list = new ArrayList<>();
     for (Object obj: arr) {

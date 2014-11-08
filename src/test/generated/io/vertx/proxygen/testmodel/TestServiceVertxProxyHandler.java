@@ -183,11 +183,11 @@ public class TestServiceVertxProxyHandler implements Handler<Message<JsonObject>
         break;
       }
       case "listJsonObjectHandler": {
-        service.listJsonObjectHandler(createListJsonObjectHandler(msg));
+        service.listJsonObjectHandler(createListHandler(msg));
         break;
       }
       case "listJsonArrayHandler": {
-        service.listJsonArrayHandler(createListJsonArrayHandler(msg));
+        service.listJsonArrayHandler(createListHandler(msg));
         break;
       }
       case "ignoredMethod": {
@@ -214,34 +214,6 @@ public class TestServiceVertxProxyHandler implements Handler<Message<JsonObject>
         msg.fail(-1, res.cause().getMessage());
       } else {
         msg.reply(new JsonArray(res.result()));
-      }
-    };
-  }
-  // This is clunky, but will disappear once we refactor JsonObject to be a map
-  private Handler<AsyncResult<List<JsonObject>>> createListJsonObjectHandler(Message msg) {
-    return res -> {
-      if (res.failed()) {
-        msg.fail(-1, res.cause().getMessage());
-      } else {
-        JsonArray arr = new JsonArray();
-        for (JsonObject obj: res.result()) {
-          arr.add(obj);
-        }
-        msg.reply(arr);
-      }
-    };
-  }
-  // This is clunky, but will disappear once we refactor JsonArray to be a list
-  private Handler<AsyncResult<List<JsonArray>>> createListJsonArrayHandler(Message msg) {
-    return res -> {
-      if (res.failed()) {
-        msg.fail(-1, res.cause().getMessage());
-      } else {
-        JsonArray arr = new JsonArray();
-        for (JsonArray obj: res.result()) {
-          arr.add(obj);
-        }
-        msg.reply(arr);
       }
     };
   }

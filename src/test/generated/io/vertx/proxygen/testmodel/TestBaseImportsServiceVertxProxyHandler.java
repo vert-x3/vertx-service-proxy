@@ -74,34 +74,6 @@ public class TestBaseImportsServiceVertxProxyHandler implements Handler<Message<
       }
     };
   }
-  // This is clunky, but will disappear once we refactor JsonObject to be a map
-  private Handler<AsyncResult<List<JsonObject>>> createListJsonObjectHandler(Message msg) {
-    return res -> {
-      if (res.failed()) {
-        msg.fail(-1, res.cause().getMessage());
-      } else {
-        JsonArray arr = new JsonArray();
-        for (JsonObject obj: res.result()) {
-          arr.add(obj);
-        }
-        msg.reply(arr);
-      }
-    };
-  }
-  // This is clunky, but will disappear once we refactor JsonArray to be a list
-  private Handler<AsyncResult<List<JsonArray>>> createListJsonArrayHandler(Message msg) {
-    return res -> {
-      if (res.failed()) {
-        msg.fail(-1, res.cause().getMessage());
-      } else {
-        JsonArray arr = new JsonArray();
-        for (JsonArray obj: res.result()) {
-          arr.add(obj);
-        }
-        msg.reply(arr);
-      }
-    };
-  }
   private Handler<AsyncResult<List<Character>>> createListCharHandler(Message msg) {
     return res -> {
       if (res.failed()) {

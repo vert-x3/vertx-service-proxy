@@ -37,9 +37,9 @@ send(_address, _json, _deliveryOptions, res -> {\n
         @{lastParam.name}.handle(Future.completedFuture(res.cause()));\n
       } else {\n
 				@if{resultKind == CLASS_LIST && resultType.args[0].kind == CLASS_JSON_OBJECT}
-        @{lastParam.name}.handle(Future.completedFuture(convertToListJsonObject(res.result().body())));\n
+        @{lastParam.name}.handle(Future.completedFuture(res.result().body().getList()));\n
 				@else{resultKind == CLASS_LIST && resultType.args[0].kind == CLASS_JSON_ARRAY}
-        @{lastParam.name}.handle(Future.completedFuture(convertToListJsonArray(res.result().body())));\n
+        @{lastParam.name}.handle(Future.completedFuture(res.result().body().getList()));\n
 				@else{resultKind == CLASS_LIST && resultType.args[0].name == 'java.lang.Character'}
         @{lastParam.name}.handle(Future.completedFuture(convertToListChar(res.result().body())));\n
 				@else{resultKind == CLASS_LIST}
@@ -121,25 +121,6 @@ public class @{ifaceSimpleName}VertxEBProxy implements @{ifaceSimpleName} {\n
 @end{}
 
 \n
-  // This is clunky, but will disappear once we refactor JsonObject to be a map\n
-  private List<JsonObject> convertToListJsonObject(JsonArray arr) {\n
-    List<JsonObject> list = new ArrayList<>();\n
-    for (Object obj: arr) {\n
-      JsonObject jobj = (JsonObject)obj;\n
-      list.add(jobj);\n
-    }\n
-    return list;\n
-  }\n
-
-  // This is clunky, but will disappear once we refactor Json stuff\n
-  private List<JsonArray> convertToListJsonArray(JsonArray arr) {\n
-    List<JsonArray> list = new ArrayList<>();\n
-    for (Object obj: arr) {\n
-      JsonArray jobj = (JsonArray)obj;\n
-      list.add(jobj);\n
-    }\n
-    return list;\n
-  }\n
 
   private List<Character> convertToListChar(JsonArray arr) {\n
     List<Character> list = new ArrayList<>();\n
