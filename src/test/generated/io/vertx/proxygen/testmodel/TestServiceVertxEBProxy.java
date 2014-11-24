@@ -24,12 +24,14 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.util.List;
 import java.util.ArrayList;
+import io.vertx.proxygen.ProxyHelper;
 import io.vertx.proxygen.testmodel.SomeEnum;
 import io.vertx.proxygen.testmodel.TestService;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import java.util.List;
 import io.vertx.proxygen.testmodel.TestOptions;
+import io.vertx.proxygen.testmodel.TestConnection;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -42,13 +44,28 @@ public class TestServiceVertxEBProxy implements TestService {
 
   private Vertx _vertx;
   private String _address;
+  private boolean closed;
 
   public TestServiceVertxEBProxy(Vertx vertx, String address) {
     this._vertx = vertx;
     this._address = address;
   }
 
+  public TestConnection createConnection(String str) {
+    checkClosed();
+    JsonObject _json = new JsonObject();
+    String addr = java.util.UUID.randomUUID().toString();
+    TestConnection proxy = ProxyHelper.createProxy(io.vertx.proxygen.testmodel.TestConnection.class, _vertx, addr);
+    _json.put("str", str);
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "createConnection");
+    _deliveryOptions.addHeader("newproxyaddr", addr);
+    _vertx.eventBus().send(_address, _json, _deliveryOptions);
+    return proxy;
+  }
+
   public void noParams() {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "noParams");
@@ -56,6 +73,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void basicTypes(String str, byte b, short s, int i, long l, float f, double d, char c, boolean bool) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     _json.put("str", str);
     _json.put("b", b);
@@ -72,6 +90,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void basicBoxedTypes(String str, Byte b, Short s, Integer i, Long l, Float f, Double d, Character c, Boolean bool) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     _json.put("str", str);
     _json.put("b", b);
@@ -88,6 +107,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void jsonTypes(JsonObject jsonObject, JsonArray jsonArray) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     _json.put("jsonObject", jsonObject);
     _json.put("jsonArray", jsonArray);
@@ -97,6 +117,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void enumType(SomeEnum someEnum) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     _json.put("someEnum", someEnum.toString());
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
@@ -105,6 +126,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void optionType(TestOptions options) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     _json.put("options", options.toJson());
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
@@ -113,6 +135,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void stringHandler(Handler<AsyncResult<String>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "stringHandler");
@@ -126,6 +149,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void byteHandler(Handler<AsyncResult<Byte>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "byteHandler");
@@ -139,6 +163,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void shortHandler(Handler<AsyncResult<Short>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "shortHandler");
@@ -152,6 +177,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void intHandler(Handler<AsyncResult<Integer>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "intHandler");
@@ -165,6 +191,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void longHandler(Handler<AsyncResult<Long>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "longHandler");
@@ -178,6 +205,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void floatHandler(Handler<AsyncResult<Float>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "floatHandler");
@@ -191,6 +219,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void doubleHandler(Handler<AsyncResult<Double>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "doubleHandler");
@@ -204,6 +233,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void charHandler(Handler<AsyncResult<Character>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "charHandler");
@@ -217,6 +247,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void booleanHandler(Handler<AsyncResult<Boolean>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "booleanHandler");
@@ -230,6 +261,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void jsonObjectHandler(Handler<AsyncResult<JsonObject>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "jsonObjectHandler");
@@ -243,6 +275,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void jsonArrayHandler(Handler<AsyncResult<JsonArray>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "jsonArrayHandler");
@@ -256,6 +289,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void voidHandler(Handler<AsyncResult<Void>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "voidHandler");
@@ -269,6 +303,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public TestService fluentMethod(String str, Handler<AsyncResult<String>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     _json.put("str", str);
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
@@ -284,6 +319,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public TestService fluentNoParams() {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "fluentNoParams");
@@ -292,6 +328,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void failingMethod(Handler<AsyncResult<JsonObject>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "failingMethod");
@@ -305,6 +342,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void invokeWithMessage(JsonObject object, String str, int i, char chr, SomeEnum senum, Handler<AsyncResult<String>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     _json.put("object", object);
     _json.put("str", str);
@@ -323,6 +361,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void listStringHandler(Handler<AsyncResult<List<String>>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listStringHandler");
@@ -336,6 +375,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void listByteHandler(Handler<AsyncResult<List<Byte>>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listByteHandler");
@@ -349,6 +389,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void listShortHandler(Handler<AsyncResult<List<Short>>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listShortHandler");
@@ -362,6 +403,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void listIntHandler(Handler<AsyncResult<List<Integer>>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listIntHandler");
@@ -375,6 +417,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void listLongHandler(Handler<AsyncResult<List<Long>>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listLongHandler");
@@ -388,6 +431,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void listFloatHandler(Handler<AsyncResult<List<Float>>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listFloatHandler");
@@ -401,6 +445,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void listDoubleHandler(Handler<AsyncResult<List<Double>>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listDoubleHandler");
@@ -414,6 +459,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void listCharHandler(Handler<AsyncResult<List<Character>>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listCharHandler");
@@ -427,6 +473,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void listBoolHandler(Handler<AsyncResult<List<Boolean>>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listBoolHandler");
@@ -440,6 +487,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void listJsonObjectHandler(Handler<AsyncResult<List<JsonObject>>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listJsonObjectHandler");
@@ -453,6 +501,7 @@ public class TestServiceVertxEBProxy implements TestService {
   }
 
   public void listJsonArrayHandler(Handler<AsyncResult<List<JsonArray>>> resultHandler) {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listJsonArrayHandler");
@@ -476,5 +525,11 @@ public class TestServiceVertxEBProxy implements TestService {
       list.add((char)jobj.intValue());
     }
     return list;
+  }
+
+  private void checkClosed() {
+    if (closed) {
+      throw new IllegalStateException("Proxy is closed");
+    }
   }
 }

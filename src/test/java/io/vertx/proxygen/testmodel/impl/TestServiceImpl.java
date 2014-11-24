@@ -25,6 +25,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.proxygen.test.ServiceProxyTest;
 import io.vertx.proxygen.testmodel.SomeEnum;
+import io.vertx.proxygen.testmodel.TestConnection;
 import io.vertx.proxygen.testmodel.TestOptions;
 import io.vertx.proxygen.testmodel.TestService;
 
@@ -42,6 +43,11 @@ public class TestServiceImpl implements TestService {
 
   public TestServiceImpl(Vertx vertx) {
     this.vertx = vertx;
+  }
+
+  @Override
+  public TestConnection createConnection(String str) {
+    return new TestConnectionImpl(vertx, str);
   }
 
   @Override

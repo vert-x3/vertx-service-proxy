@@ -25,12 +25,15 @@ import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.util.List;
+import io.vertx.proxygen.ProxyHelper;
+import io.vertx.proxygen.ProxyHandler;
 import io.vertx.proxygen.testmodel.SomeEnum;
 import io.vertx.proxygen.testmodel.TestService;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import java.util.List;
 import io.vertx.proxygen.testmodel.TestOptions;
+import io.vertx.proxygen.testmodel.TestConnection;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -39,14 +42,16 @@ import io.vertx.core.Handler;
   Generated Proxy code - DO NOT EDIT
   @author Roger the Robot
 */
-public class TestServiceVertxProxyHandler implements Handler<Message<JsonObject>> {
+public class TestServiceVertxProxyHandler extends ProxyHandler {
 
-  private Vertx vertx;
-  private TestService service;
+  private final Vertx vertx;
+  private final TestService service;
+  private final String address;
 
-  public TestServiceVertxProxyHandler(Vertx vertx, TestService service) {
+  public TestServiceVertxProxyHandler(Vertx vertx, TestService service, String address) {
     this.vertx = vertx;
     this.service = service;
+    this.address = address;
   }
 
   public void handle(Message<JsonObject> msg) {
@@ -58,6 +63,12 @@ public class TestServiceVertxProxyHandler implements Handler<Message<JsonObject>
     switch (action) {
 
 
+      case "createConnection": {
+        TestConnection res = service.createConnection((java.lang.String)json.getValue("str"));
+        String addr = msg.headers().get("newproxyaddr");
+        ProxyHelper.registerService(io.vertx.proxygen.testmodel.TestConnection.class, vertx, res, addr);
+        break;
+      }
       case "noParams": {
         service.noParams();
         break;

@@ -45,6 +45,8 @@ public interface TestService {
     return ProxyHelper.createProxy(TestService.class, vertx, address);
   }
 
+  TestConnection createConnection(String str);
+
   void noParams();
 
   void basicTypes(String str, byte b, short s, int i, long l, float f, double d, char c, boolean bool);

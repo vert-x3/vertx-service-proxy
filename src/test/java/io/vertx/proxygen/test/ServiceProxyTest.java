@@ -24,6 +24,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.proxygen.ProxyHelper;
 import io.vertx.proxygen.testmodel.SomeEnum;
+import io.vertx.proxygen.testmodel.TestConnection;
 import io.vertx.proxygen.testmodel.TestOptions;
 import io.vertx.proxygen.testmodel.TestService;
 import io.vertx.test.core.VertxTestBase;
@@ -403,6 +404,35 @@ public class ServiceProxyTest extends VertxTestBase {
   public void testProxyIgnore() {
     proxy.ignoredMethod();
     vertx.setTimer(500, id -> testComplete());
+    await();
+  }
+
+  @Test
+  public void testConnection() {
+    TestConnection conn = proxy.createConnection("foo");
+    conn.startTransaction(onSuccess(res -> {
+      assertEquals("foo", res);
+    }));
+    conn.insert("blah", new JsonObject(), onSuccess(res -> {
+      assertEquals("foo", res);
+    }));
+    conn.commit(onSuccess(res -> {
+      assertEquals("foo", res);
+    }));
+    vertx.eventBus().consumer("closeCalled").handler(msg -> {
+      assertEquals("blah", msg.body());
+      testComplete();
+    });
+    conn.close();
+
+    try {
+      conn.startTransaction(onFailure(res -> {
+      }));
+      fail();
+    } catch (IllegalStateException e) {
+      // OK
+    }
+
     await();
   }
 

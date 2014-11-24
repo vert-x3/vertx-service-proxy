@@ -16,9 +16,7 @@
 
 package io.vertx.proxygen;
 
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 
@@ -40,10 +38,11 @@ public class ProxyHelper {
   public static <T> MessageConsumer<JsonObject> registerService(Class<T> clazz, Vertx vertx, T service, String address) {
     String handlerClassName = clazz.getName() + "VertxProxyHandler";
     Class<?> handlerClass = loadClass(handlerClassName);
-    Constructor constructor = getConstructor(handlerClass, Vertx.class, clazz);
-    Object instance = createInstance(constructor, vertx, service);
-    Handler<Message<JsonObject>> handler = (Handler<Message<JsonObject>>)instance;
+    Constructor constructor = getConstructor(handlerClass, Vertx.class, clazz, String.class);
+    Object instance = createInstance(constructor, vertx, service, address);
+    ProxyHandler handler = (ProxyHandler)instance;
     MessageConsumer<JsonObject> consumer = vertx.eventBus().<JsonObject>consumer(address).handler(handler);
+    handler.setConsumer(consumer);
     return consumer;
   }
 

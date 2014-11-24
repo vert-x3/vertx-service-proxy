@@ -24,6 +24,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.util.List;
 import java.util.ArrayList;
+import io.vertx.proxygen.ProxyHelper;
 
 /*
   Generated Proxy code - DO NOT EDIT
@@ -33,6 +34,7 @@ public class TestBaseImportsServiceVertxEBProxy implements TestBaseImportsServic
 
   private Vertx _vertx;
   private String _address;
+  private boolean closed;
 
   public TestBaseImportsServiceVertxEBProxy(Vertx vertx, String address) {
     this._vertx = vertx;
@@ -40,6 +42,7 @@ public class TestBaseImportsServiceVertxEBProxy implements TestBaseImportsServic
   }
 
   public void m() {
+    checkClosed();
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "m");
@@ -54,5 +57,11 @@ public class TestBaseImportsServiceVertxEBProxy implements TestBaseImportsServic
       list.add((char)jobj.intValue());
     }
     return list;
+  }
+
+  private void checkClosed() {
+    if (closed) {
+      throw new IllegalStateException("Proxy is closed");
+    }
   }
 }

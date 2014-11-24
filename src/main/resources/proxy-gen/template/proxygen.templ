@@ -1,10 +1,18 @@
 
 @declare{'methodBody'}
+    checkClosed();\n
     JsonObject _json = new JsonObject();\n
 	@code{hasParams = !method.params.isEmpty()}
 	@code{lastParam = hasParams ? method.params.get(method.params.size() - 1) : null}
 	@code{hasResultHandler=(lastParam != null) && (lastParam.type.kind == CLASS_HANDLER) && (lastParam.type.args[0].kind == CLASS_ASYNC_RESULT)}
 	@code{count=0}
+	@if{method.proxyGenReturn && !method.fluent}
+    String addr = java.util.UUID.randomUUID().toString();\n
+    @{method.returnType.simpleName} proxy = ProxyHelper.createProxy(@{method.returnType.name}.class, _vertx, addr);\n
+	@end{}
+	@if{method.proxyClose}
+    closed = true;\n
+	@end{}
 	@foreach{param: method.params}
 		@if{!hasResultHandler || (count++ != method.params.size() - 1)}
 			@if{param.type.name == 'char' || param.type.name == 'java.lang.Character'}
@@ -23,6 +31,9 @@
 
     DeliveryOptions _deliveryOptions = new DeliveryOptions();\n
     _deliveryOptions.addHeader("action", "@{method.name}");\n
+	@if{method.proxyGenReturn && !method.fluent}
+    _deliveryOptions.addHeader("newproxyaddr", addr);\n
+	@end{}
 	@if{hasResultHandler}
 		@code{resultType=lastParam.type.args[0].args[0]}
 		@code{resultKind=resultType.kind}
@@ -87,6 +98,7 @@ import io.vertx.core.json.JsonObject;\n
 import io.vertx.core.json.JsonArray;\n
 import java.util.List;\n
 import java.util.ArrayList;\n
+import io.vertx.proxygen.ProxyHelper;\n
 @foreach{importedType:importedTypes}
 	@if{!importedType.packageName.equals("java.lang")}
 		import @{importedType};\n
@@ -101,6 +113,7 @@ public class @{ifaceSimpleName}VertxEBProxy implements @{ifaceSimpleName} {\n
 \n
   private Vertx _vertx;\n
   private String _address;\n
+  private boolean closed;\n
 \n
   public @{ifaceSimpleName}VertxEBProxy(Vertx vertx, String address) {\n
     this._vertx = vertx;\n
@@ -115,6 +128,9 @@ public class @{ifaceSimpleName}VertxEBProxy implements @{ifaceSimpleName} {\n
     return this;\n
 		@else{method.returnType.name.equals('void')}
 				@if{!method.proxyIgnore}@includeNamed{'methodBody';method:method}@end{}
+		@else{method.proxyGenReturn}
+				@if{!method.proxyIgnore}@includeNamed{'methodBody';method:method}@end{}
+    return proxy;\n
 		@end{}
   }\n\n
 	@end{}
@@ -129,6 +145,12 @@ public class @{ifaceSimpleName}VertxEBProxy implements @{ifaceSimpleName} {\n
       list.add((char)jobj.intValue());\n
     }\n
     return list;\n
+  }\n\n
+
+  private void checkClosed() {\n
+    if (closed) {\n
+      throw new IllegalStateException("Proxy is closed");\n
+    }\n
   }\n
 
 }

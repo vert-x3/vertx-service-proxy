@@ -69,6 +69,44 @@ in any of the languages supported by Vert.x - this means you can write your serv
 through an idiomatic other language API irrespective of whether the service lives locally or is somewhere else on
 the eventbus entirely.
 
+Proxy service methods can also return references to other proxy services. This is useful, for example, if you want to
+return a connection interface, e.g.
+
+    @ProxyGen
+    public interface SomeDatabaseService {
+    
+        // A couple of factory methods to create an instance and a proxy
+    
+        static SomeDatabaseService create(Vertx vertx) {
+           return new SomeDatabaseServiceImpl(vertx);
+        }
+        
+        static SomeDatabaseService createProxy(Vertx vertx, String address) {
+          return ProxyHelper.createProxy(SomeDatabaseService.class, vertx, address);
+        }
+        
+        // Create a connection
+    
+        MyDatabaseConnection createConnection();
+    }
+    
+Where:
+
+    @ProxyGen
+    public interface MyDatabaseConnection {
+    
+        void insert(JsonObject someData);
+        
+        void commit(Handler<AsyncResult<Void>> resultHandler);
+        
+        @ProxyClose
+        void close();
+    }
+    
+You can also declare that a particular method unregisters the proxy by annotating it with the `@ProxyClose` annotation.    
+        
+
+
 ## Convention for invoking services over the eventbus
 
 Service Proxies assume that event bus messages follow a certain format so they can be used to invoke services.
@@ -117,6 +155,7 @@ marshall over event bus messages and so they can be used asynchronously. They ar
 
 * Return values must be `void` or the method must be marked as `Fluent` and return a reference to itself. This is because
 methods must not block and it's not possible to return a result immediately without blocking if the service is remote.
+You can also return a reference to another proxy which is annotated with the `ProxyGen` annotation.
 * If a return value is required a parameter of type `Handler<AsyncResult<R>>` must be provided. This will be invoked
 asynchronously with the result when it is ready. This must be the last parameter in the list of parameters.
 * The type `R` above includes any primitive type (or boxed equivalent), `String`, `JsonObject`, `JsonArray` or any enum type,

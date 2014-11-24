@@ -24,6 +24,8 @@ import io.vertx.core.eventbus.ReplyException;\n
 import io.vertx.core.json.JsonObject;\n
 import io.vertx.core.json.JsonArray;\n
 import java.util.List;\n
+import io.vertx.proxygen.ProxyHelper;\n
+import io.vertx.proxygen.ProxyHandler;\n
 @foreach{importedType:importedTypes}
 	@if{!importedType.packageName.equals("java.lang")}
 		import @{importedType};\n
@@ -34,14 +36,16 @@ import java.util.List;\n
   Generated Proxy code - DO NOT EDIT\n
   @author Roger the Robot\n
 */\n
-public class @{ifaceSimpleName}VertxProxyHandler implements Handler<Message<JsonObject>> {\n
+public class @{ifaceSimpleName}VertxProxyHandler extends ProxyHandler {\n
 \n
-  private Vertx vertx;\n
-  private @{ifaceSimpleName} service;\n
+  private final Vertx vertx;\n
+  private final @{ifaceSimpleName} service;\n
+  private final String address;\n
 \n
-  public @{ifaceSimpleName}VertxProxyHandler(Vertx vertx, @{ifaceSimpleName} service) {\n
+  public @{ifaceSimpleName}VertxProxyHandler(Vertx vertx, @{ifaceSimpleName} service, String address) {\n
     this.vertx = vertx;\n
     this.service = service;\n
+    this.address = address;\n
   }\n
 \n
   public void handle(Message<JsonObject> msg) {\n
@@ -54,7 +58,11 @@ public class @{ifaceSimpleName}VertxProxyHandler implements Handler<Message<Json
 @foreach{method:methods}
 	@if{!method.staticMethod}
       case "@{method.name}": {\n
+		@if{method.proxyGenReturn && !method.fluent}
+        @{method.returnType.simpleName} res = service.@{method.name}(
+		@else{}
         service.@{method.name}(
+		@end{}
 		@code{hasParams = !method.params.isEmpty()}
 		@code{lastParam = hasParams? method.params.get(method.params.size() - 1) : null}
 		@code{hasResultHandler=(lastParam != null) && (lastParam.type.kind == CLASS_HANDLER) && (lastParam.type.args[0].kind==CLASS_ASYNC_RESULT)}
@@ -80,6 +88,13 @@ createListHandler(msg)
 createHandler(msg)
 			@end{}
 		@end{", "});\n
+		@if{method.proxyGenReturn && !method.fluent}
+        String addr = msg.headers().get("newproxyaddr");\n
+        ProxyHelper.registerService(@{method.returnType.name}.class, vertx, res, addr);\n
+		@end{}
+		@if{method.proxyClose}
+        close();\n
+		@end{}
         break;\n
       }
 	@end{}

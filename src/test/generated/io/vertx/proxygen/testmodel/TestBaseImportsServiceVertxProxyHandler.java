@@ -25,19 +25,23 @@ import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.util.List;
+import io.vertx.proxygen.ProxyHelper;
+import io.vertx.proxygen.ProxyHandler;
 
 /*
   Generated Proxy code - DO NOT EDIT
   @author Roger the Robot
 */
-public class TestBaseImportsServiceVertxProxyHandler implements Handler<Message<JsonObject>> {
+public class TestBaseImportsServiceVertxProxyHandler extends ProxyHandler {
 
-  private Vertx vertx;
-  private TestBaseImportsService service;
+  private final Vertx vertx;
+  private final TestBaseImportsService service;
+  private final String address;
 
-  public TestBaseImportsServiceVertxProxyHandler(Vertx vertx, TestBaseImportsService service) {
+  public TestBaseImportsServiceVertxProxyHandler(Vertx vertx, TestBaseImportsService service, String address) {
     this.vertx = vertx;
     this.service = service;
+    this.address = address;
   }
 
   public void handle(Message<JsonObject> msg) {
