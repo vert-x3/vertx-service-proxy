@@ -45,18 +45,18 @@
 @end{}
 send(_address, _json, _deliveryOptions, res -> {\n
       if (res.failed()) {\n
-        @{lastParam.name}.handle(Future.completedFuture(res.cause()));\n
+        @{lastParam.name}.handle(Future.failedFuture(res.cause()));\n
       } else {\n
 				@if{resultKind == CLASS_LIST && resultType.args[0].kind == CLASS_JSON_OBJECT}
-        @{lastParam.name}.handle(Future.completedFuture(res.result().body().getList()));\n
+        @{lastParam.name}.handle(Future.succeededFuture(res.result().body().getList()));\n
 				@else{resultKind == CLASS_LIST && resultType.args[0].kind == CLASS_JSON_ARRAY}
-        @{lastParam.name}.handle(Future.completedFuture(res.result().body().getList()));\n
+        @{lastParam.name}.handle(Future.succeededFuture(res.result().body().getList()));\n
 				@else{resultKind == CLASS_LIST && resultType.args[0].name == 'java.lang.Character'}
-        @{lastParam.name}.handle(Future.completedFuture(convertToListChar(res.result().body())));\n
+        @{lastParam.name}.handle(Future.succeededFuture(convertToListChar(res.result().body())));\n
 				@else{resultKind == CLASS_LIST}
-        @{lastParam.name}.handle(Future.completedFuture(res.result().body().getList()));\n
+        @{lastParam.name}.handle(Future.succeededFuture(res.result().body().getList()));\n
 				@else{}
-        @{lastParam.name}.handle(Future.completedFuture(res.result().body()));\n
+        @{lastParam.name}.handle(Future.succeededFuture(res.result().body()));\n
 				@end{}
       }\n
     });\n

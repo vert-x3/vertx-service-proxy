@@ -38,25 +38,25 @@ public class TestConnectionImpl implements TestConnection {
 
   @Override
   public TestConnection startTransaction(Handler<AsyncResult<String>> resultHandler) {
-    resultHandler.handle(Future.completedFuture(str));
+    resultHandler.handle(Future.succeededFuture(str));
     return this;
   }
 
   @Override
   public TestConnection insert(String name, JsonObject data, Handler<AsyncResult<String>> resultHandler) {
-    resultHandler.handle(Future.completedFuture(str));
+    resultHandler.handle(Future.succeededFuture(str));
     return this;
   }
 
   @Override
   public TestConnection commit(Handler<AsyncResult<String>> resultHandler) {
-    resultHandler.handle(Future.completedFuture(str));
+    resultHandler.handle(Future.succeededFuture(str));
     return this;
   }
 
   @Override
   public TestConnection rollback(Handler<AsyncResult<String>> resultHandler) {
-    resultHandler.handle(Future.completedFuture(str));
+    resultHandler.handle(Future.succeededFuture(str));
     return this;
   }
 

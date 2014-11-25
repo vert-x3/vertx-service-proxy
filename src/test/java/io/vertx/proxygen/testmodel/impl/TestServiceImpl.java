@@ -97,68 +97,68 @@ public class TestServiceImpl implements TestService {
 
   @Override
   public void stringHandler(Handler<AsyncResult<String>> resultHandler) {
-    resultHandler.handle(Future.completedFuture("foobar"));
+    resultHandler.handle(Future.succeededFuture("foobar"));
   }
 
   @Override
   public void byteHandler(Handler<AsyncResult<Byte>> resultHandler) {
-    resultHandler.handle(Future.completedFuture((byte)123));
+    resultHandler.handle(Future.succeededFuture((byte)123));
   }
 
   @Override
   public void shortHandler(Handler<AsyncResult<Short>> resultHandler) {
-    resultHandler.handle(Future.completedFuture((short)1234));
+    resultHandler.handle(Future.succeededFuture((short)1234));
   }
 
   @Override
   public void intHandler(Handler<AsyncResult<Integer>> resultHandler) {
-    resultHandler.handle(Future.completedFuture(12345));
+    resultHandler.handle(Future.succeededFuture(12345));
   }
 
   @Override
   public void longHandler(Handler<AsyncResult<Long>> resultHandler) {
-    resultHandler.handle(Future.completedFuture(123456l));
+    resultHandler.handle(Future.succeededFuture(123456l));
   }
 
   @Override
   public void floatHandler(Handler<AsyncResult<Float>> resultHandler) {
-    resultHandler.handle(Future.completedFuture(12.34f));
+    resultHandler.handle(Future.succeededFuture(12.34f));
   }
 
   @Override
   public void doubleHandler(Handler<AsyncResult<Double>> resultHandler) {
-    resultHandler.handle(Future.completedFuture(12.3456d));
+    resultHandler.handle(Future.succeededFuture(12.3456d));
   }
 
   @Override
   public void charHandler(Handler<AsyncResult<Character>> resultHandler) {
-    resultHandler.handle(Future.completedFuture('X'));
+    resultHandler.handle(Future.succeededFuture('X'));
   }
 
   @Override
   public void booleanHandler(Handler<AsyncResult<Boolean>> resultHandler) {
-    resultHandler.handle(Future.completedFuture(true));
+    resultHandler.handle(Future.succeededFuture(true));
   }
 
   @Override
   public void jsonObjectHandler(Handler<AsyncResult<JsonObject>> resultHandler) {
-    resultHandler.handle(Future.completedFuture(new JsonObject().put("blah", "wibble")));
+    resultHandler.handle(Future.succeededFuture(new JsonObject().put("blah", "wibble")));
   }
 
   @Override
   public void jsonArrayHandler(Handler<AsyncResult<JsonArray>> resultHandler) {
-    resultHandler.handle(Future.completedFuture(new JsonArray().add("blurrg")));
+    resultHandler.handle(Future.succeededFuture(new JsonArray().add("blurrg")));
   }
 
   @Override
   public void voidHandler(Handler<AsyncResult<Void>> resultHandler) {
-    resultHandler.handle(Future.completedFuture((Void) null));
+    resultHandler.handle(Future.succeededFuture((Void) null));
   }
 
   @Override
   public TestService fluentMethod(String str, Handler<AsyncResult<String>> resultHandler) {
     assertEquals("foo", str);
-    resultHandler.handle(Future.completedFuture("bar"));
+    resultHandler.handle(Future.succeededFuture("bar"));
     return this;
   }
 
@@ -170,7 +170,7 @@ public class TestServiceImpl implements TestService {
 
   @Override
   public void failingMethod(Handler<AsyncResult<JsonObject>> resultHandler) {
-    resultHandler.handle(Future.completedFuture(new VertxException("wibble")));
+    resultHandler.handle(Future.failedFuture(new VertxException("wibble")));
   }
 
   @Override
@@ -180,75 +180,75 @@ public class TestServiceImpl implements TestService {
     assertEquals(1234, i);
     assertEquals('X', chr);
     assertEquals(SomeEnum.BAR, senum);
-    resultHandler.handle(Future.completedFuture("goats"));
+    resultHandler.handle(Future.succeededFuture("goats"));
   }
 
   @Override
   public void listStringHandler(Handler<AsyncResult<List<String>>> resultHandler) {
     List<String> list = Arrays.asList("foo", "bar", "wibble");
-    resultHandler.handle(Future.completedFuture(list));
+    resultHandler.handle(Future.succeededFuture(list));
   }
 
   @Override
   public void listByteHandler(Handler<AsyncResult<List<Byte>>> resultHandler) {
     List<Byte> list = Arrays.asList((byte)1, (byte)2, (byte)3);
-    resultHandler.handle(Future.completedFuture(list));
+    resultHandler.handle(Future.succeededFuture(list));
   }
 
   @Override
   public void listShortHandler(Handler<AsyncResult<List<Short>>> resultHandler) {
     List<Short> list = Arrays.asList((short)11, (short)12, (short)13);
-    resultHandler.handle(Future.completedFuture(list));
+    resultHandler.handle(Future.succeededFuture(list));
   }
 
   @Override
   public void listIntHandler(Handler<AsyncResult<List<Integer>>> resultHandler) {
     List<Integer> list = Arrays.asList(100, 101, 102);
-    resultHandler.handle(Future.completedFuture(list));
+    resultHandler.handle(Future.succeededFuture(list));
   }
 
   @Override
   public void listLongHandler(Handler<AsyncResult<List<Long>>> resultHandler) {
     List<Long> list = Arrays.asList(1000l, 1001l, 1002l);
-    resultHandler.handle(Future.completedFuture(list));
+    resultHandler.handle(Future.succeededFuture(list));
   }
 
   @Override
   public void listFloatHandler(Handler<AsyncResult<List<Float>>> resultHandler) {
     List<Float> list = Arrays.asList(1.1f, 1.2f, 1.3f);
-    resultHandler.handle(Future.completedFuture(list));
+    resultHandler.handle(Future.succeededFuture(list));
   }
 
   @Override
   public void listDoubleHandler(Handler<AsyncResult<List<Double>>> resultHandler) {
     List<Double> list = Arrays.asList(1.11d, 1.12d, 1.13d);
-    resultHandler.handle(Future.completedFuture(list));
+    resultHandler.handle(Future.succeededFuture(list));
   }
 
   @Override
   public void listCharHandler(Handler<AsyncResult<List<Character>>> resultHandler) {
     List<Character> list = Arrays.asList('X', 'Y', 'Z');
-    resultHandler.handle(Future.completedFuture(list));
+    resultHandler.handle(Future.succeededFuture(list));
   }
 
   @Override
   public void listBoolHandler(Handler<AsyncResult<List<Boolean>>> resultHandler) {
     List<Boolean> list = Arrays.asList(true, false, true);
-    resultHandler.handle(Future.completedFuture(list));
+    resultHandler.handle(Future.succeededFuture(list));
   }
 
   @Override
   public void listJsonObjectHandler(Handler<AsyncResult<List<JsonObject>>> resultHandler) {
     List<JsonObject> list = Arrays.asList(new JsonObject().put("a", "foo"),
       new JsonObject().put("b", "bar"), new JsonObject().put("c", "wibble"));
-    resultHandler.handle(Future.completedFuture(list));
+    resultHandler.handle(Future.succeededFuture(list));
   }
 
   @Override
   public void listJsonArrayHandler(Handler<AsyncResult<List<JsonArray>>> resultHandler) {
     List<JsonArray> list = Arrays.asList(new JsonArray().add("foo"),
       new JsonArray().add("bar"), new JsonArray().add("wibble"));
-    resultHandler.handle(Future.completedFuture(list));
+    resultHandler.handle(Future.succeededFuture(list));
   }
 
   @Override
