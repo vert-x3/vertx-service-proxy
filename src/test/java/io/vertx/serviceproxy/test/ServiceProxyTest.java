@@ -14,7 +14,7 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.proxygen.test;
+package io.vertx.serviceproxy.test;
 
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.MessageConsumer;
@@ -22,11 +22,10 @@ import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.proxygen.ProxyHelper;
-import io.vertx.proxygen.testmodel.SomeEnum;
-import io.vertx.proxygen.testmodel.TestConnection;
-import io.vertx.proxygen.testmodel.TestOptions;
-import io.vertx.proxygen.testmodel.TestService;
+import io.vertx.serviceproxy.ProxyHelper;
+import io.vertx.serviceproxy.testmodel.SomeEnum;
+import io.vertx.serviceproxy.testmodel.TestOptions;
+import io.vertx.serviceproxy.testmodel.TestService;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
@@ -409,29 +408,30 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testConnection() {
-    TestConnection conn = proxy.createConnection("foo");
-    conn.startTransaction(onSuccess(res -> {
-      assertEquals("foo", res);
-    }));
-    conn.insert("blah", new JsonObject(), onSuccess(res -> {
-      assertEquals("foo", res);
-    }));
-    conn.commit(onSuccess(res -> {
-      assertEquals("foo", res);
-    }));
-    vertx.eventBus().consumer("closeCalled").handler(msg -> {
-      assertEquals("blah", msg.body());
-      testComplete();
-    });
-    conn.close();
-
-    try {
-      conn.startTransaction(onFailure(res -> {
+    proxy.createConnection("foo", onSuccess(conn -> {
+      conn.startTransaction(onSuccess(res -> {
+        assertEquals("foo", res);
       }));
-      fail();
-    } catch (IllegalStateException e) {
-      // OK
-    }
+      conn.insert("blah", new JsonObject(), onSuccess(res -> {
+        assertEquals("foo", res);
+      }));
+      conn.commit(onSuccess(res -> {
+        assertEquals("foo", res);
+      }));
+      vertx.eventBus().consumer("closeCalled").handler(msg -> {
+        assertEquals("blah", msg.body());
+        testComplete();
+      });
+      conn.close();
+
+      try {
+        conn.startTransaction(onFailure(res -> {
+        }));
+        fail();
+      } catch (IllegalStateException e) {
+        // OK
+      }
+    }));
 
     await();
   }

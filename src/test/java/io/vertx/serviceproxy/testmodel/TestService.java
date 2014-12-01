@@ -14,7 +14,7 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.proxygen.testmodel;
+package io.vertx.serviceproxy.testmodel;
 
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.ProxyGen;
@@ -25,8 +25,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.proxygen.ProxyHelper;
-import io.vertx.proxygen.testmodel.impl.TestServiceImpl;
+import io.vertx.serviceproxy.ProxyHelper;
+import io.vertx.serviceproxy.testmodel.impl.TestServiceImpl;
 
 import java.util.List;
 
@@ -45,7 +45,7 @@ public interface TestService {
     return ProxyHelper.createProxy(TestService.class, vertx, address);
   }
 
-  TestConnection createConnection(String str);
+  void createConnection(String str, Handler<AsyncResult<TestConnection>> resultHandler);
 
   void noParams();
 

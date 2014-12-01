@@ -6,10 +6,6 @@
 	@code{lastParam = hasParams ? method.params.get(method.params.size() - 1) : null}
 	@code{hasResultHandler=(lastParam != null) && (lastParam.type.kind == CLASS_HANDLER) && (lastParam.type.args[0].kind == CLASS_ASYNC_RESULT)}
 	@code{count=0}
-	@if{method.proxyGenReturn && !method.fluent}
-    String addr = java.util.UUID.randomUUID().toString();\n
-    @{method.returnType.simpleName} proxy = ProxyHelper.createProxy(@{method.returnType.name}.class, _vertx, addr);\n
-	@end{}
 	@if{method.proxyClose}
     closed = true;\n
 	@end{}
@@ -31,9 +27,6 @@
 
     DeliveryOptions _deliveryOptions = new DeliveryOptions();\n
     _deliveryOptions.addHeader("action", "@{method.name}");\n
-	@if{method.proxyGenReturn && !method.fluent}
-    _deliveryOptions.addHeader("newproxyaddr", addr);\n
-	@end{}
 	@if{hasResultHandler}
 		@code{resultType=lastParam.type.args[0].args[0]}
 		@code{resultKind=resultType.kind}
@@ -55,6 +48,9 @@ send(_address, _json, _deliveryOptions, res -> {\n
         @{lastParam.name}.handle(Future.succeededFuture(convertToListChar(res.result().body())));\n
 				@else{resultKind == CLASS_LIST}
         @{lastParam.name}.handle(Future.succeededFuture(res.result().body().getList()));\n
+				@else{resultKind == CLASS_API && resultType.proxyGen}
+        String addr = res.result().headers().get("proxyaddr");\n
+        @{lastParam.name}.handle(Future.succeededFuture(ProxyHelper.createProxy(@{resultType.simpleName}.class, _vertx, addr)));\n
 				@else{}
         @{lastParam.name}.handle(Future.succeededFuture(res.result().body()));\n
 				@end{}
@@ -98,7 +94,7 @@ import io.vertx.core.json.JsonObject;\n
 import io.vertx.core.json.JsonArray;\n
 import java.util.List;\n
 import java.util.ArrayList;\n
-import io.vertx.proxygen.ProxyHelper;\n
+import io.vertx.serviceproxy.ProxyHelper;\n
 @foreach{importedType:importedTypes}
 	@if{!importedType.packageName.equals("java.lang")}
 		import @{importedType};\n
@@ -123,14 +119,9 @@ public class @{ifaceSimpleName}VertxEBProxy implements @{ifaceSimpleName} {\n
 @foreach{method:methods}
 	@if{!method.staticMethod}
   @includeNamed{'startMethodTemplate';method:method}\n
+		@if{!method.proxyIgnore}@includeNamed{'methodBody';method:method}@end{}
 		@if{method.fluent}
-				@if{!method.proxyIgnore}@includeNamed{'methodBody';method:method}@end{}
     return this;\n
-		@else{method.returnType.name.equals('void')}
-				@if{!method.proxyIgnore}@includeNamed{'methodBody';method:method}@end{}
-		@else{method.proxyGenReturn}
-				@if{!method.proxyIgnore}@includeNamed{'methodBody';method:method}@end{}
-    return proxy;\n
 		@end{}
   }\n\n
 	@end{}

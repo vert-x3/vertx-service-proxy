@@ -14,7 +14,7 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.proxygen.testmodel;
+package io.vertx.serviceproxy.testmodel;
 
 import io.vertx.codegen.annotations.Options;
 import io.vertx.core.json.JsonObject;

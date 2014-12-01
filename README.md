@@ -69,7 +69,8 @@ in any of the languages supported by Vert.x - this means you can write your serv
 through an idiomatic other language API irrespective of whether the service lives locally or is somewhere else on
 the eventbus entirely.
 
-Proxy service methods can also return references to other proxy services. This is useful, for example, if you want to
+Proxy service methods can also asynchronously return references to other proxy services. In other words proxies can
+ be factories for other proxies. This is useful, for example, if you want to
 return a connection interface, e.g.
 
     @ProxyGen
@@ -87,7 +88,7 @@ return a connection interface, e.g.
         
         // Create a connection
     
-        MyDatabaseConnection createConnection();
+        void createConnection(String shoeSize, Handler<AsyncResult<MyDatabaseConnection>> resultHandler);
     }
     
 Where:

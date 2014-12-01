@@ -20,12 +20,14 @@ import io.vertx.core.Vertx;\n
 import io.vertx.core.Handler;\n
 import io.vertx.core.AsyncResult;\n
 import io.vertx.core.eventbus.Message;\n
+import io.vertx.core.eventbus.DeliveryOptions;\n
 import io.vertx.core.eventbus.ReplyException;\n
 import io.vertx.core.json.JsonObject;\n
 import io.vertx.core.json.JsonArray;\n
 import java.util.List;\n
-import io.vertx.proxygen.ProxyHelper;\n
-import io.vertx.proxygen.ProxyHandler;\n
+import java.util.UUID;\n
+import io.vertx.serviceproxy.ProxyHelper;\n
+import io.vertx.serviceproxy.ProxyHandler;\n
 @foreach{importedType:importedTypes}
 	@if{!importedType.packageName.equals("java.lang")}
 		import @{importedType};\n
@@ -58,11 +60,7 @@ public class @{ifaceSimpleName}VertxProxyHandler extends ProxyHandler {\n
 @foreach{method:methods}
 	@if{!method.staticMethod}
       case "@{method.name}": {\n
-		@if{method.proxyGenReturn && !method.fluent}
-        @{method.returnType.simpleName} res = service.@{method.name}(
-		@else{}
         service.@{method.name}(
-		@end{}
 		@code{hasParams = !method.params.isEmpty()}
 		@code{lastParam = hasParams? method.params.get(method.params.size() - 1) : null}
 		@code{hasResultHandler=(lastParam != null) && (lastParam.type.kind == CLASS_HANDLER) && (lastParam.type.args[0].kind==CLASS_ASYNC_RESULT)}
@@ -84,14 +82,20 @@ new @{param.type.name}(json.getJsonObject("@{param.name}"))
 createListCharHandler(msg)
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_LIST}
 createListHandler(msg)
+			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_API && lastParam.type.args[0].args[0].proxyGen}
+res -> {\n
+          if (res.failed()) {\n
+            msg.fail(-1, res.cause().getMessage());\n
+          } else {\n
+            String proxyAddress = UUID.randomUUID().toString();\n
+            ProxyHelper.registerService(@{lastParam.type.args[0].args[0].simpleName}.class, vertx, res.result(), proxyAddress);\n
+            msg.reply(null, new DeliveryOptions().addHeader("proxyaddr", proxyAddress));\n
+          }\n
+        }
 			@else{}
 createHandler(msg)
 			@end{}
 		@end{", "});\n
-		@if{method.proxyGenReturn && !method.fluent}
-        String addr = msg.headers().get("newproxyaddr");\n
-        ProxyHelper.registerService(@{method.returnType.name}.class, vertx, res, addr);\n
-		@end{}
 		@if{method.proxyClose}
         close();\n
 		@end{}
@@ -140,5 +144,6 @@ createHandler(msg)
       }\n
     };\n
   }\n
+
 }
 

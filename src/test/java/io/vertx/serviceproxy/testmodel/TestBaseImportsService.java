@@ -1,4 +1,4 @@
-package io.vertx.proxygen.testmodel;
+package io.vertx.serviceproxy.testmodel;
 
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
