@@ -17,6 +17,10 @@
     _json.put("@{param.name}", @{param.name}.toString());\n
 			@else{param.type.kind == CLASS_LIST}
     _json.put("@{param.name}", new JsonArray(@{param.name}));\n
+			@else{param.type.kind == CLASS_SET}
+    _json.put("@{param.name}", new JsonArray(new ArrayList<>(@{param.name})));\n
+			@else{param.type.kind == CLASS_MAP}
+    _json.put("@{param.name}", new JsonObject(convertMap(@{param.name})));\n
 			@else{param.type.kind == CLASS_OPTIONS}
     _json.put("@{param.name}", @{param.name}.toJson());\n
 			@else{}
@@ -31,7 +35,7 @@
 		@code{resultType=lastParam.type.args[0].args[0]}
 		@code{resultKind=resultType.kind}
     _vertx.eventBus().
-@if{resultKind == CLASS_LIST}
+@if{resultKind == CLASS_LIST || resultKind == CLASS_SET}
 <JsonArray>
 @else{}
 <@{resultType.simpleName}>
@@ -40,14 +44,18 @@ send(_address, _json, _deliveryOptions, res -> {\n
       if (res.failed()) {\n
         @{lastParam.name}.handle(Future.failedFuture(res.cause()));\n
       } else {\n
-				@if{resultKind == CLASS_LIST && resultType.args[0].kind == CLASS_JSON_OBJECT}
-        @{lastParam.name}.handle(Future.succeededFuture(res.result().body().getList()));\n
-				@else{resultKind == CLASS_LIST && resultType.args[0].kind == CLASS_JSON_ARRAY}
-        @{lastParam.name}.handle(Future.succeededFuture(res.result().body().getList()));\n
-				@else{resultKind == CLASS_LIST && resultType.args[0].name == 'java.lang.Character'}
+				@if{resultKind == CLASS_LIST}
+					@if{resultType.args[0].name == 'java.lang.Character'}
         @{lastParam.name}.handle(Future.succeededFuture(convertToListChar(res.result().body())));\n
-				@else{resultKind == CLASS_LIST}
-        @{lastParam.name}.handle(Future.succeededFuture(res.result().body().getList()));\n
+					@else{}
+        @{lastParam.name}.handle(Future.succeededFuture(convertList(res.result().body().getList())));\n
+					@end{}
+				@else{resultKind == CLASS_SET}
+					@if{resultType.args[0].name == 'java.lang.Character'}
+        @{lastParam.name}.handle(Future.succeededFuture(convertToSetChar(res.result().body())));\n
+					@else{}
+        @{lastParam.name}.handle(Future.succeededFuture(convertSet(res.result().body().getList())));\n
+					@end{}
 				@else{resultKind == CLASS_API && resultType.proxyGen}
         String addr = res.result().headers().get("proxyaddr");\n
         @{lastParam.name}.handle(Future.succeededFuture(ProxyHelper.createProxy(@{resultType.simpleName}.class, _vertx, addr)));\n
@@ -92,8 +100,11 @@ import io.vertx.core.Vertx;\n
 import io.vertx.core.Future;\n
 import io.vertx.core.json.JsonObject;\n
 import io.vertx.core.json.JsonArray;\n
-import java.util.List;\n
-import java.util.ArrayList;\n
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import io.vertx.serviceproxy.ProxyHelper;\n
 @foreach{importedType:importedTypes}
 	@if{!importedType.packageName.equals("java.lang")}
@@ -138,10 +149,31 @@ public class @{ifaceSimpleName}VertxEBProxy implements @{ifaceSimpleName} {\n
     return list;\n
   }\n\n
 
+  private Set<Character> convertToSetChar(JsonArray arr) {\n
+    Set<Character> set = new HashSet<>();\n
+    for (Object obj: arr) {\n
+      Integer jobj = (Integer)obj;\n
+      set.add((char)jobj.intValue());\n
+    }\n
+    return set;\n
+  }\n\n
+
   private void checkClosed() {\n
     if (closed) {\n
       throw new IllegalStateException("Proxy is closed");\n
     }\n
+  }\n
+
+  private <T> Map<String, T> convertMap(Map map) {\n
+    return (Map<String, T>)map;\n
+  }\n
+
+  private <T> List<T> convertList(List list) {\n
+    return (List<T>)list;\n
+  }\n
+
+  private <T> Set<T> convertSet(List list) {\n
+    return new HashSet<T>((List<T>)list);\n
   }\n
 
 }

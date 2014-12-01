@@ -24,7 +24,11 @@ import io.vertx.core.eventbus.DeliveryOptions;\n
 import io.vertx.core.eventbus.ReplyException;\n
 import io.vertx.core.json.JsonObject;\n
 import io.vertx.core.json.JsonArray;\n
-import java.util.List;\n
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;\n
 import io.vertx.serviceproxy.ProxyHelper;\n
 import io.vertx.serviceproxy.ProxyHandler;\n
@@ -72,7 +76,11 @@ public class @{ifaceSimpleName}VertxProxyHandler extends ProxyHandler {\n
 				@else{param.type.kind == CLASS_ENUM}
 @{param.type.name}.valueOf(json.getString("@{param.name}"))
 				@else{param.type.kind == CLASS_LIST}
-json.getJsonArray("@{param.name}").toList()
+convertList(json.getJsonArray("@{param.name}").getList())
+				@else{param.type.kind == CLASS_SET}
+convertSet(json.getJsonArray("@{param.name}").getList())
+				@else{param.type.kind == CLASS_MAP}
+convertMap(json.getJsonObject("@{param.name}").getMap())
 				@else{param.type.kind == CLASS_OPTIONS}
 new @{param.type.name}(json.getJsonObject("@{param.name}"))
 				@else{}
@@ -82,6 +90,10 @@ new @{param.type.name}(json.getJsonObject("@{param.name}"))
 createListCharHandler(msg)
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_LIST}
 createListHandler(msg)
+			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_SET && lastParam.type.args[0].args[0].args[0].name=='java.lang.Character'}
+createSetCharHandler(msg)
+			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_SET}
+createSetHandler(msg)
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_API && lastParam.type.args[0].args[0].proxyGen}
 res -> {\n
           if (res.failed()) {\n
@@ -131,6 +143,16 @@ createHandler(msg)
     };\n
   }\n
 
+  private <T> Handler<AsyncResult<Set<T>>> createSetHandler(Message msg) {\n
+    return res -> {\n
+      if (res.failed()) {\n
+        msg.fail(-1, res.cause().getMessage());\n
+      } else {\n
+        msg.reply(new JsonArray(new ArrayList<>(res.result())));\n
+      }\n
+    };\n
+  }\n
+
   private Handler<AsyncResult<List<Character>>> createListCharHandler(Message msg) {\n
     return res -> {\n
       if (res.failed()) {\n
@@ -143,6 +165,32 @@ createHandler(msg)
         msg.reply(arr);\n
       }\n
     };\n
+  }\n
+
+  private Handler<AsyncResult<Set<Character>>> createSetCharHandler(Message msg) {\n
+    return res -> {\n
+      if (res.failed()) {\n
+        msg.fail(-1, res.cause().getMessage());\n
+      } else {\n
+        JsonArray arr = new JsonArray();\n
+        for (Character chr: res.result()) {\n
+          arr.add((int)chr);\n
+        }\n
+        msg.reply(arr);\n
+      }\n
+    };\n
+  }\n
+
+  private <T> Map<String, T> convertMap(Map map) {\n
+    return (Map<String, T>)map;\n
+  }\n
+
+  private <T> List<T> convertList(List list) {\n
+    return (List<T>)list;\n
+  }\n
+
+  private <T> Set<T> convertSet(List list) {\n
+    return new HashSet<T>((List<T>)list);\n
   }\n
 
 }

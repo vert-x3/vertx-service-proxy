@@ -29,6 +29,10 @@ import io.vertx.serviceproxy.testmodel.TestService;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
@@ -92,6 +96,35 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testOptionsType() {
     proxy.optionType(new TestOptions().setString("foo").setNumber(123).setBool(true));
+    await();
+  }
+
+  @Test
+  public void testListTypes() {
+    proxy.listParams(Arrays.asList("foo", "bar"), Arrays.asList((byte)12, (byte)13), Arrays.asList((short)123, (short)134), Arrays.asList(1234, 1235),
+      Arrays.asList(12345l, 12346l), Arrays.asList(new JsonObject().put("foo", "bar"), new JsonObject().put("blah", "eek")),
+      Arrays.asList(new JsonArray().add("foo"), new JsonArray().add("blah")));
+    await();
+  }
+
+  @Test
+  public void testSetTypes() {
+    proxy.setParams(new HashSet<>(Arrays.asList("foo", "bar")), new HashSet<>(Arrays.asList((byte) 12, (byte) 13)), new HashSet<>(Arrays.asList((short) 123, (short) 134)),
+      new HashSet<>(Arrays.asList(1234, 1235)),
+      new HashSet<>(Arrays.asList(12345l, 12346l)), new HashSet<>(Arrays.asList(new JsonObject().put("foo", "bar"), new JsonObject().put("blah", "eek"))),
+      new HashSet<>(Arrays.asList(new JsonArray().add("foo"), new JsonArray().add("blah"))));
+    await();
+  }
+
+  @Test
+  public void testMapTypes() {
+    proxy.mapParams(new HashMap<String, String>(){{put("eek", "foo"); put("wob", "bar");}},
+      new HashMap<String, Byte>(){{put("eek", (byte)12); put("wob", (byte)13);}},
+      new HashMap<String, Short>(){{put("eek", (short)123); put("wob", (short)134);}},
+      new HashMap<String, Integer>(){{put("eek", 1234); put("wob", 1235);}},
+      new HashMap<String, Long>(){{put("eek", 12345l); put("wob", 12356l);}},
+      new HashMap<String, JsonObject>(){{put("eek", new JsonObject().put("foo", "bar")); put("wob", new JsonObject().put("blah", "eek"));}},
+      new HashMap<String, JsonArray>(){{put("eek", new JsonArray().add("foo")); put("wob", new JsonArray().add("blah"));}});
     await();
   }
 
@@ -377,6 +410,7 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+
   @Test
   public void testListJsonObjectHandler() {
     proxy.listJsonObjectHandler(onSuccess(list -> {
@@ -394,6 +428,126 @@ public class ServiceProxyTest extends VertxTestBase {
       assertEquals("foo", list.get(0).getString(0));
       assertEquals("bar", list.get(1).getString(0));
       assertEquals("wibble", list.get(2).getString(0));
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testSetStringHandler() {
+    proxy.setStringHandler(onSuccess(set -> {
+      assertTrue(set.contains("foo"));
+      assertTrue(set.contains("bar"));
+      assertTrue(set.contains("wibble"));
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testSetByteHandler() {
+    proxy.setByteHandler(onSuccess(set -> {
+      assertTrue(set.contains((byte) 1));
+      assertTrue(set.contains((byte) 2));
+      assertTrue(set.contains((byte) 3));
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testSetShortHandler() {
+    proxy.setShortHandler(onSuccess(set -> {
+      assertTrue(set.contains((short) 11));
+      assertTrue(set.contains((short) 12));
+      assertTrue(set.contains((short) 13));
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testSetIntHandler() {
+    proxy.setIntHandler(onSuccess(set -> {
+      assertTrue(set.contains(100));
+      assertTrue(set.contains(101));
+      assertTrue(set.contains(102));
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testSetLongHandler() {
+    proxy.setLongHandler(onSuccess(set -> {
+      assertTrue(set.contains(1000l));
+      assertTrue(set.contains(1001l));
+      assertTrue(set.contains(1002l));
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testSetFloatHandler() {
+    proxy.setFloatHandler(onSuccess(set -> {
+      assertTrue(set.contains(1.1f));
+      assertTrue(set.contains(1.2f));
+      assertTrue(set.contains(1.3f));
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testSetDoubleHandler() {
+    proxy.setDoubleHandler(onSuccess(set -> {
+      assertTrue(set.contains(1.11d));
+      assertTrue(set.contains(1.12d));
+      assertTrue(set.contains(1.13d));
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testSetCharHandler() {
+    proxy.setCharHandler(onSuccess(set -> {
+      assertTrue(set.contains('X'));
+      assertTrue(set.contains('Y'));
+      assertTrue(set.contains('Z'));
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testSetBoolHandler() {
+    proxy.setBoolHandler(onSuccess(set -> {
+      assertTrue(set.contains(true));
+      assertTrue(set.contains(false));
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testSetJsonObjectHandler() {
+    proxy.setJsonObjectHandler(onSuccess(set -> {
+      assertTrue(set.contains(new JsonObject().put("a", "foo")));
+      assertTrue(set.contains(new JsonObject().put("b", "bar")));
+      assertTrue(set.contains(new JsonObject().put("c", "wibble")));
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void setSetJsonArrayHandler() {
+    proxy.setJsonArrayHandler(onSuccess(set -> {
+      assertTrue(set.contains(new JsonArray().add("foo")));
+      assertTrue(set.contains(new JsonArray().add("bar")));
+      assertTrue(set.contains(new JsonArray().add("wibble")));
       testComplete();
     }));
     await();
