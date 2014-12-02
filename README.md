@@ -69,7 +69,8 @@ in any of the languages supported by Vert.x - this means you can write your serv
 through an idiomatic other language API irrespective of whether the service lives locally or is somewhere else on
 the eventbus entirely.
 
-Proxy service methods can also return references to other proxy services. This is useful, for example, if you want to
+Proxy service methods can also asynchronously return references to other proxy services. In other words proxies can
+ be factories for other proxies. This is useful, for example, if you want to
 return a connection interface, e.g.
 
     @ProxyGen
@@ -87,7 +88,7 @@ return a connection interface, e.g.
         
         // Create a connection
     
-        MyDatabaseConnection createConnection();
+        void createConnection(String shoeSize, Handler<AsyncResult<MyDatabaseConnection>> resultHandler);
     }
     
 Where:
@@ -153,13 +154,46 @@ If you are using service proxies the generated code will handle this for you aut
 There are restrictions on the types and return values that can be used in a service method so that these are easy to
 marshall over event bus messages and so they can be used asynchronously. They are:
 
-* Return values must be `void` or the method must be marked as `Fluent` and return a reference to itself. This is because
-methods must not block and it's not possible to return a result immediately without blocking if the service is remote.
-You can also return a reference to another proxy which is annotated with the `ProxyGen` annotation.
-* If a return value is required a parameter of type `Handler<AsyncResult<R>>` must be provided. This will be invoked
-asynchronously with the result when it is ready. This must be the last parameter in the list of parameters.
-* The type `R` above includes any primitive type (or boxed equivalent), `String`, `JsonObject`, `JsonArray` or any enum type,
-or any `List` containing the above types.
-* Other than the return handler valid parameter types include any primitive type (or boxed equivalent), `String`, `JsonObject`,
- `JsonArray`, any enum type or any Options class.
-* There must be no overloaded service methods. (I.e. more than one with the same name)
+#### Return types
+
+Must be one of
+
+* `void`
+* `@Fluent` and return reference to the service
+
+This is because methods must not block and it's not possible to return a result immediately without blocking if the service is remote.
+
+#### Parameter types
+
+Let `J` = `JsonObject | JsonArray`
+Let `B` = Any primitive type or boxed primitive type
+
+Parameters can be any of:
+
+* `J`
+* `B`
+* `List<J>`
+* `List<B>`
+* `Set<J>`
+* `Set<B>`
+* `Map<String, J>`
+* `Map<String, B>`
+* Any Enum type
+* Any `@Options` class
+
+If an asynchronous result is required a final parameter of type `Handler<AsyncResult<R>>` can be provided.
+
+`R` can be any of:
+
+* `J`
+* `B`
+* `List<J>`
+* `List<B>`
+* `Set<J>`
+* `Set<B>`
+* `Map<String, J>`
+* `Map<String, B>`
+
+#### Overloaded methods
+
+There must be no overloaded service methods. (I.e. more than one with the same name)

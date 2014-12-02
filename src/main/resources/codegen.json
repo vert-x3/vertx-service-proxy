@@ -4,13 +4,13 @@
     {
       "kind": "proxy",
       "fileName": "ifaceFQCN + 'VertxEBProxy.java'",
-      "templateFileName": "proxy-gen/template/proxygen.templ"
+      "templateFileName": "serviceproxy/template/proxygen.templ"
     }
     ,
     {
       "kind": "proxy",
       "fileName": "ifaceFQCN + 'VertxProxyHandler.java'",
-      "templateFileName": "proxy-gen/template/handlergen.templ"
+      "templateFileName": "serviceproxy/template/handlergen.templ"
     }
   ]
 }

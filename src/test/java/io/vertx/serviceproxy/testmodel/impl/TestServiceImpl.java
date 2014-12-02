@@ -14,7 +14,7 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.proxygen.testmodel.impl;
+package io.vertx.serviceproxy.testmodel.impl;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -23,14 +23,17 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.proxygen.test.ServiceProxyTest;
-import io.vertx.proxygen.testmodel.SomeEnum;
-import io.vertx.proxygen.testmodel.TestConnection;
-import io.vertx.proxygen.testmodel.TestOptions;
-import io.vertx.proxygen.testmodel.TestService;
+import io.vertx.serviceproxy.test.ServiceProxyTest;
+import io.vertx.serviceproxy.testmodel.SomeEnum;
+import io.vertx.serviceproxy.testmodel.TestConnection;
+import io.vertx.serviceproxy.testmodel.TestOptions;
+import io.vertx.serviceproxy.testmodel.TestService;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -46,8 +49,8 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
-  public TestConnection createConnection(String str) {
-    return new TestConnectionImpl(vertx, str);
+  public void createConnection(String str, Handler<AsyncResult<TestConnection>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(new TestConnectionImpl(vertx, str)));
   }
 
   @Override
@@ -92,6 +95,73 @@ public class TestServiceImpl implements TestService {
   @Override
   public void optionType(TestOptions options) {
     assertEquals(new TestOptions().setString("foo").setNumber(123).setBool(true), options);
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
+  public void listParams(List<String> listString, List<Byte> listByte, List<Short> listShort, List<Integer> listInt, List<Long> listLong,
+                         List<JsonObject> listJsonObject, List<JsonArray> listJsonArray) {
+    assertEquals("foo", listString.get(0));
+    assertEquals("bar", listString.get(1));
+    assertEquals((byte)12, listByte.get(0).byteValue());
+    assertEquals((byte)13, listByte.get(1).byteValue());
+    assertEquals((short)123, listShort.get(0).shortValue());
+    assertEquals((short)134, listShort.get(1).shortValue());
+    assertEquals(1234, listInt.get(0).intValue());
+    assertEquals(1235, listInt.get(1).intValue());
+    assertEquals(12345l, listLong.get(0).longValue());
+    assertEquals(12346l, listLong.get(1).longValue());
+    assertEquals(new JsonObject().put("foo", "bar"), listJsonObject.get(0));
+    assertEquals(new JsonObject().put("blah", "eek"), listJsonObject.get(1));
+    assertEquals(new JsonArray().add("foo"), listJsonArray.get(0));
+    assertEquals(new JsonArray().add("blah"), listJsonArray.get(1));
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
+  public void setParams(Set<String> setString, Set<Byte> setByte, Set<Short> setShort, Set<Integer> setInt, Set<Long> setLong,
+                        Set<JsonObject> setJsonObject, Set<JsonArray> setJsonArray) {
+    assertEquals(2, setString.size());
+    assertTrue(setString.contains("foo"));
+    assertTrue(setString.contains("bar"));
+    assertEquals(2, setByte.size());
+    assertTrue(setByte.contains((byte)12));
+    assertTrue(setByte.contains((byte)13));
+    assertEquals(2, setShort.size());
+    assertTrue(setShort.contains((short)123));
+    assertTrue(setShort.contains((short)134));
+    assertEquals(2, setInt.size());
+    assertTrue(setInt.contains(1234));
+    assertTrue(setInt.contains(1235));
+    assertEquals(2, setLong.size());
+    assertTrue(setLong.contains(12345l));
+    assertTrue(setLong.contains(12346l));
+    assertEquals(2, setJsonObject.size());
+    assertTrue(setJsonObject.contains(new JsonObject().put("foo", "bar")));
+    assertTrue(setJsonObject.contains(new JsonObject().put("blah", "eek")));
+    assertEquals(2, setJsonArray.size());
+    assertTrue(setJsonArray.contains(new JsonArray().add("foo")));
+    assertTrue(setJsonArray.contains(new JsonArray().add("blah")));
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
+  public void mapParams(Map<String, String> mapString, Map<String, Byte> mapByte, Map<String, Short> mapShort,
+                        Map<String, Integer> mapInt, Map<String, Long> mapLong, Map<String, JsonObject> mapJsonObject, Map<String, JsonArray> mapJsonArray) {
+    assertEquals("foo", mapString.get("eek"));
+    assertEquals("bar", mapString.get("wob"));
+    assertEquals((byte)12, mapByte.get("eek").byteValue());
+    assertEquals((byte)13, mapByte.get("wob").byteValue());
+    assertEquals((short)123, mapShort.get("eek").shortValue());
+    assertEquals((short)134, mapShort.get("wob").shortValue());
+    assertEquals(1234, mapInt.get("eek").intValue());
+    assertEquals(1235, mapInt.get("wob").intValue());
+    assertEquals(12345l, mapLong.get("eek").longValue());
+    assertEquals(12356l, mapLong.get("wob").longValue());
+    assertEquals(new JsonObject().put("foo", "bar"), mapJsonObject.get("eek"));
+    assertEquals(new JsonObject().put("blah", "eek"), mapJsonObject.get("wob"));
+    assertEquals(new JsonArray().add("foo"), mapJsonArray.get("eek"));
+    assertEquals(new JsonArray().add("blah"), mapJsonArray.get("wob"));
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
 
@@ -249,6 +319,74 @@ public class TestServiceImpl implements TestService {
     List<JsonArray> list = Arrays.asList(new JsonArray().add("foo"),
       new JsonArray().add("bar"), new JsonArray().add("wibble"));
     resultHandler.handle(Future.succeededFuture(list));
+  }
+
+  @Override
+  public void setStringHandler(Handler<AsyncResult<Set<String>>> resultHandler) {
+    Set<String> set = new HashSet<>(Arrays.asList("foo", "bar", "wibble"));
+    resultHandler.handle(Future.succeededFuture(set));
+  }
+
+  @Override
+  public void setByteHandler(Handler<AsyncResult<Set<Byte>>> resultHandler) {
+    Set<Byte> set = new HashSet<>(Arrays.asList((byte)1, (byte)2, (byte)3));
+    resultHandler.handle(Future.succeededFuture(set));
+  }
+
+  @Override
+  public void setShortHandler(Handler<AsyncResult<Set<Short>>> resultHandler) {
+    Set<Short> set = new HashSet<>(Arrays.asList((short)11, (short)12, (short)13));
+    resultHandler.handle(Future.succeededFuture(set));
+  }
+
+  @Override
+  public void setIntHandler(Handler<AsyncResult<Set<Integer>>> resultHandler) {
+    Set<Integer> set = new HashSet<>(Arrays.asList(100, 101, 102));
+    resultHandler.handle(Future.succeededFuture(set));
+  }
+
+  @Override
+  public void setLongHandler(Handler<AsyncResult<Set<Long>>> resultHandler) {
+    Set<Long> set = new HashSet<>(Arrays.asList(1000l, 1001l, 1002l));
+    resultHandler.handle(Future.succeededFuture(set));
+  }
+
+  @Override
+  public void setFloatHandler(Handler<AsyncResult<Set<Float>>> resultHandler) {
+    Set<Float> set = new HashSet<>(Arrays.asList(1.1f, 1.2f, 1.3f));
+    resultHandler.handle(Future.succeededFuture(set));
+  }
+
+  @Override
+  public void setDoubleHandler(Handler<AsyncResult<Set<Double>>> resultHandler) {
+    Set<Double> set = new HashSet<>(Arrays.asList(1.11d, 1.12d, 1.13d));
+    resultHandler.handle(Future.succeededFuture(set));
+  }
+
+  @Override
+  public void setCharHandler(Handler<AsyncResult<Set<Character>>> resultHandler) {
+    Set<Character> set = new HashSet<>(Arrays.asList('X', 'Y', 'Z'));
+    resultHandler.handle(Future.succeededFuture(set));
+  }
+
+  @Override
+  public void setBoolHandler(Handler<AsyncResult<Set<Boolean>>> resultHandler) {
+    Set<Boolean> set = new HashSet<>(Arrays.asList(true, false, true));
+    resultHandler.handle(Future.succeededFuture(set));
+  }
+
+  @Override
+  public void setJsonObjectHandler(Handler<AsyncResult<Set<JsonObject>>> resultHandler) {
+    Set<JsonObject> set = new HashSet<>(Arrays.asList(new JsonObject().put("a", "foo"),
+      new JsonObject().put("b", "bar"), new JsonObject().put("c", "wibble")));
+    resultHandler.handle(Future.succeededFuture(set));
+  }
+
+  @Override
+  public void setJsonArrayHandler(Handler<AsyncResult<Set<JsonArray>>> resultHandler) {
+    Set<JsonArray> set = new HashSet<>(Arrays.asList(new JsonArray().add("foo"),
+      new JsonArray().add("bar"), new JsonArray().add("wibble")));
+    resultHandler.handle(Future.succeededFuture(set));
   }
 
   @Override

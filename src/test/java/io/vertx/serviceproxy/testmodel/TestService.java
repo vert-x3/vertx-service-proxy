@@ -14,7 +14,7 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.proxygen.testmodel;
+package io.vertx.serviceproxy.testmodel;
 
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.ProxyGen;
@@ -25,10 +25,12 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.proxygen.ProxyHelper;
-import io.vertx.proxygen.testmodel.impl.TestServiceImpl;
+import io.vertx.serviceproxy.ProxyHelper;
+import io.vertx.serviceproxy.testmodel.impl.TestServiceImpl;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -45,7 +47,7 @@ public interface TestService {
     return ProxyHelper.createProxy(TestService.class, vertx, address);
   }
 
-  TestConnection createConnection(String str);
+  void createConnection(String str, Handler<AsyncResult<TestConnection>> resultHandler);
 
   void noParams();
 
@@ -59,6 +61,12 @@ public interface TestService {
   void enumType(SomeEnum someEnum);
 
   void optionType(TestOptions options);
+
+  void listParams(List<String> listString, List<Byte> listByte, List<Short> listShort, List<Integer> listInt, List<Long> listLong, List<JsonObject> listJsonObject, List<JsonArray> listJsonArray);
+
+  void setParams(Set<String> setString, Set<Byte> setByte, Set<Short> setShort, Set<Integer> setInt, Set<Long> setLong, Set<JsonObject> setJsonObject, Set<JsonArray> setJsonArray);
+
+  void mapParams(Map<String, String> mapString, Map<String, Byte> mapByte, Map<String, Short> mapShort, Map<String, Integer> mapInt, Map<String, Long> mapLong, Map<String, JsonObject> mapJsonObject, Map<String, JsonArray> mapJsonArray);
 
   void stringHandler(Handler<AsyncResult<String>> resultHandler);
 
@@ -115,6 +123,28 @@ public interface TestService {
   void listJsonObjectHandler(Handler<AsyncResult<List<JsonObject>>> resultHandler);
 
   void listJsonArrayHandler(Handler<AsyncResult<List<JsonArray>>> resultHandler);
+
+  void setStringHandler(Handler<AsyncResult<Set<String>>> resultHandler);
+
+  void setByteHandler(Handler<AsyncResult<Set<Byte>>> resultHandler);
+
+  void setShortHandler(Handler<AsyncResult<Set<Short>>> resultHandler);
+
+  void setIntHandler(Handler<AsyncResult<Set<Integer>>> resultHandler);
+
+  void setLongHandler(Handler<AsyncResult<Set<Long>>> resultHandler);
+
+  void setFloatHandler(Handler<AsyncResult<Set<Float>>> resultHandler);
+
+  void setDoubleHandler(Handler<AsyncResult<Set<Double>>> resultHandler);
+
+  void setCharHandler(Handler<AsyncResult<Set<Character>>> resultHandler);
+
+  void setBoolHandler(Handler<AsyncResult<Set<Boolean>>> resultHandler);
+
+  void setJsonObjectHandler(Handler<AsyncResult<Set<JsonObject>>> resultHandler);
+
+  void setJsonArrayHandler(Handler<AsyncResult<Set<JsonArray>>> resultHandler);
 
   @ProxyIgnore
   void ignoredMethod();
