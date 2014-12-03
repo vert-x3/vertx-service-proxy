@@ -115,7 +115,7 @@ Service Proxies assume that event bus messages follow a certain format so they c
 Of course, you don't *have to* use client proxies to access remote service if you don't want to. It's perfectly acceptable
 to interact with them by just sending messages over the event bus.
 
-In order for services to be interacted with a consistent way the following message formats *should be used* for any
+In order for services to be interacted with a consistent way the following message formats *must be used* for any
 Vert.x services.
 
 The format is very simple:
