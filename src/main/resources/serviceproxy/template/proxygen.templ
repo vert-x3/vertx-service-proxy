@@ -1,14 +1,28 @@
 
 @declare{'methodBody'}
-    checkClosed();\n
-    JsonObject _json = new JsonObject();\n
 	@code{hasParams = !method.params.isEmpty()}
 	@code{lastParam = hasParams ? method.params.get(method.params.size() - 1) : null}
 	@code{hasResultHandler=(lastParam != null) && (lastParam.type.kind == CLASS_HANDLER) && (lastParam.type.args[0].kind == CLASS_ASYNC_RESULT)}
 	@code{count=0}
-	@if{method.proxyClose}
-    closed = true;\n
-	@end{}
+  @if{hasResultHandler}
+  if (closed) {\n  
+    @{lastParam.name}.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));\n
+  @if{method.fluent}
+    return this;\n
+  @else{}
+    return;\n
+  @end{}
+  }\n
+  @else{}
+  if (closed) {\n  
+    throw new IllegalStateException("Proxy is closed");\n  
+  }\n
+  @end{}
+@if{method.proxyClose}
+  closed = true;\n  
+@end{}
+
+	  JsonObject _json = new JsonObject();\n
 	@foreach{param: method.params}
 		@if{!hasResultHandler || (count++ != method.params.size() - 1)}
 			@if{param.type.name == 'char' || param.type.name == 'java.lang.Character'}
@@ -157,12 +171,6 @@ public class @{ifaceSimpleName}VertxEBProxy implements @{ifaceSimpleName} {\n
     }\n
     return set;\n
   }\n\n
-
-  private void checkClosed() {\n
-    if (closed) {\n
-      throw new IllegalStateException("Proxy is closed");\n
-    }\n
-  }\n
 
   private <T> Map<String, T> convertMap(Map map) {\n
     return (Map<String, T>)map;\n

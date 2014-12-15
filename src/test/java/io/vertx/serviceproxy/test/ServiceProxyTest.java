@@ -578,13 +578,10 @@ public class ServiceProxyTest extends VertxTestBase {
       });
       conn.close();
 
-      try {
-        conn.startTransaction(onFailure(res -> {
-        }));
-        fail();
-      } catch (IllegalStateException e) {
-        // OK
-      }
+      conn.startTransaction(onFailure(cause -> {
+        assertNotNull(cause);
+        assertTrue(cause instanceof IllegalStateException);
+      }));
     }));
 
     await();
