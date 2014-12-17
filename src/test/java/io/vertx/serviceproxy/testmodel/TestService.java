@@ -90,6 +90,8 @@ public interface TestService {
 
   void jsonArrayHandler(Handler<AsyncResult<JsonArray>> resultHandler);
 
+  void optionsHandler(Handler<AsyncResult<TestOptions>> resultHandler);
+
   void voidHandler(Handler<AsyncResult<Void>> resultHandler);
 
   @Fluent

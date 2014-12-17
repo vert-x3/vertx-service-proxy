@@ -221,6 +221,11 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
+  public void optionsHandler(Handler<AsyncResult<TestOptions>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(new TestOptions().setString("foo").setNumber(123).setBool(true)));
+  }
+
+  @Override
   public void voidHandler(Handler<AsyncResult<Void>> resultHandler) {
     resultHandler.handle(Future.succeededFuture((Void) null));
   }

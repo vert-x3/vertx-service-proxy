@@ -228,6 +228,15 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
+  public void testOptionsHandler() {
+    proxy.optionHandler(onSuccess(res -> {
+      assertEquals(new TestOptions().setString("foo").setNumber(123).setBool(true), res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
   public void testVoidHandler() {
     proxy.voidHandler(onSuccess(res -> {
       assertNull(res);
