@@ -30,6 +30,7 @@
       <artifactId>vertx-codegen</artifactId>
       <version>${vertx.version}</version>
       <classifier>sources</classifier>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -41,6 +42,7 @@
       <artifactId>vertx-core</artifactId>
       <version>${vertx.version}</version>
       <classifier>sources</classifier>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
