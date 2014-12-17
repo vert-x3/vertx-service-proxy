@@ -94,6 +94,14 @@ createListHandler(msg)
 createSetCharHandler(msg)
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_SET}
 createSetHandler(msg)
+			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_OPTIONS}
+res -> {\n
+  if (res.failed()) {\n
+    msg.fail(-1, res.cause().getMessage());\n
+  } else {\n
+    msg.reply(res.result().toJson());\n
+  }\n
+}
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_API && lastParam.type.args[0].args[0].proxyGen}
 res -> {\n
           if (res.failed()) {\n
