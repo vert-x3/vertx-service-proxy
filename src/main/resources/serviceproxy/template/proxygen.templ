@@ -76,7 +76,6 @@ send(_address, _json, _deliveryOptions, res -> {\n
         String addr = res.result().headers().get("proxyaddr");\n
         @{lastParam.name}.handle(Future.succeededFuture(ProxyHelper.createProxy(@{resultType.simpleName}.class, _vertx, addr)));\n
 				@else{resultKind == CLASS_OPTIONS}
-        System.err.println("what the..."+res.result().body().getClass());\n
         @{lastParam.name}.handle(Future.succeededFuture(new @{resultType.simpleName}(res.result().body())));\n
 				@else{}
         @{lastParam.name}.handle(Future.succeededFuture(res.result().body()));\n
