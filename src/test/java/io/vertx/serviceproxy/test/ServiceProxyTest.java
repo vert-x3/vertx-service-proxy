@@ -95,7 +95,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testOptionsType() {
-    proxy.optionType(new TestOptions().setString("foo").setNumber(123).setBool(true));
+    proxy.optionsType(new TestOptions().setString("foo").setNumber(123).setBool(true));
     await();
   }
 
@@ -222,6 +222,15 @@ public class ServiceProxyTest extends VertxTestBase {
   public void testJsonArrayHandler() {
     proxy.jsonArrayHandler(onSuccess(res -> {
       assertEquals("blurrg", res.getString(0));
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testOptionsHandler() {
+    proxy.optionsHandler(onSuccess(res -> {
+      assertEquals(new TestOptions().setString("foo").setNumber(123).setBool(true), res);
       testComplete();
     }));
     await();

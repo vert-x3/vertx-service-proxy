@@ -51,6 +51,8 @@
     _vertx.eventBus().
 @if{resultKind == CLASS_LIST || resultKind == CLASS_SET}
 <JsonArray>
+@else{resultKind == CLASS_OPTIONS}
+<JsonObject>
 @else{}
 <@{resultType.simpleName}>
 @end{}
@@ -73,6 +75,8 @@ send(_address, _json, _deliveryOptions, res -> {\n
 				@else{resultKind == CLASS_API && resultType.proxyGen}
         String addr = res.result().headers().get("proxyaddr");\n
         @{lastParam.name}.handle(Future.succeededFuture(ProxyHelper.createProxy(@{resultType.simpleName}.class, _vertx, addr)));\n
+				@else{resultKind == CLASS_OPTIONS}
+        @{lastParam.name}.handle(Future.succeededFuture(new @{resultType.simpleName}(res.result().body())));\n
 				@else{}
         @{lastParam.name}.handle(Future.succeededFuture(res.result().body()));\n
 				@end{}

@@ -93,7 +93,7 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
-  public void optionType(TestOptions options) {
+  public void optionsType(TestOptions options) {
     assertEquals(new TestOptions().setString("foo").setNumber(123).setBool(true), options);
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
@@ -218,6 +218,11 @@ public class TestServiceImpl implements TestService {
   @Override
   public void jsonArrayHandler(Handler<AsyncResult<JsonArray>> resultHandler) {
     resultHandler.handle(Future.succeededFuture(new JsonArray().add("blurrg")));
+  }
+
+  @Override
+  public void optionsHandler(Handler<AsyncResult<TestOptions>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(new TestOptions().setString("foo").setNumber(123).setBool(true)));
   }
 
   @Override
