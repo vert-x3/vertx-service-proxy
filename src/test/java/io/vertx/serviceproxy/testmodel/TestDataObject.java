@@ -16,29 +16,29 @@
 
 package io.vertx.serviceproxy.testmodel;
 
-import io.vertx.codegen.annotations.Options;
+import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-@Options
-public class TestOptions {
+@DataObject
+public class TestDataObject {
 
   private int number;
   private String string;
   private boolean bool;
 
-  public TestOptions() {
+  public TestDataObject() {
   }
 
-  public TestOptions(TestOptions other) {
+  public TestDataObject(TestDataObject other) {
     this.number = other.number;
     this.string = other.string;
     this.bool = other.bool;
   }
 
-  public TestOptions(JsonObject json) {
+  public TestDataObject(JsonObject json) {
     this.number = json.getInteger("number");
     this.string = json.getString("string");
     this.bool = json.getBoolean("bool");
@@ -55,7 +55,7 @@ public class TestOptions {
     return number;
   }
 
-  public TestOptions setNumber(int number) {
+  public TestDataObject setNumber(int number) {
     this.number = number;
     return this;
   }
@@ -64,7 +64,7 @@ public class TestOptions {
     return string;
   }
 
-  public TestOptions setString(String string) {
+  public TestDataObject setString(String string) {
     this.string = string;
     return this;
   }
@@ -73,7 +73,7 @@ public class TestOptions {
     return bool;
   }
 
-  public TestOptions setBool(boolean bool) {
+  public TestDataObject setBool(boolean bool) {
     this.bool = bool;
     return this;
   }
@@ -83,7 +83,7 @@ public class TestOptions {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
 
-    TestOptions that = (TestOptions) o;
+    TestDataObject that = (TestDataObject) o;
 
     if (bool != that.bool) return false;
     if (number != that.number) return false;

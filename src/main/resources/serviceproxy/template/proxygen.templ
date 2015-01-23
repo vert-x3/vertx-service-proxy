@@ -35,7 +35,7 @@
     _json.put("@{param.name}", new JsonArray(new ArrayList<>(@{param.name})));\n
 			@else{param.type.kind == CLASS_MAP}
     _json.put("@{param.name}", new JsonObject(convertMap(@{param.name})));\n
-			@else{param.type.kind == CLASS_OPTIONS}
+			@else{param.type.kind == CLASS_DATA_OBJECT}
     _json.put("@{param.name}", @{param.name}.toJson());\n
 			@else{}
     _json.put("@{param.name}", @{param.name});\n
@@ -51,7 +51,7 @@
     _vertx.eventBus().
 @if{resultKind == CLASS_LIST || resultKind == CLASS_SET}
 <JsonArray>
-@else{resultKind == CLASS_OPTIONS}
+@else{resultKind == CLASS_DATA_OBJECT}
 <JsonObject>
 @else{}
 <@{resultType.simpleName}>
@@ -75,7 +75,7 @@ send(_address, _json, _deliveryOptions, res -> {\n
 				@else{resultKind == CLASS_API && resultType.proxyGen}
         String addr = res.result().headers().get("proxyaddr");\n
         @{lastParam.name}.handle(Future.succeededFuture(ProxyHelper.createProxy(@{resultType.simpleName}.class, _vertx, addr)));\n
-				@else{resultKind == CLASS_OPTIONS}
+				@else{resultKind == CLASS_DATA_OBJECT}
         @{lastParam.name}.handle(Future.succeededFuture(new @{resultType.simpleName}(res.result().body())));\n
 				@else{}
         @{lastParam.name}.handle(Future.succeededFuture(res.result().body()));\n

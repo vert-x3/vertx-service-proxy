@@ -179,7 +179,7 @@ Parameters can be any of:
 * `Map<String, J>`
 * `Map<String, B>`
 * Any Enum type
-* Any `@Options` class
+* Any `@DataObject` class
 
 If an asynchronous result is required a final parameter of type `Handler<AsyncResult<R>>` can be provided.
 
@@ -193,7 +193,7 @@ If an asynchronous result is required a final parameter of type `Handler<AsyncRe
 * `Set<B>`
 * `Map<String, J>`
 * `Map<String, B>`
-* Any `@Options` class
+* Any `@DataObject` class
 
 #### Overloaded methods
 

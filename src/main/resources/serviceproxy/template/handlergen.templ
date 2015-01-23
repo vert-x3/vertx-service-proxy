@@ -81,7 +81,7 @@ convertList(json.getJsonArray("@{param.name}").getList())
 convertSet(json.getJsonArray("@{param.name}").getList())
 				@else{param.type.kind == CLASS_MAP}
 convertMap(json.getJsonObject("@{param.name}").getMap())
-				@else{param.type.kind == CLASS_OPTIONS}
+				@else{param.type.kind == CLASS_DATA_OBJECT}
 new @{param.type.name}(json.getJsonObject("@{param.name}"))
 				@else{}
 (@{param.type.name})json.getValue("@{param.name}")
@@ -94,7 +94,7 @@ createListHandler(msg)
 createSetCharHandler(msg)
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_SET}
 createSetHandler(msg)
-			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_OPTIONS}
+			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_DATA_OBJECT}
 res -> {\n
   if (res.failed()) {\n
     msg.fail(-1, res.cause().getMessage());\n

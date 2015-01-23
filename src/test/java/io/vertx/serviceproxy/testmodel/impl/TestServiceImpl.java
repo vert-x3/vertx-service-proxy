@@ -26,7 +26,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.test.ServiceProxyTest;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
 import io.vertx.serviceproxy.testmodel.TestConnection;
-import io.vertx.serviceproxy.testmodel.TestOptions;
+import io.vertx.serviceproxy.testmodel.TestDataObject;
 import io.vertx.serviceproxy.testmodel.TestService;
 
 import java.util.Arrays;
@@ -93,8 +93,8 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
-  public void optionsType(TestOptions options) {
-    assertEquals(new TestOptions().setString("foo").setNumber(123).setBool(true), options);
+  public void dataObjectType(TestDataObject options) {
+    assertEquals(new TestDataObject().setString("foo").setNumber(123).setBool(true), options);
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
 
@@ -221,8 +221,8 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
-  public void optionsHandler(Handler<AsyncResult<TestOptions>> resultHandler) {
-    resultHandler.handle(Future.succeededFuture(new TestOptions().setString("foo").setNumber(123).setBool(true)));
+  public void dataObjectHandler(Handler<AsyncResult<TestDataObject>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(new TestDataObject().setString("foo").setNumber(123).setBool(true)));
   }
 
   @Override

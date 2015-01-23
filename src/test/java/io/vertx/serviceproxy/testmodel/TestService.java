@@ -60,7 +60,7 @@ public interface TestService {
 
   void enumType(SomeEnum someEnum);
 
-  void optionsType(TestOptions options);
+  void dataObjectType(TestDataObject options);
 
   void listParams(List<String> listString, List<Byte> listByte, List<Short> listShort, List<Integer> listInt, List<Long> listLong, List<JsonObject> listJsonObject, List<JsonArray> listJsonArray);
 
@@ -90,7 +90,7 @@ public interface TestService {
 
   void jsonArrayHandler(Handler<AsyncResult<JsonArray>> resultHandler);
 
-  void optionsHandler(Handler<AsyncResult<TestOptions>> resultHandler);
+  void dataObjectHandler(Handler<AsyncResult<TestDataObject>> resultHandler);
 
   void voidHandler(Handler<AsyncResult<Void>> resultHandler);
 

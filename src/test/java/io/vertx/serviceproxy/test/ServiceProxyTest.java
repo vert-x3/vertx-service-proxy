@@ -24,7 +24,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
-import io.vertx.serviceproxy.testmodel.TestOptions;
+import io.vertx.serviceproxy.testmodel.TestDataObject;
 import io.vertx.serviceproxy.testmodel.TestService;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
@@ -94,8 +94,8 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
-  public void testOptionsType() {
-    proxy.optionsType(new TestOptions().setString("foo").setNumber(123).setBool(true));
+  public void testDataObjectType() {
+    proxy.dataObjectType(new TestDataObject().setString("foo").setNumber(123).setBool(true));
     await();
   }
 
@@ -228,9 +228,9 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
-  public void testOptionsHandler() {
-    proxy.optionsHandler(onSuccess(res -> {
-      assertEquals(new TestOptions().setString("foo").setNumber(123).setBool(true), res);
+  public void testDataObjectHandler() {
+    proxy.dataObjectHandler(onSuccess(res -> {
+      assertEquals(new TestDataObject().setString("foo").setNumber(123).setBool(true), res);
       testComplete();
     }));
     await();
