@@ -596,6 +596,43 @@ public class ServiceProxyTest extends VertxTestBase {
     await();
   }
 
+  @Test
+  public void testConnectionTimeout() {
+
+    consumer.unregister();
+    long timeoutSeconds = 2;
+    consumer = ProxyHelper.registerService(TestService.class, vertx, service, SERVICE_ADDRESS, timeoutSeconds);
+
+    proxy.createConnection("foo", onSuccess(conn -> {
+      conn.startTransaction(onSuccess(res -> {
+        assertEquals("foo", res);
+
+        long start = System.currentTimeMillis();
+
+        vertx.eventBus().consumer("closeCalled").handler(msg -> {
+          assertEquals("blah", msg.body());
+
+          long now = System.currentTimeMillis();
+          assertTrue(now - start > timeoutSeconds * 1000);
+
+          // Should be closed now
+          conn.startTransaction(onFailure(cause -> {
+            assertNotNull(cause);
+            assertTrue(cause instanceof ReplyException);
+            ReplyException re = (ReplyException)cause;
+            assertEquals(ReplyFailure.NO_HANDLERS, re.failureType());
+            testComplete();
+          }));
+
+
+        });
+
+      }));
+    }));
+
+    await();
+  }
+
 
 
 }

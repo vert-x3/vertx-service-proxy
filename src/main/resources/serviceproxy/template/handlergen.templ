@@ -47,11 +47,49 @@ public class @{ifaceSimpleName}VertxProxyHandler extends ProxyHandler {\n
   private final Vertx vertx;\n
   private final @{ifaceSimpleName} service;\n
   private final String address;\n
+  private final long timerID;\n
+  private long lastAccessed;\n
+  private final long timeoutSeconds;\n
 \n
-  public @{ifaceSimpleName}VertxProxyHandler(Vertx vertx, @{ifaceSimpleName} service, String address) {\n
+  public @{ifaceSimpleName}VertxProxyHandler(Vertx vertx, @{ifaceSimpleName} service, String address, boolean topLevel, long timeoutSeconds) {\n
     this.vertx = vertx;\n
     this.service = service;\n
     this.address = address;\n
+    this.timeoutSeconds = timeoutSeconds;\n
+    if (timeoutSeconds != -1 && !topLevel) {\n
+      long period = timeoutSeconds * 1000 / 2;\n
+      if (period > 10000) {\n
+        period = 10000;\n
+      }\n
+      this.timerID = vertx.setPeriodic(period, this::checkTimedOut);\n
+    } else {\n
+      this.timerID = -1;\n
+    }\n
+    accessed();\n
+  }\n
+\n
+  private void checkTimedOut(long id) {\n
+    long now = System.nanoTime();\n
+    if (now - lastAccessed > timeoutSeconds * 1000000000) {\n
+@foreach{method:methods}
+	@if{method.proxyClose}
+      service.@{method.name}();\n
+	@end{}
+@end{}
+      close();\n
+    }\n
+  }\n
+\n
+  @Override\n
+  public void close() {\n
+    if (timerID != -1) {\n
+      vertx.cancelTimer(timerID);\n
+    }\n
+    super.close();\n
+  }\n
+\n
+  private void accessed() {\n
+    this.lastAccessed = System.nanoTime();\n
   }\n
 \n
   public void handle(Message<JsonObject> msg) {\n
@@ -60,6 +98,7 @@ public class @{ifaceSimpleName}VertxProxyHandler extends ProxyHandler {\n
     if (action == null) {\n
       throw new IllegalStateException("action not specified");\n
     }\n
+    accessed();\n
     switch (action) {\n
 @foreach{method:methods}
 	@if{!method.staticMethod}
@@ -108,7 +147,7 @@ res -> {\n
             msg.fail(-1, res.cause().getMessage());\n
           } else {\n
             String proxyAddress = UUID.randomUUID().toString();\n
-            ProxyHelper.registerService(@{lastParam.type.args[0].args[0].simpleName}.class, vertx, res.result(), proxyAddress);\n
+            ProxyHelper.registerService(@{lastParam.type.args[0].args[0].simpleName}.class, vertx, res.result(), proxyAddress, false, timeoutSeconds);\n
             msg.reply(null, new DeliveryOptions().addHeader("proxyaddr", proxyAddress));\n
           }\n
         }

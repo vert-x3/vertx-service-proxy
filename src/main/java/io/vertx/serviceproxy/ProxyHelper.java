@@ -35,11 +35,26 @@ public class ProxyHelper {
     return (T)instance;
   }
 
+  public static final long DEFAULT_CONNECTION_TIMEOUT = 5 * 60; // 5 minutes
+
   public static <T> MessageConsumer<JsonObject> registerService(Class<T> clazz, Vertx vertx, T service, String address) {
+    // No timeout - used for top level services
+    return registerService(clazz, vertx, service, address, DEFAULT_CONNECTION_TIMEOUT);
+  }
+
+  public static <T> MessageConsumer<JsonObject> registerService(Class<T> clazz, Vertx vertx, T service, String address,
+                                                                long timeoutSeconds) {
+    // No timeout - used for top level services
+    return registerService(clazz, vertx, service, address, true, timeoutSeconds);
+  }
+
+  public static <T> MessageConsumer<JsonObject> registerService(Class<T> clazz, Vertx vertx, T service, String address,
+                                                                boolean topLevel,
+                                                                long timeoutSeconds) {
     String handlerClassName = clazz.getName() + "VertxProxyHandler";
     Class<?> handlerClass = loadClass(handlerClassName);
-    Constructor constructor = getConstructor(handlerClass, Vertx.class, clazz, String.class);
-    Object instance = createInstance(constructor, vertx, service, address);
+    Constructor constructor = getConstructor(handlerClass, Vertx.class, clazz, String.class, boolean.class, long.class);
+    Object instance = createInstance(constructor, vertx, service, address, topLevel, timeoutSeconds);
     ProxyHandler handler = (ProxyHandler)instance;
     MessageConsumer<JsonObject> consumer = vertx.eventBus().<JsonObject>consumer(address).handler(handler);
     handler.setConsumer(consumer);
