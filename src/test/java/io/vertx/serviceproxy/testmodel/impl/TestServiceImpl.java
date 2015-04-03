@@ -26,6 +26,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.test.ServiceProxyTest;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
 import io.vertx.serviceproxy.testmodel.TestConnection;
+import io.vertx.serviceproxy.testmodel.TestConnectionWithCloseFuture;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 import io.vertx.serviceproxy.testmodel.TestService;
 
@@ -51,6 +52,11 @@ public class TestServiceImpl implements TestService {
   @Override
   public void createConnection(String str, Handler<AsyncResult<TestConnection>> resultHandler) {
     resultHandler.handle(Future.succeededFuture(new TestConnectionImpl(vertx, str)));
+  }
+
+  @Override
+  public void createConnectionWithCloseFuture(Handler<AsyncResult<TestConnectionWithCloseFuture>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(new TestConnectionWithCloseFutureImpl(vertx)));
   }
 
   @Override

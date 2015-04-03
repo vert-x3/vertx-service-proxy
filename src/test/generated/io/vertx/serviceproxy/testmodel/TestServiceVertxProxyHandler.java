@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
+import io.vertx.serviceproxy.testmodel.TestConnectionWithCloseFuture;
 import io.vertx.core.Handler;
 
 /*
@@ -50,11 +51,44 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
   private final Vertx vertx;
   private final TestService service;
   private final String address;
+  private final long timerID;
+  private long lastAccessed;
+  private final long timeoutSeconds;
 
-  public TestServiceVertxProxyHandler(Vertx vertx, TestService service, String address) {
+  public TestServiceVertxProxyHandler(Vertx vertx, TestService service, String address, boolean topLevel, long timeoutSeconds) {
     this.vertx = vertx;
     this.service = service;
     this.address = address;
+    this.timeoutSeconds = timeoutSeconds;
+    if (timeoutSeconds != -1 && !topLevel) {
+      long period = timeoutSeconds * 1000 / 2;
+      if (period > 10000) {
+        period = 10000;
+      }
+      this.timerID = vertx.setPeriodic(period, this::checkTimedOut);
+    } else {
+      this.timerID = -1;
+    }
+    accessed();
+  }
+
+  private void checkTimedOut(long id) {
+    long now = System.nanoTime();
+    if (now - lastAccessed > timeoutSeconds * 1000000000) {
+      close();
+    }
+  }
+
+  @Override
+  public void close() {
+    if (timerID != -1) {
+      vertx.cancelTimer(timerID);
+    }
+    super.close();
+  }
+
+  private void accessed() {
+    this.lastAccessed = System.nanoTime();
   }
 
   public void handle(Message<JsonObject> msg) {
@@ -63,6 +97,7 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
     if (action == null) {
       throw new IllegalStateException("action not specified");
     }
+    accessed();
     switch (action) {
 
 
@@ -72,7 +107,19 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
             msg.fail(-1, res.cause().getMessage());
           } else {
             String proxyAddress = UUID.randomUUID().toString();
-            ProxyHelper.registerService(TestConnection.class, vertx, res.result(), proxyAddress);
+            ProxyHelper.registerService(TestConnection.class, vertx, res.result(), proxyAddress, false, timeoutSeconds);
+            msg.reply(null, new DeliveryOptions().addHeader("proxyaddr", proxyAddress));
+          }
+        });
+        break;
+      }
+      case "createConnectionWithCloseFuture": {
+        service.createConnectionWithCloseFuture(res -> {
+          if (res.failed()) {
+            msg.fail(-1, res.cause().getMessage());
+          } else {
+            String proxyAddress = UUID.randomUUID().toString();
+            ProxyHelper.registerService(TestConnectionWithCloseFuture.class, vertx, res.result(), proxyAddress, false, timeoutSeconds);
             msg.reply(null, new DeliveryOptions().addHeader("proxyaddr", proxyAddress));
           }
         });

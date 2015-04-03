@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
+import io.vertx.serviceproxy.testmodel.TestConnectionWithCloseFuture;
 import io.vertx.core.Handler;
 
 /*
@@ -66,6 +67,24 @@ public class TestServiceVertxEBProxy implements TestService {
       } else {
         String addr = res.result().headers().get("proxyaddr");
         resultHandler.handle(Future.succeededFuture(ProxyHelper.createProxy(TestConnection.class, _vertx, addr)));
+      }
+    });
+  }
+
+  public void createConnectionWithCloseFuture(Handler<AsyncResult<TestConnectionWithCloseFuture>> resultHandler) {
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "createConnectionWithCloseFuture");
+    _vertx.eventBus().<TestConnectionWithCloseFuture>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        String addr = res.result().headers().get("proxyaddr");
+        resultHandler.handle(Future.succeededFuture(ProxyHelper.createProxy(TestConnectionWithCloseFuture.class, _vertx, addr)));
       }
     });
   }

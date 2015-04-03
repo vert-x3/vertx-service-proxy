@@ -101,30 +101,51 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testListTypes() {
-    proxy.listParams(Arrays.asList("foo", "bar"), Arrays.asList((byte)12, (byte)13), Arrays.asList((short)123, (short)134), Arrays.asList(1234, 1235),
-      Arrays.asList(12345l, 12346l), Arrays.asList(new JsonObject().put("foo", "bar"), new JsonObject().put("blah", "eek")),
-      Arrays.asList(new JsonArray().add("foo"), new JsonArray().add("blah")));
+    proxy.listParams(Arrays.asList("foo", "bar"), Arrays.asList((byte) 12, (byte) 13), Arrays.asList((short) 123, (short) 134), Arrays.asList(1234, 1235),
+        Arrays.asList(12345l, 12346l), Arrays.asList(new JsonObject().put("foo", "bar"), new JsonObject().put("blah", "eek")),
+        Arrays.asList(new JsonArray().add("foo"), new JsonArray().add("blah")));
     await();
   }
 
   @Test
   public void testSetTypes() {
     proxy.setParams(new HashSet<>(Arrays.asList("foo", "bar")), new HashSet<>(Arrays.asList((byte) 12, (byte) 13)), new HashSet<>(Arrays.asList((short) 123, (short) 134)),
-      new HashSet<>(Arrays.asList(1234, 1235)),
-      new HashSet<>(Arrays.asList(12345l, 12346l)), new HashSet<>(Arrays.asList(new JsonObject().put("foo", "bar"), new JsonObject().put("blah", "eek"))),
-      new HashSet<>(Arrays.asList(new JsonArray().add("foo"), new JsonArray().add("blah"))));
+        new HashSet<>(Arrays.asList(1234, 1235)),
+        new HashSet<>(Arrays.asList(12345l, 12346l)), new HashSet<>(Arrays.asList(new JsonObject().put("foo", "bar"), new JsonObject().put("blah", "eek"))),
+        new HashSet<>(Arrays.asList(new JsonArray().add("foo"), new JsonArray().add("blah"))));
     await();
   }
 
   @Test
   public void testMapTypes() {
-    proxy.mapParams(new HashMap<String, String>(){{put("eek", "foo"); put("wob", "bar");}},
-      new HashMap<String, Byte>(){{put("eek", (byte)12); put("wob", (byte)13);}},
-      new HashMap<String, Short>(){{put("eek", (short)123); put("wob", (short)134);}},
-      new HashMap<String, Integer>(){{put("eek", 1234); put("wob", 1235);}},
-      new HashMap<String, Long>(){{put("eek", 12345l); put("wob", 12356l);}},
-      new HashMap<String, JsonObject>(){{put("eek", new JsonObject().put("foo", "bar")); put("wob", new JsonObject().put("blah", "eek"));}},
-      new HashMap<String, JsonArray>(){{put("eek", new JsonArray().add("foo")); put("wob", new JsonArray().add("blah"));}});
+    proxy.mapParams(new HashMap<String, String>() {{
+                      put("eek", "foo");
+                      put("wob", "bar");
+                    }},
+        new HashMap<String, Byte>() {{
+          put("eek", (byte) 12);
+          put("wob", (byte) 13);
+        }},
+        new HashMap<String, Short>() {{
+          put("eek", (short) 123);
+          put("wob", (short) 134);
+        }},
+        new HashMap<String, Integer>() {{
+          put("eek", 1234);
+          put("wob", 1235);
+        }},
+        new HashMap<String, Long>() {{
+          put("eek", 12345l);
+          put("wob", 12356l);
+        }},
+        new HashMap<String, JsonObject>() {{
+          put("eek", new JsonObject().put("foo", "bar"));
+          put("wob", new JsonObject().put("blah", "eek"));
+        }},
+        new HashMap<String, JsonArray>() {{
+          put("eek", new JsonArray().add("foo"));
+          put("wob", new JsonArray().add("blah"));
+        }});
     await();
   }
 
@@ -149,7 +170,7 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testShortHandler() {
     proxy.shortHandler(onSuccess(res -> {
-      assertEquals(Short.valueOf((short)1234), res);
+      assertEquals(Short.valueOf((short) 1234), res);
       testComplete();
     }));
     await();
@@ -264,7 +285,7 @@ public class ServiceProxyTest extends VertxTestBase {
   public void testFailingMethod() {
     proxy.failingMethod(onFailure(t -> {
       assertTrue(t instanceof ReplyException);
-      ReplyException re = (ReplyException)t;
+      ReplyException re = (ReplyException) t;
       assertEquals(ReplyFailure.RECIPIENT_FAILURE, re.failureType());
       assertEquals("wibble", re.getMessage());
       testComplete();
@@ -295,7 +316,7 @@ public class ServiceProxyTest extends VertxTestBase {
     message.put("i", 1234);
     vertx.eventBus().send("someaddress", message, new DeliveryOptions().addHeader("action", "yourmum").setSendTimeout(500), onFailure(t -> {
       assertTrue(t instanceof ReplyException);
-      ReplyException re = (ReplyException)t;
+      ReplyException re = (ReplyException) t;
       // This will as operation will fail to be invoked
       assertEquals(ReplyFailure.TIMEOUT, re.failureType());
       testComplete();
@@ -346,9 +367,9 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testListShortHandler() {
     proxy.listShortHandler(onSuccess(list -> {
-      assertEquals(Short.valueOf((short)11), list.get(0));
-      assertEquals(Short.valueOf((short)12), list.get(1));
-      assertEquals(Short.valueOf((short)13), list.get(2));
+      assertEquals(Short.valueOf((short) 11), list.get(0));
+      assertEquals(Short.valueOf((short) 12), list.get(1));
+      assertEquals(Short.valueOf((short) 13), list.get(2));
       testComplete();
     }));
     await();
@@ -619,7 +640,7 @@ public class ServiceProxyTest extends VertxTestBase {
           conn.startTransaction(onFailure(cause -> {
             assertNotNull(cause);
             assertTrue(cause instanceof ReplyException);
-            ReplyException re = (ReplyException)cause;
+            ReplyException re = (ReplyException) cause;
             assertEquals(ReplyFailure.NO_HANDLERS, re.failureType());
             testComplete();
           }));
@@ -633,6 +654,33 @@ public class ServiceProxyTest extends VertxTestBase {
     await();
   }
 
+  @Test
+  public void testConnectionWithCloseFutureTimeout() {
 
+    consumer.unregister();
+    long timeoutSeconds = 2;
+    consumer = ProxyHelper.registerService(TestService.class, vertx, service, SERVICE_ADDRESS, timeoutSeconds);
 
+    proxy.createConnectionWithCloseFuture(onSuccess(conn -> {
+      long start = System.currentTimeMillis();
+
+      vertx.eventBus().consumer("closeCalled").handler(msg -> {
+        assertEquals("blah", msg.body());
+
+        long now = System.currentTimeMillis();
+        assertTrue(now - start > timeoutSeconds * 1000);
+
+        // Should be closed now
+        conn.someMethod(onFailure(cause -> {
+          assertNotNull(cause);
+          assertTrue(cause instanceof ReplyException);
+          ReplyException re = (ReplyException) cause;
+          assertEquals(ReplyFailure.NO_HANDLERS, re.failureType());
+          testComplete();
+        }));
+      });
+    }));
+
+    await();
+  }
 }

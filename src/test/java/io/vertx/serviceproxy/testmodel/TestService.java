@@ -49,6 +49,8 @@ public interface TestService {
 
   void createConnection(String str, Handler<AsyncResult<TestConnection>> resultHandler);
 
+  void createConnectionWithCloseFuture(Handler<AsyncResult<TestConnectionWithCloseFuture>> resultHandler);
+
   void noParams();
 
   void basicTypes(String str, byte b, short s, int i, long l, float f, double d, char c, boolean bool);

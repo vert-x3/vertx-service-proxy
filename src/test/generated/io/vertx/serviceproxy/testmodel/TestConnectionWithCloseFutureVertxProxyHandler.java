@@ -16,7 +16,7 @@
 
 package io.vertx.serviceproxy.testmodel;
 
-import io.vertx.serviceproxy.testmodel.TestBaseImportsService;
+import io.vertx.serviceproxy.testmodel.TestConnectionWithCloseFuture;
 import io.vertx.core.Vertx;
 import io.vertx.core.Handler;
 import io.vertx.core.AsyncResult;
@@ -28,21 +28,23 @@ import io.vertx.core.json.JsonArray;
 import java.util.ArrayList;import java.util.HashSet;import java.util.List;import java.util.Map;import java.util.Set;import java.util.UUID;
 import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.serviceproxy.ProxyHandler;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 
 /*
   Generated Proxy code - DO NOT EDIT
   @author Roger the Robot
 */
-public class TestBaseImportsServiceVertxProxyHandler extends ProxyHandler {
+public class TestConnectionWithCloseFutureVertxProxyHandler extends ProxyHandler {
 
   private final Vertx vertx;
-  private final TestBaseImportsService service;
+  private final TestConnectionWithCloseFuture service;
   private final String address;
   private final long timerID;
   private long lastAccessed;
   private final long timeoutSeconds;
 
-  public TestBaseImportsServiceVertxProxyHandler(Vertx vertx, TestBaseImportsService service, String address, boolean topLevel, long timeoutSeconds) {
+  public TestConnectionWithCloseFutureVertxProxyHandler(Vertx vertx, TestConnectionWithCloseFuture service, String address, boolean topLevel, long timeoutSeconds) {
     this.vertx = vertx;
     this.service = service;
     this.address = address;
@@ -62,6 +64,7 @@ public class TestBaseImportsServiceVertxProxyHandler extends ProxyHandler {
   private void checkTimedOut(long id) {
     long now = System.nanoTime();
     if (now - lastAccessed > timeoutSeconds * 1000000000) {
+      service.close(done -> {});
       close();
     }
   }
@@ -86,8 +89,13 @@ public class TestBaseImportsServiceVertxProxyHandler extends ProxyHandler {
     }
     accessed();
     switch (action) {
-      case "m": {
-        service.m();
+      case "close": {
+        service.close(createHandler(msg));
+        close();
+        break;
+      }
+      case "someMethod": {
+        service.someMethod(createHandler(msg));
         break;
       }
       default: {

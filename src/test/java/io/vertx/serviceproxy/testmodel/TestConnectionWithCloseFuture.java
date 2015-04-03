@@ -16,34 +16,22 @@
 
 package io.vertx.serviceproxy.testmodel;
 
-import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.ProxyClose;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
-import io.vertx.core.json.JsonObject;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 @ProxyGen
 @VertxGen
-public interface TestConnection {
-
-  @Fluent
-  TestConnection startTransaction(Handler<AsyncResult<String>> resultHandler);
-
-  @Fluent
-  TestConnection insert(String name, JsonObject data, Handler<AsyncResult<String>> resultHandler);
-
-  @Fluent
-  TestConnection commit(Handler<AsyncResult<String>> resultHandler);
-
-  @Fluent
-  TestConnection rollback(Handler<AsyncResult<String>> resultHandler);
+public interface TestConnectionWithCloseFuture {
 
   @ProxyClose
-  void close();
+  void close(Handler<AsyncResult<Void>> handler);
+
+  void someMethod(Handler<AsyncResult<String>> resultHandler);
 
 }

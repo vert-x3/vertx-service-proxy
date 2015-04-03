@@ -73,7 +73,11 @@ public class @{ifaceSimpleName}VertxProxyHandler extends ProxyHandler {\n
     if (now - lastAccessed > timeoutSeconds * 1000000000) {\n
 @foreach{method:methods}
 	@if{method.proxyClose}
+		@if{method.params.empty}
       service.@{method.name}();\n
+		@else{}
+      service.@{method.name}(done -> {});\n
+		@end{}
 	@end{}
 @end{}
       close();\n
