@@ -22,7 +22,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
-import java.util.ArrayList;import java.util.HashSet;import java.util.List;import java.util.Map;import java.util.Set;import io.vertx.serviceproxy.ProxyHelper;
+import java.util.ArrayList;import java.util.HashSet;import java.util.List;import java.util.Map;import java.util.Set;import java.util.stream.Collectors;
+import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.serviceproxy.testmodel.TestService;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
 import io.vertx.core.Vertx;
@@ -171,7 +172,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
 
-  public void listParams(List<String> listString, List<Byte> listByte, List<Short> listShort, List<Integer> listInt, List<Long> listLong, List<JsonObject> listJsonObject, List<JsonArray> listJsonArray) {
+  public void listParams(List<String> listString, List<Byte> listByte, List<Short> listShort, List<Integer> listInt, List<Long> listLong, List<JsonObject> listJsonObject, List<JsonArray> listJsonArray, List<TestDataObject> listDataObject) {
     if (closed) {
       throw new IllegalStateException("Proxy is closed");
     }
@@ -183,12 +184,13 @@ public class TestServiceVertxEBProxy implements TestService {
     _json.put("listLong", new JsonArray(listLong));
     _json.put("listJsonObject", new JsonArray(listJsonObject));
     _json.put("listJsonArray", new JsonArray(listJsonArray));
+    _json.put("listDataObject", new JsonArray(listDataObject.stream().map(d -> d.toJson()).collect(Collectors.toList())));
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listParams");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
 
-  public void setParams(Set<String> setString, Set<Byte> setByte, Set<Short> setShort, Set<Integer> setInt, Set<Long> setLong, Set<JsonObject> setJsonObject, Set<JsonArray> setJsonArray) {
+  public void setParams(Set<String> setString, Set<Byte> setByte, Set<Short> setShort, Set<Integer> setInt, Set<Long> setLong, Set<JsonObject> setJsonObject, Set<JsonArray> setJsonArray, Set<TestDataObject> setDataObject) {
     if (closed) {
       throw new IllegalStateException("Proxy is closed");
     }
@@ -200,6 +202,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _json.put("setLong", new JsonArray(new ArrayList<>(setLong)));
     _json.put("setJsonObject", new JsonArray(new ArrayList<>(setJsonObject)));
     _json.put("setJsonArray", new JsonArray(new ArrayList<>(setJsonArray)));
+    _json.put("setDataObject", new JsonArray(setDataObject.stream().map(d -> d.toJson()).collect(Collectors.toList())));
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "setParams");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
@@ -699,6 +702,23 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  public void listDataObjectHandler(Handler<AsyncResult<List<TestDataObject>>> resultHandler) {
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "listDataObjectHandler");
+    _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(res.result().body().stream().map(o -> new TestDataObject((JsonObject)o)).collect(Collectors.toList())));
+      }
+    });
+  }
+
   public void setStringHandler(Handler<AsyncResult<Set<String>>> resultHandler) {
     if (closed) {
       resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -882,6 +902,23 @@ public class TestServiceVertxEBProxy implements TestService {
         resultHandler.handle(Future.failedFuture(res.cause()));
       } else {
         resultHandler.handle(Future.succeededFuture(convertSet(res.result().body().getList())));
+      }
+    });
+  }
+
+  public void setDataObjectHandler(Handler<AsyncResult<Set<TestDataObject>>> resultHandler) {
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "setDataObjectHandler");
+    _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(res.result().body().stream().map(o -> new TestDataObject((JsonObject)o)).collect(Collectors.toSet())));
       }
     });
   }

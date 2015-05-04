@@ -21,6 +21,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxException;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.test.ServiceProxyTest;
@@ -35,6 +36,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -106,7 +108,7 @@ public class TestServiceImpl implements TestService {
 
   @Override
   public void listParams(List<String> listString, List<Byte> listByte, List<Short> listShort, List<Integer> listInt, List<Long> listLong,
-                         List<JsonObject> listJsonObject, List<JsonArray> listJsonArray) {
+                         List<JsonObject> listJsonObject, List<JsonArray> listJsonArray, List<TestDataObject> listDataObject) {
     assertEquals("foo", listString.get(0));
     assertEquals("bar", listString.get(1));
     assertEquals((byte)12, listByte.get(0).byteValue());
@@ -121,12 +123,14 @@ public class TestServiceImpl implements TestService {
     assertEquals(new JsonObject().put("blah", "eek"), listJsonObject.get(1));
     assertEquals(new JsonArray().add("foo"), listJsonArray.get(0));
     assertEquals(new JsonArray().add("blah"), listJsonArray.get(1));
+    assertEquals(new JsonObject().put("number", 1).put("string", "String 1").put("bool", false), listDataObject.get(0).toJson());
+    assertEquals(new JsonObject().put("number", 2).put("string", "String 2").put("bool", true), listDataObject.get(1).toJson());
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
 
   @Override
   public void setParams(Set<String> setString, Set<Byte> setByte, Set<Short> setShort, Set<Integer> setInt, Set<Long> setLong,
-                        Set<JsonObject> setJsonObject, Set<JsonArray> setJsonArray) {
+                        Set<JsonObject> setJsonObject, Set<JsonArray> setJsonArray, Set<TestDataObject> setDataObject) {
     assertEquals(2, setString.size());
     assertTrue(setString.contains("foo"));
     assertTrue(setString.contains("bar"));
@@ -148,6 +152,10 @@ public class TestServiceImpl implements TestService {
     assertEquals(2, setJsonArray.size());
     assertTrue(setJsonArray.contains(new JsonArray().add("foo")));
     assertTrue(setJsonArray.contains(new JsonArray().add("blah")));
+    assertEquals(2, setDataObject.size());
+    Set<JsonObject> setDataObjectJson = setDataObject.stream().map(d -> d.toJson()).collect(Collectors.toSet());
+    assertTrue(setDataObjectJson.contains(new JsonObject().put("number", 1).put("string", "String 1").put("bool", false)));
+    assertTrue(setDataObjectJson.contains(new JsonObject().put("number", 2).put("string", "String 2").put("bool", true)));
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
 
@@ -404,5 +412,33 @@ public class TestServiceImpl implements TestService {
   public void ignoredMethod() {
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "called");
   }
-}
 
+  @Override
+  public void listDataObjectHandler(Handler<AsyncResult<List<TestDataObject>>> resultHandler) {
+    List<TestDataObject> list = 
+        Arrays.asList(new TestDataObject().setNumber(1).setString("String 1").setBool(false), new TestDataObject().setNumber(2).setString("String 2").setBool(true));
+    resultHandler.handle(Future.succeededFuture(list));
+  }
+
+  @Override
+  public void setDataObjectHandler(Handler<AsyncResult<Set<TestDataObject>>> resultHandler) {
+    Set<TestDataObject> set = 
+        new HashSet<>(Arrays.asList(new TestDataObject().setNumber(1).setString("String 1").setBool(false), new TestDataObject().setNumber(2).setString("String 2").setBool(true)));
+    resultHandler.handle(Future.succeededFuture(set));
+  }
+
+
+  public void slistDataObjectHandler(Handler<AsyncResult<List<TestDataObject>>> resultHandler) {
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "listDataObjectHandler");
+    vertx.eventBus().<JsonArray>send("werwe", _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(res.result().body().stream().map(o -> new TestDataObject((JsonObject)o)).collect(Collectors.toList())));
+      }
+    });
+  }
+
+}

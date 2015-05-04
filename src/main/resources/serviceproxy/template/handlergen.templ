@@ -29,7 +29,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;\n
+import java.util.UUID;
+import java.util.stream.Collectors;\n
 import io.vertx.serviceproxy.ProxyHelper;\n
 import io.vertx.serviceproxy.ProxyHandler;\n
 @foreach{importedType:importedTypes}
@@ -119,9 +120,17 @@ public class @{ifaceSimpleName}VertxProxyHandler extends ProxyHandler {\n
 				@else{param.type.kind == CLASS_ENUM}
 @{param.type.name}.valueOf(json.getString("@{param.name}"))
 				@else{param.type.kind == CLASS_LIST}
+					@if{param.type.args[0].kind == CLASS_DATA_OBJECT}
+json.getJsonArray("@{param.name}").stream().map(o -> new @{param.type.args[0].simpleName}((JsonObject)o)).collect(Collectors.toList())
+					@else{}		
 convertList(json.getJsonArray("@{param.name}").getList())
+					@end{}
 				@else{param.type.kind == CLASS_SET}
+					@if{param.type.args[0].kind == CLASS_DATA_OBJECT}
+json.getJsonArray("@{param.name}").stream().map(o -> new @{param.type.args[0].simpleName}((JsonObject)o)).collect(Collectors.toSet())
+					@else{}		
 convertSet(json.getJsonArray("@{param.name}").getList())
+					@end{}
 				@else{param.type.kind == CLASS_MAP}
 convertMap(json.getJsonObject("@{param.name}").getMap())
 				@else{param.type.kind == CLASS_DATA_OBJECT}
@@ -131,20 +140,36 @@ new @{param.type.name}(json.getJsonObject("@{param.name}"))
 				@end{}
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_LIST && lastParam.type.args[0].args[0].args[0].name=='java.lang.Character'}
 createListCharHandler(msg)
+			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_LIST && lastParam.type.args[0].args[0].args[0].kind==CLASS_DATA_OBJECT}
+res -> {\n
+          if (res.failed()) {\n
+            msg.fail(-1, res.cause().getMessage());\n
+          } else {\n
+            msg.reply(new JsonArray(res.result().stream().map(d -> d.toJson()).collect(Collectors.toList())));\n
+          }\n
+       }
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_LIST}
 createListHandler(msg)
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_SET && lastParam.type.args[0].args[0].args[0].name=='java.lang.Character'}
 createSetCharHandler(msg)
+			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_SET && lastParam.type.args[0].args[0].args[0].kind==CLASS_DATA_OBJECT}
+res -> {\n
+          if (res.failed()) {\n
+            msg.fail(-1, res.cause().getMessage());\n
+          } else {\n
+            msg.reply(new JsonArray(res.result().stream().map(d -> d.toJson()).collect(Collectors.toList())));\n
+          }\n
+       }
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_SET}
 createSetHandler(msg)
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_DATA_OBJECT}
 res -> {\n
-  if (res.failed()) {\n
-    msg.fail(-1, res.cause().getMessage());\n
-  } else {\n
-    msg.reply(res.result().toJson());\n
-  }\n
-}
+          if (res.failed()) {\n
+            msg.fail(-1, res.cause().getMessage());\n
+          } else {\n
+            msg.reply(res.result().toJson());\n
+          }\n
+       }
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_API && lastParam.type.args[0].args[0].proxyGen}
 res -> {\n
           if (res.failed()) {\n

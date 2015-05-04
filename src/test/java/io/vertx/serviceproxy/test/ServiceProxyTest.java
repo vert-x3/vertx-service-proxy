@@ -16,6 +16,8 @@
 
 package io.vertx.serviceproxy.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.ReplyException;
@@ -27,11 +29,15 @@ import io.vertx.serviceproxy.testmodel.SomeEnum;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 import io.vertx.serviceproxy.testmodel.TestService;
 import io.vertx.test.core.VertxTestBase;
+
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -103,7 +109,8 @@ public class ServiceProxyTest extends VertxTestBase {
   public void testListTypes() {
     proxy.listParams(Arrays.asList("foo", "bar"), Arrays.asList((byte) 12, (byte) 13), Arrays.asList((short) 123, (short) 134), Arrays.asList(1234, 1235),
         Arrays.asList(12345l, 12346l), Arrays.asList(new JsonObject().put("foo", "bar"), new JsonObject().put("blah", "eek")),
-        Arrays.asList(new JsonArray().add("foo"), new JsonArray().add("blah")));
+        Arrays.asList(new JsonArray().add("foo"), new JsonArray().add("blah")),
+        Arrays.asList(new TestDataObject().setNumber(1).setString("String 1").setBool(false), new TestDataObject().setNumber(2).setString("String 2").setBool(true)));
     await();
   }
 
@@ -112,7 +119,8 @@ public class ServiceProxyTest extends VertxTestBase {
     proxy.setParams(new HashSet<>(Arrays.asList("foo", "bar")), new HashSet<>(Arrays.asList((byte) 12, (byte) 13)), new HashSet<>(Arrays.asList((short) 123, (short) 134)),
         new HashSet<>(Arrays.asList(1234, 1235)),
         new HashSet<>(Arrays.asList(12345l, 12346l)), new HashSet<>(Arrays.asList(new JsonObject().put("foo", "bar"), new JsonObject().put("blah", "eek"))),
-        new HashSet<>(Arrays.asList(new JsonArray().add("foo"), new JsonArray().add("blah"))));
+        new HashSet<>(Arrays.asList(new JsonArray().add("foo"), new JsonArray().add("blah"))),
+        new HashSet<>(Arrays.asList(new TestDataObject().setNumber(1).setString("String 1").setBool(false), new TestDataObject().setNumber(2).setString("String 2").setBool(true))));
     await();
   }
 
@@ -578,6 +586,31 @@ public class ServiceProxyTest extends VertxTestBase {
       assertTrue(set.contains(new JsonArray().add("foo")));
       assertTrue(set.contains(new JsonArray().add("bar")));
       assertTrue(set.contains(new JsonArray().add("wibble")));
+      testComplete();
+    }));
+    await();
+  }
+
+  public void testListDataObjectHandler() {
+    proxy.listDataObjectHandler(onSuccess(list -> {
+      assertEquals(1, list.get(0).getNumber());
+      assertEquals("String 1", list.get(0).getString());
+      assertEquals(true, list.get(0).isBool());
+      assertEquals(2, list.get(1).getNumber());
+      assertEquals("String 2", list.get(1).getString());
+      assertEquals(false, list.get(1).isBool());
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testSetDataObjectHandler() {
+    proxy.setDataObjectHandler(onSuccess(set -> {
+      Set<JsonObject> setJson = set.stream().map(d -> d.toJson()).collect(Collectors.toSet());
+      assertEquals(2, setJson.size());
+      assertTrue(setJson.contains(new JsonObject().put("number", 1).put("string", "String 1").put("bool", false)));
+      assertTrue(setJson.contains(new JsonObject().put("number", 2).put("string", "String 2").put("bool", true)));
       testComplete();
     }));
     await();

@@ -25,7 +25,7 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
-import java.util.ArrayList;import java.util.HashSet;import java.util.List;import java.util.Map;import java.util.Set;import java.util.UUID;
+import java.util.ArrayList;import java.util.HashSet;import java.util.List;import java.util.Map;import java.util.Set;import java.util.UUID;import java.util.stream.Collectors;
 import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.serviceproxy.ProxyHandler;
 import io.vertx.serviceproxy.testmodel.TestService;
@@ -150,11 +150,11 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
         break;
       }
       case "listParams": {
-        service.listParams(convertList(json.getJsonArray("listString").getList()), convertList(json.getJsonArray("listByte").getList()), convertList(json.getJsonArray("listShort").getList()), convertList(json.getJsonArray("listInt").getList()), convertList(json.getJsonArray("listLong").getList()), convertList(json.getJsonArray("listJsonObject").getList()), convertList(json.getJsonArray("listJsonArray").getList()));
+        service.listParams(convertList(json.getJsonArray("listString").getList()), convertList(json.getJsonArray("listByte").getList()), convertList(json.getJsonArray("listShort").getList()), convertList(json.getJsonArray("listInt").getList()), convertList(json.getJsonArray("listLong").getList()), convertList(json.getJsonArray("listJsonObject").getList()), convertList(json.getJsonArray("listJsonArray").getList()), json.getJsonArray("listDataObject").stream().map(o -> new TestDataObject((JsonObject)o)).collect(Collectors.toList()));
         break;
       }
       case "setParams": {
-        service.setParams(convertSet(json.getJsonArray("setString").getList()), convertSet(json.getJsonArray("setByte").getList()), convertSet(json.getJsonArray("setShort").getList()), convertSet(json.getJsonArray("setInt").getList()), convertSet(json.getJsonArray("setLong").getList()), convertSet(json.getJsonArray("setJsonObject").getList()), convertSet(json.getJsonArray("setJsonArray").getList()));
+        service.setParams(convertSet(json.getJsonArray("setString").getList()), convertSet(json.getJsonArray("setByte").getList()), convertSet(json.getJsonArray("setShort").getList()), convertSet(json.getJsonArray("setInt").getList()), convertSet(json.getJsonArray("setLong").getList()), convertSet(json.getJsonArray("setJsonObject").getList()), convertSet(json.getJsonArray("setJsonArray").getList()), json.getJsonArray("setDataObject").stream().map(o -> new TestDataObject((JsonObject)o)).collect(Collectors.toSet()));
         break;
       }
       case "mapParams": {
@@ -207,12 +207,12 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
       }
       case "dataObjectHandler": {
         service.dataObjectHandler(res -> {
-  if (res.failed()) {
-    msg.fail(-1, res.cause().getMessage());
-  } else {
-    msg.reply(res.result().toJson());
-  }
-});
+          if (res.failed()) {
+            msg.fail(-1, res.cause().getMessage());
+          } else {
+            msg.reply(res.result().toJson());
+          }
+       });
         break;
       }
       case "voidHandler": {
@@ -279,6 +279,16 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
         service.listJsonArrayHandler(createListHandler(msg));
         break;
       }
+      case "listDataObjectHandler": {
+        service.listDataObjectHandler(res -> {
+          if (res.failed()) {
+            msg.fail(-1, res.cause().getMessage());
+          } else {
+            msg.reply(new JsonArray(res.result().stream().map(d -> d.toJson()).collect(Collectors.toList())));
+          }
+       });
+        break;
+      }
       case "setStringHandler": {
         service.setStringHandler(createSetHandler(msg));
         break;
@@ -321,6 +331,16 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
       }
       case "setJsonArrayHandler": {
         service.setJsonArrayHandler(createSetHandler(msg));
+        break;
+      }
+      case "setDataObjectHandler": {
+        service.setDataObjectHandler(res -> {
+          if (res.failed()) {
+            msg.fail(-1, res.cause().getMessage());
+          } else {
+            msg.reply(new JsonArray(res.result().stream().map(d -> d.toJson()).collect(Collectors.toList())));
+          }
+       });
         break;
       }
       case "ignoredMethod": {
