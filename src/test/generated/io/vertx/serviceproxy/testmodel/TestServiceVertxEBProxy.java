@@ -131,10 +131,29 @@ public class TestServiceVertxEBProxy implements TestService {
     _json.put("l", l);
     _json.put("f", f);
     _json.put("d", d);
-    _json.put("c", (int)c);
+    _json.put("c", c == null ? null : (int)c);
     _json.put("bool", bool);
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "basicBoxedTypes");
+    _vertx.eventBus().send(_address, _json, _deliveryOptions);
+  }
+
+  public void basicBoxedTypesNull(String str, Byte b, Short s, Integer i, Long l, Float f, Double d, Character c, Boolean bool) {
+    if (closed) {
+      throw new IllegalStateException("Proxy is closed");
+    }
+    JsonObject _json = new JsonObject();
+    _json.put("str", str);
+    _json.put("b", b);
+    _json.put("s", s);
+    _json.put("i", i);
+    _json.put("l", l);
+    _json.put("f", f);
+    _json.put("d", d);
+    _json.put("c", c == null ? null : (int)c);
+    _json.put("bool", bool);
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "basicBoxedTypesNull");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
 
@@ -150,14 +169,37 @@ public class TestServiceVertxEBProxy implements TestService {
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
 
+  public void jsonTypesNull(JsonObject jsonObject, JsonArray jsonArray) {
+    if (closed) {
+      throw new IllegalStateException("Proxy is closed");
+    }
+    JsonObject _json = new JsonObject();
+    _json.put("jsonObject", jsonObject);
+    _json.put("jsonArray", jsonArray);
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "jsonTypesNull");
+    _vertx.eventBus().send(_address, _json, _deliveryOptions);
+  }
+
   public void enumType(SomeEnum someEnum) {
     if (closed) {
       throw new IllegalStateException("Proxy is closed");
     }
     JsonObject _json = new JsonObject();
-    _json.put("someEnum", someEnum.toString());
+    _json.put("someEnum", someEnum == null ? null : someEnum.toString());
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "enumType");
+    _vertx.eventBus().send(_address, _json, _deliveryOptions);
+  }
+
+  public void enumTypeNull(SomeEnum someEnum) {
+    if (closed) {
+      throw new IllegalStateException("Proxy is closed");
+    }
+    JsonObject _json = new JsonObject();
+    _json.put("someEnum", someEnum == null ? null : someEnum.toString());
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "enumTypeNull");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
 
@@ -166,9 +208,20 @@ public class TestServiceVertxEBProxy implements TestService {
       throw new IllegalStateException("Proxy is closed");
     }
     JsonObject _json = new JsonObject();
-    _json.put("options", options.toJson());
+    _json.put("options", options == null ? null : options.toJson());
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "dataObjectType");
+    _vertx.eventBus().send(_address, _json, _deliveryOptions);
+  }
+
+  public void dataObjectTypeNull(TestDataObject options) {
+    if (closed) {
+      throw new IllegalStateException("Proxy is closed");
+    }
+    JsonObject _json = new JsonObject();
+    _json.put("options", options == null ? null : options.toJson());
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "dataObjectTypeNull");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
 
@@ -242,6 +295,23 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  public void stringNullHandler(Handler<AsyncResult<String>> resultHandler) {
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "stringNullHandler");
+    _vertx.eventBus().<String>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(res.result().body()));
+      }
+    });
+  }
+
   public void byteHandler(Handler<AsyncResult<Byte>> resultHandler) {
     if (closed) {
       resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -250,6 +320,23 @@ public class TestServiceVertxEBProxy implements TestService {
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "byteHandler");
+    _vertx.eventBus().<Byte>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(res.result().body()));
+      }
+    });
+  }
+
+  public void byteNullHandler(Handler<AsyncResult<Byte>> resultHandler) {
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "byteNullHandler");
     _vertx.eventBus().<Byte>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
         resultHandler.handle(Future.failedFuture(res.cause()));
@@ -276,6 +363,23 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  public void shortNullHandler(Handler<AsyncResult<Short>> resultHandler) {
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "shortNullHandler");
+    _vertx.eventBus().<Short>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(res.result().body()));
+      }
+    });
+  }
+
   public void intHandler(Handler<AsyncResult<Integer>> resultHandler) {
     if (closed) {
       resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -284,6 +388,23 @@ public class TestServiceVertxEBProxy implements TestService {
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "intHandler");
+    _vertx.eventBus().<Integer>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(res.result().body()));
+      }
+    });
+  }
+
+  public void intNullHandler(Handler<AsyncResult<Integer>> resultHandler) {
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "intNullHandler");
     _vertx.eventBus().<Integer>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
         resultHandler.handle(Future.failedFuture(res.cause()));
@@ -310,6 +431,23 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  public void longNullHandler(Handler<AsyncResult<Long>> resultHandler) {
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "longNullHandler");
+    _vertx.eventBus().<Long>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(res.result().body()));
+      }
+    });
+  }
+
   public void floatHandler(Handler<AsyncResult<Float>> resultHandler) {
     if (closed) {
       resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -318,6 +456,23 @@ public class TestServiceVertxEBProxy implements TestService {
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "floatHandler");
+    _vertx.eventBus().<Float>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(res.result().body()));
+      }
+    });
+  }
+
+  public void floatNullHandler(Handler<AsyncResult<Float>> resultHandler) {
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "floatNullHandler");
     _vertx.eventBus().<Float>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
         resultHandler.handle(Future.failedFuture(res.cause()));
@@ -344,6 +499,23 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  public void doubleNullHandler(Handler<AsyncResult<Double>> resultHandler) {
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "doubleNullHandler");
+    _vertx.eventBus().<Double>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(res.result().body()));
+      }
+    });
+  }
+
   public void charHandler(Handler<AsyncResult<Character>> resultHandler) {
     if (closed) {
       resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -352,6 +524,23 @@ public class TestServiceVertxEBProxy implements TestService {
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "charHandler");
+    _vertx.eventBus().<Character>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(res.result().body()));
+      }
+    });
+  }
+
+  public void charNullHandler(Handler<AsyncResult<Character>> resultHandler) {
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "charNullHandler");
     _vertx.eventBus().<Character>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
         resultHandler.handle(Future.failedFuture(res.cause()));
@@ -378,6 +567,23 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  public void booleanNullHandler(Handler<AsyncResult<Boolean>> resultHandler) {
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "booleanNullHandler");
+    _vertx.eventBus().<Boolean>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(res.result().body()));
+      }
+    });
+  }
+
   public void jsonObjectHandler(Handler<AsyncResult<JsonObject>> resultHandler) {
     if (closed) {
       resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -386,6 +592,23 @@ public class TestServiceVertxEBProxy implements TestService {
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "jsonObjectHandler");
+    _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(res.result().body()));
+      }
+    });
+  }
+
+  public void jsonObjectNullHandler(Handler<AsyncResult<JsonObject>> resultHandler) {
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "jsonObjectNullHandler");
     _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
         resultHandler.handle(Future.failedFuture(res.cause()));
@@ -412,6 +635,23 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  public void jsonArrayNullHandler(Handler<AsyncResult<JsonArray>> resultHandler) {
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "jsonArrayNullHandler");
+    _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(res.result().body()));
+      }
+    });
+  }
+
   public void dataObjectHandler(Handler<AsyncResult<TestDataObject>> resultHandler) {
     if (closed) {
       resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -424,7 +664,24 @@ public class TestServiceVertxEBProxy implements TestService {
       if (res.failed()) {
         resultHandler.handle(Future.failedFuture(res.cause()));
       } else {
-        resultHandler.handle(Future.succeededFuture(new TestDataObject(res.result().body())));
+        resultHandler.handle(Future.succeededFuture(res.result().body() == null ? null : new TestDataObject(res.result().body())));
+      }
+    });
+  }
+
+  public void dataObjectNullHandler(Handler<AsyncResult<TestDataObject>> resultHandler) {
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "dataObjectNullHandler");
+    _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(res.result().body() == null ? null : new TestDataObject(res.result().body())));
       }
     });
   }
@@ -503,7 +760,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _json.put("str", str);
     _json.put("i", i);
     _json.put("chr", (int)chr);
-    _json.put("senum", senum.toString());
+    _json.put("senum", senum == null ? null : senum.toString());
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "invokeWithMessage");
     _vertx.eventBus().<String>send(_address, _json, _deliveryOptions, res -> {

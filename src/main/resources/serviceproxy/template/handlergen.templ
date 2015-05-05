@@ -116,9 +116,9 @@ public class @{ifaceSimpleName}VertxProxyHandler extends ProxyHandler {\n
 		@foreach{param: method.params}
 			@if{!hasResultHandler || (count++ != method.params.size() - 1)}
 				@if{param.type.name == 'char' || param.type.name == 'java.lang.Character'}
-(char)(json.getInteger("@{param.name}").intValue())
+json.getInteger("@{param.name}") == null ? null : (char)(json.getInteger("@{param.name}").intValue())
 				@else{param.type.kind == CLASS_ENUM}
-@{param.type.name}.valueOf(json.getString("@{param.name}"))
+json.getString("@{param.name}") == null ? null : @{param.type.name}.valueOf(json.getString("@{param.name}"))
 				@else{param.type.kind == CLASS_LIST}
 					@if{param.type.args[0].kind == CLASS_DATA_OBJECT}
 json.getJsonArray("@{param.name}").stream().map(o -> new @{param.type.args[0].simpleName}((JsonObject)o)).collect(Collectors.toList())
@@ -134,7 +134,7 @@ convertSet(json.getJsonArray("@{param.name}").getList())
 				@else{param.type.kind == CLASS_MAP}
 convertMap(json.getJsonObject("@{param.name}").getMap())
 				@else{param.type.kind == CLASS_DATA_OBJECT}
-new @{param.type.name}(json.getJsonObject("@{param.name}"))
+json.getJsonObject("@{param.name}") == null ? null : new @{param.type.name}(json.getJsonObject("@{param.name}"))
 				@else{}
 (@{param.type.name})json.getValue("@{param.name}")
 				@end{}
@@ -167,7 +167,7 @@ res -> {\n
           if (res.failed()) {\n
             msg.fail(-1, res.cause().getMessage());\n
           } else {\n
-            msg.reply(res.result().toJson());\n
+            msg.reply(res.result() == null ? null : res.result().toJson());\n
           }\n
        }
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_API && lastParam.type.args[0].args[0].proxyGen}

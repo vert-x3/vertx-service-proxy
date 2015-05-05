@@ -88,8 +88,20 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
+  public void testBasicBoxedTypesNull() {
+    proxy.basicBoxedTypesNull(null, null, null, null, null, null, null, null, null);
+    await();
+  }
+
+  @Test
   public void testJsonTypes() {
     proxy.jsonTypes(new JsonObject().put("foo", "bar"), new JsonArray().add("wibble"));
+    await();
+  }
+
+  @Test
+  public void testJsonTypesNull() {
+    proxy.jsonTypesNull(null, null);
     await();
   }
 
@@ -100,8 +112,20 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
+  public void testEnumTypeNull() {
+    proxy.enumTypeNull(null);
+    await();
+  }
+
+  @Test
   public void testDataObjectType() {
     proxy.dataObjectType(new TestDataObject().setString("foo").setNumber(123).setBool(true));
+    await();
+  }
+
+  @Test
+  public void testDataObjectTypeNull() {
+    proxy.dataObjectTypeNull(null);
     await();
   }
 
@@ -167,9 +191,27 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
+  public void testStringNullHandler() {
+    proxy.stringNullHandler(onSuccess(res -> {
+      assertNull(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
   public void testByteHandler() {
     proxy.byteHandler(onSuccess(res -> {
       assertEquals(Byte.valueOf((byte) 123), res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testByteNullHandler() {
+    proxy.byteNullHandler(onSuccess(res -> {
+      assertNull(res);
       testComplete();
     }));
     await();
@@ -185,9 +227,27 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
+  public void testShortNullHandler() {
+    proxy.shortNullHandler(onSuccess(res -> {
+      assertNull(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
   public void testIntHandler() {
     proxy.intHandler(onSuccess(res -> {
       assertEquals(Integer.valueOf(12345), res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testIntNullHandler() {
+    proxy.intNullHandler(onSuccess(res -> {
+      assertNull(res);
       testComplete();
     }));
     await();
@@ -203,9 +263,27 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
+  public void testLongNullHandler() {
+    proxy.longNullHandler(onSuccess(res -> {
+      assertNull(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
   public void testFloatHandler() {
     proxy.floatHandler(onSuccess(res -> {
       assertEquals(Float.valueOf(12.34f), res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testFloatNullHandler() {
+    proxy.floatNullHandler(onSuccess(res -> {
+      assertNull(res);
       testComplete();
     }));
     await();
@@ -221,9 +299,27 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
+  public void testDoubleNullHandler() {
+    proxy.doubleNullHandler(onSuccess(res -> {
+      assertNull(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
   public void testCharHandler() {
     proxy.charHandler(onSuccess(res -> {
       assertEquals(Character.valueOf('X'), res);
+      testComplete();
+    }));
+    await();
+  }
+  
+  @Test
+  public void testCharNullHandler() {
+    proxy.charNullHandler(onSuccess(res -> {
+      assertNull(res);
       testComplete();
     }));
     await();
@@ -239,9 +335,27 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
+  public void testBooleanNullHandler() {
+    proxy.booleanNullHandler(onSuccess(res -> {
+      assertNull(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
   public void testJsonObjectHandler() {
     proxy.jsonObjectHandler(onSuccess(res -> {
       assertEquals("wibble", res.getString("blah"));
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testJsonObjectNullHandler() {
+    proxy.jsonObjectNullHandler(onSuccess(res -> {
+      assertNull(res);
       testComplete();
     }));
     await();
@@ -257,9 +371,27 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
+  public void testJsonArrayNullHandler() {
+    proxy.jsonArrayNullHandler(onSuccess(res -> {
+      assertNull(res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
   public void testDataObjectHandler() {
     proxy.dataObjectHandler(onSuccess(res -> {
       assertEquals(new TestDataObject().setString("foo").setNumber(123).setBool(true), res);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testDataObjectNullHandler() {
+    proxy.dataObjectNullHandler(onSuccess(res -> {
+      assertNull(res);
       testComplete();
     }));
     await();

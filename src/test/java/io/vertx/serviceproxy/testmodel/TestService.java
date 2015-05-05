@@ -58,11 +58,20 @@ public interface TestService {
   void basicBoxedTypes(String str, Byte b, Short s, Integer i, Long l, Float f, Double d, Character c,
                                 Boolean bool);
 
+  void basicBoxedTypesNull(String str, Byte b, Short s, Integer i, Long l, Float f, Double d, Character c,
+      Boolean bool);
+
   void jsonTypes(JsonObject jsonObject, JsonArray jsonArray);
+
+  void jsonTypesNull(JsonObject jsonObject, JsonArray jsonArray);
 
   void enumType(SomeEnum someEnum);
 
+  void enumTypeNull(SomeEnum someEnum);
+
   void dataObjectType(TestDataObject options);
+
+  void dataObjectTypeNull(TestDataObject options);
 
   void listParams(List<String> listString, List<Byte> listByte, List<Short> listShort, List<Integer> listInt, List<Long> listLong, List<JsonObject> listJsonObject, List<JsonArray> listJsonArray, List<TestDataObject> listDataObject);
 
@@ -72,27 +81,51 @@ public interface TestService {
 
   void stringHandler(Handler<AsyncResult<String>> resultHandler);
 
+  void stringNullHandler(Handler<AsyncResult<String>> resultHandler);
+
   void byteHandler(Handler<AsyncResult<Byte>> resultHandler);
+
+  void byteNullHandler(Handler<AsyncResult<Byte>> resultHandler);
 
   void shortHandler(Handler<AsyncResult<Short>> resultHandler);
 
+  void shortNullHandler(Handler<AsyncResult<Short>> resultHandler);
+
   void intHandler(Handler<AsyncResult<Integer>> resultHandler);
+
+  void intNullHandler(Handler<AsyncResult<Integer>> resultHandler);
 
   void longHandler(Handler<AsyncResult<Long>> resultHandler);
 
+  void longNullHandler(Handler<AsyncResult<Long>> resultHandler);
+
   void floatHandler(Handler<AsyncResult<Float>> resultHandler);
+
+  void floatNullHandler(Handler<AsyncResult<Float>> resultHandler);
 
   void doubleHandler(Handler<AsyncResult<Double>> resultHandler);
 
+  void doubleNullHandler(Handler<AsyncResult<Double>> resultHandler);
+
   void charHandler(Handler<AsyncResult<Character>> resultHandler);
+
+  void charNullHandler(Handler<AsyncResult<Character>> resultHandler);
 
   void booleanHandler(Handler<AsyncResult<Boolean>> resultHandler);
 
+  void booleanNullHandler(Handler<AsyncResult<Boolean>> resultHandler);
+
   void jsonObjectHandler(Handler<AsyncResult<JsonObject>> resultHandler);
+
+  void jsonObjectNullHandler(Handler<AsyncResult<JsonObject>> resultHandler);
 
   void jsonArrayHandler(Handler<AsyncResult<JsonArray>> resultHandler);
 
+  void jsonArrayNullHandler(Handler<AsyncResult<JsonArray>> resultHandler);
+
   void dataObjectHandler(Handler<AsyncResult<TestDataObject>> resultHandler);
+
+  void dataObjectNullHandler(Handler<AsyncResult<TestDataObject>> resultHandler);
 
   void voidHandler(Handler<AsyncResult<Void>> resultHandler);
 

@@ -86,11 +86,31 @@ public class TestServiceImpl implements TestService {
     basicTypes(str, b, s, i, l, f, d, c, bool);
   }
 
+  @Override
+  public void basicBoxedTypesNull(String str, Byte b, Short s, Integer i, Long l, Float f, Double d, Character c, Boolean bool) {
+    assertNull(str);
+    assertNull(b);
+    assertNull(s);
+    assertNull(i);
+    assertNull(l);
+    assertNull(f);
+    assertNull(d);
+    assertNull(c);
+    assertNull(bool);
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
 
   @Override
   public void jsonTypes(JsonObject jsonObject, JsonArray jsonArray) {
     assertEquals("bar", jsonObject.getString("foo"));
     assertEquals("wibble", jsonArray.getString(0));
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
+  public void jsonTypesNull(JsonObject jsonObject, JsonArray jsonArray) {
+    assertNull(jsonObject);
+    assertNull(jsonArray);
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
 
@@ -101,8 +121,20 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
+  public void enumTypeNull(SomeEnum someEnum) {
+    assertNull(someEnum);
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
   public void dataObjectType(TestDataObject options) {
     assertEquals(new TestDataObject().setString("foo").setNumber(123).setBool(true), options);
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
+  public void dataObjectTypeNull(TestDataObject options) {
+    assertNull(options);
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
 
@@ -185,8 +217,18 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
+  public void stringNullHandler(Handler<AsyncResult<String>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
+  }
+
+  @Override
   public void byteHandler(Handler<AsyncResult<Byte>> resultHandler) {
     resultHandler.handle(Future.succeededFuture((byte)123));
+  }
+
+  @Override
+  public void byteNullHandler(Handler<AsyncResult<Byte>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
   }
 
   @Override
@@ -195,8 +237,18 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
+  public void shortNullHandler(Handler<AsyncResult<Short>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
+  }
+
+  @Override
   public void intHandler(Handler<AsyncResult<Integer>> resultHandler) {
     resultHandler.handle(Future.succeededFuture(12345));
+  }
+
+  @Override
+  public void intNullHandler(Handler<AsyncResult<Integer>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
   }
 
   @Override
@@ -205,8 +257,18 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
+  public void longNullHandler(Handler<AsyncResult<Long>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
+  }
+
+  @Override
   public void floatHandler(Handler<AsyncResult<Float>> resultHandler) {
     resultHandler.handle(Future.succeededFuture(12.34f));
+  }
+
+  @Override
+  public void floatNullHandler(Handler<AsyncResult<Float>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
   }
 
   @Override
@@ -215,8 +277,18 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
+  public void doubleNullHandler(Handler<AsyncResult<Double>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
+  }
+
+  @Override
   public void charHandler(Handler<AsyncResult<Character>> resultHandler) {
     resultHandler.handle(Future.succeededFuture('X'));
+  }
+
+  @Override
+  public void charNullHandler(Handler<AsyncResult<Character>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
   }
 
   @Override
@@ -225,8 +297,18 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
+  public void booleanNullHandler(Handler<AsyncResult<Boolean>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
+  }
+
+  @Override
   public void jsonObjectHandler(Handler<AsyncResult<JsonObject>> resultHandler) {
     resultHandler.handle(Future.succeededFuture(new JsonObject().put("blah", "wibble")));
+  }
+
+  @Override
+  public void jsonObjectNullHandler(Handler<AsyncResult<JsonObject>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
   }
 
   @Override
@@ -235,8 +317,18 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
+  public void jsonArrayNullHandler(Handler<AsyncResult<JsonArray>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
+  }
+
+  @Override
   public void dataObjectHandler(Handler<AsyncResult<TestDataObject>> resultHandler) {
     resultHandler.handle(Future.succeededFuture(new TestDataObject().setString("foo").setNumber(123).setBool(true)));
+  }
+
+  @Override
+  public void dataObjectNullHandler(Handler<AsyncResult<TestDataObject>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
   }
 
   @Override
