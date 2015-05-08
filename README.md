@@ -165,21 +165,24 @@ This is because methods must not block and it's not possible to return a result 
 
 #### Parameter types
 
-Let `J` = `JsonObject | JsonArray`
-Let `B` = Any primitive type or boxed primitive type
+1. Let `J` = `JsonObject | JsonArray`
+2. Let `B` = Any primitive type or boxed primitive type
+3. Let `D` = Any `@DataObject` class
 
 Parameters can be any of:
 
 * `J`
 * `B`
+* `D`
 * `List<J>`
 * `List<B>`
+* `List<D>`
 * `Set<J>`
 * `Set<B>`
+* `Set<D>`
 * `Map<String, J>`
 * `Map<String, B>`
 * Any Enum type
-* Any `@DataObject` class
 
 If an asynchronous result is required a final parameter of type `Handler<AsyncResult<R>>` can be provided.
 
@@ -187,13 +190,15 @@ If an asynchronous result is required a final parameter of type `Handler<AsyncRe
 
 * `J`
 * `B`
+* `D`
 * `List<J>`
 * `List<B>`
+* `List<D>`
 * `Set<J>`
 * `Set<B>`
+* `Set<D>`
 * `Map<String, J>`
 * `Map<String, B>`
-* Any `@DataObject` class
 
 #### Overloaded methods
 

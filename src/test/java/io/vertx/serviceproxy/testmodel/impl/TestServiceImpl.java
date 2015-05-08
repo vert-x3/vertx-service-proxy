@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -84,11 +85,31 @@ public class TestServiceImpl implements TestService {
     basicTypes(str, b, s, i, l, f, d, c, bool);
   }
 
+  @Override
+  public void basicBoxedTypesNull(String str, Byte b, Short s, Integer i, Long l, Float f, Double d, Character c, Boolean bool) {
+    assertNull(str);
+    assertNull(b);
+    assertNull(s);
+    assertNull(i);
+    assertNull(l);
+    assertNull(f);
+    assertNull(d);
+    assertNull(c);
+    assertNull(bool);
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
 
   @Override
   public void jsonTypes(JsonObject jsonObject, JsonArray jsonArray) {
     assertEquals("bar", jsonObject.getString("foo"));
     assertEquals("wibble", jsonArray.getString(0));
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
+  public void jsonTypesNull(JsonObject jsonObject, JsonArray jsonArray) {
+    assertNull(jsonObject);
+    assertNull(jsonArray);
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
 
@@ -99,14 +120,26 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
+  public void enumTypeNull(SomeEnum someEnum) {
+    assertNull(someEnum);
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
   public void dataObjectType(TestDataObject options) {
     assertEquals(new TestDataObject().setString("foo").setNumber(123).setBool(true), options);
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
 
   @Override
+  public void dataObjectTypeNull(TestDataObject options) {
+    assertNull(options);
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
   public void listParams(List<String> listString, List<Byte> listByte, List<Short> listShort, List<Integer> listInt, List<Long> listLong,
-                         List<JsonObject> listJsonObject, List<JsonArray> listJsonArray) {
+                         List<JsonObject> listJsonObject, List<JsonArray> listJsonArray, List<TestDataObject> listDataObject) {
     assertEquals("foo", listString.get(0));
     assertEquals("bar", listString.get(1));
     assertEquals((byte)12, listByte.get(0).byteValue());
@@ -121,12 +154,14 @@ public class TestServiceImpl implements TestService {
     assertEquals(new JsonObject().put("blah", "eek"), listJsonObject.get(1));
     assertEquals(new JsonArray().add("foo"), listJsonArray.get(0));
     assertEquals(new JsonArray().add("blah"), listJsonArray.get(1));
+    assertEquals(new JsonObject().put("number", 1).put("string", "String 1").put("bool", false), listDataObject.get(0).toJson());
+    assertEquals(new JsonObject().put("number", 2).put("string", "String 2").put("bool", true), listDataObject.get(1).toJson());
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
 
   @Override
   public void setParams(Set<String> setString, Set<Byte> setByte, Set<Short> setShort, Set<Integer> setInt, Set<Long> setLong,
-                        Set<JsonObject> setJsonObject, Set<JsonArray> setJsonArray) {
+                        Set<JsonObject> setJsonObject, Set<JsonArray> setJsonArray, Set<TestDataObject> setDataObject) {
     assertEquals(2, setString.size());
     assertTrue(setString.contains("foo"));
     assertTrue(setString.contains("bar"));
@@ -148,6 +183,10 @@ public class TestServiceImpl implements TestService {
     assertEquals(2, setJsonArray.size());
     assertTrue(setJsonArray.contains(new JsonArray().add("foo")));
     assertTrue(setJsonArray.contains(new JsonArray().add("blah")));
+    assertEquals(2, setDataObject.size());
+    Set<JsonObject> setDataObjectJson = setDataObject.stream().map(d -> d.toJson()).collect(Collectors.toSet());
+    assertTrue(setDataObjectJson.contains(new JsonObject().put("number", 1).put("string", "String 1").put("bool", false)));
+    assertTrue(setDataObjectJson.contains(new JsonObject().put("number", 2).put("string", "String 2").put("bool", true)));
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
 
@@ -177,8 +216,18 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
+  public void stringNullHandler(Handler<AsyncResult<String>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
+  }
+
+  @Override
   public void byteHandler(Handler<AsyncResult<Byte>> resultHandler) {
     resultHandler.handle(Future.succeededFuture((byte)123));
+  }
+
+  @Override
+  public void byteNullHandler(Handler<AsyncResult<Byte>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
   }
 
   @Override
@@ -187,8 +236,18 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
+  public void shortNullHandler(Handler<AsyncResult<Short>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
+  }
+
+  @Override
   public void intHandler(Handler<AsyncResult<Integer>> resultHandler) {
     resultHandler.handle(Future.succeededFuture(12345));
+  }
+
+  @Override
+  public void intNullHandler(Handler<AsyncResult<Integer>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
   }
 
   @Override
@@ -197,8 +256,18 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
+  public void longNullHandler(Handler<AsyncResult<Long>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
+  }
+
+  @Override
   public void floatHandler(Handler<AsyncResult<Float>> resultHandler) {
     resultHandler.handle(Future.succeededFuture(12.34f));
+  }
+
+  @Override
+  public void floatNullHandler(Handler<AsyncResult<Float>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
   }
 
   @Override
@@ -207,8 +276,18 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
+  public void doubleNullHandler(Handler<AsyncResult<Double>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
+  }
+
+  @Override
   public void charHandler(Handler<AsyncResult<Character>> resultHandler) {
     resultHandler.handle(Future.succeededFuture('X'));
+  }
+
+  @Override
+  public void charNullHandler(Handler<AsyncResult<Character>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
   }
 
   @Override
@@ -217,8 +296,18 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
+  public void booleanNullHandler(Handler<AsyncResult<Boolean>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
+  }
+
+  @Override
   public void jsonObjectHandler(Handler<AsyncResult<JsonObject>> resultHandler) {
     resultHandler.handle(Future.succeededFuture(new JsonObject().put("blah", "wibble")));
+  }
+
+  @Override
+  public void jsonObjectNullHandler(Handler<AsyncResult<JsonObject>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
   }
 
   @Override
@@ -227,8 +316,18 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
+  public void jsonArrayNullHandler(Handler<AsyncResult<JsonArray>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
+  }
+
+  @Override
   public void dataObjectHandler(Handler<AsyncResult<TestDataObject>> resultHandler) {
     resultHandler.handle(Future.succeededFuture(new TestDataObject().setString("foo").setNumber(123).setBool(true)));
+  }
+
+  @Override
+  public void dataObjectNullHandler(Handler<AsyncResult<TestDataObject>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(null));
   }
 
   @Override
@@ -404,5 +503,18 @@ public class TestServiceImpl implements TestService {
   public void ignoredMethod() {
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "called");
   }
-}
 
+  @Override
+  public void listDataObjectHandler(Handler<AsyncResult<List<TestDataObject>>> resultHandler) {
+    List<TestDataObject> list = 
+        Arrays.asList(new TestDataObject().setNumber(1).setString("String 1").setBool(false), new TestDataObject().setNumber(2).setString("String 2").setBool(true));
+    resultHandler.handle(Future.succeededFuture(list));
+  }
+
+  @Override
+  public void setDataObjectHandler(Handler<AsyncResult<Set<TestDataObject>>> resultHandler) {
+    Set<TestDataObject> set = 
+        new HashSet<>(Arrays.asList(new TestDataObject().setNumber(1).setString("String 1").setBool(false), new TestDataObject().setNumber(2).setString("String 2").setBool(true)));
+    resultHandler.handle(Future.succeededFuture(set));
+  }
+}
