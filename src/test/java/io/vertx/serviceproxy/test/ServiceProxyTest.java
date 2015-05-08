@@ -723,14 +723,15 @@ public class ServiceProxyTest extends VertxTestBase {
     await();
   }
 
+  @Test
   public void testListDataObjectHandler() {
     proxy.listDataObjectHandler(onSuccess(list -> {
       assertEquals(1, list.get(0).getNumber());
       assertEquals("String 1", list.get(0).getString());
-      assertEquals(true, list.get(0).isBool());
+      assertEquals(false, list.get(0).isBool());
       assertEquals(2, list.get(1).getNumber());
       assertEquals("String 2", list.get(1).getString());
-      assertEquals(false, list.get(1).isBool());
+      assertEquals(true, list.get(1).isBool());
       testComplete();
     }));
     await();

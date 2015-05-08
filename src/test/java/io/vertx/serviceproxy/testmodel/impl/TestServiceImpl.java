@@ -21,7 +21,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxException;
-import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.test.ServiceProxyTest;
@@ -518,19 +517,4 @@ public class TestServiceImpl implements TestService {
         new HashSet<>(Arrays.asList(new TestDataObject().setNumber(1).setString("String 1").setBool(false), new TestDataObject().setNumber(2).setString("String 2").setBool(true)));
     resultHandler.handle(Future.succeededFuture(set));
   }
-
-
-  public void slistDataObjectHandler(Handler<AsyncResult<List<TestDataObject>>> resultHandler) {
-    JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
-    _deliveryOptions.addHeader("action", "listDataObjectHandler");
-    vertx.eventBus().<JsonArray>send("werwe", _json, _deliveryOptions, res -> {
-      if (res.failed()) {
-        resultHandler.handle(Future.failedFuture(res.cause()));
-      } else {
-        resultHandler.handle(Future.succeededFuture(res.result().body().stream().map(o -> new TestDataObject((JsonObject)o)).collect(Collectors.toList())));
-      }
-    });
-  }
-
 }

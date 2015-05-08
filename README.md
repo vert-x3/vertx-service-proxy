@@ -165,9 +165,9 @@ This is because methods must not block and it's not possible to return a result 
 
 #### Parameter types
 
-Let `J` = `JsonObject | JsonArray`
-Let `B` = Any primitive type or boxed primitive type
-Let `D` = Any `@DataObject` class
+1. Let `J` = `JsonObject | JsonArray`
+2. Let `B` = Any primitive type or boxed primitive type
+3. Let `D` = Any `@DataObject` class
 
 Parameters can be any of:
 
