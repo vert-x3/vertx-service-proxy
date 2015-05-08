@@ -25,18 +25,28 @@
 	  JsonObject _json = new JsonObject();\n
 	@foreach{param: method.params}
 		@if{!hasResultHandler || (count++ != method.params.size() - 1)}
-			@if{param.type.name == 'char' || param.type.name == 'java.lang.Character'}
+			@if{param.type.name == 'char'}
     _json.put("@{param.name}", (int)@{param.name});\n
+			@else{param.type.name == 'java.lang.Character'}
+    _json.put("@{param.name}", @{param.name} == null ? null : (int)@{param.name});\n
 			@else{param.type.kind == CLASS_ENUM}
-    _json.put("@{param.name}", @{param.name}.toString());\n
+    _json.put("@{param.name}", @{param.name} == null ? null : @{param.name}.toString());\n
 			@else{param.type.kind == CLASS_LIST}
+				@if{param.type.args[0].kind == CLASS_DATA_OBJECT}
+    _json.put("@{param.name}", new JsonArray(@{param.name}.stream().map(d -> d.toJson()).collect(Collectors.toList())));\n
+				@else{}
     _json.put("@{param.name}", new JsonArray(@{param.name}));\n
+				@end{}
 			@else{param.type.kind == CLASS_SET}
+				@if{param.type.args[0].kind == CLASS_DATA_OBJECT}
+    _json.put("@{param.name}", new JsonArray(@{param.name}.stream().map(d -> d.toJson()).collect(Collectors.toList())));\n
+				@else{}
     _json.put("@{param.name}", new JsonArray(new ArrayList<>(@{param.name})));\n
+				@end{}
 			@else{param.type.kind == CLASS_MAP}
     _json.put("@{param.name}", new JsonObject(convertMap(@{param.name})));\n
 			@else{param.type.kind == CLASS_DATA_OBJECT}
-    _json.put("@{param.name}", @{param.name}.toJson());\n
+    _json.put("@{param.name}", @{param.name} == null ? null : @{param.name}.toJson());\n
 			@else{}
     _json.put("@{param.name}", @{param.name});\n
 			@end{}
@@ -63,12 +73,16 @@ send(_address, _json, _deliveryOptions, res -> {\n
 				@if{resultKind == CLASS_LIST}
 					@if{resultType.args[0].name == 'java.lang.Character'}
         @{lastParam.name}.handle(Future.succeededFuture(convertToListChar(res.result().body())));\n
+					@else{resultType.args[0].kind == CLASS_DATA_OBJECT}
+        @{lastParam.name}.handle(Future.succeededFuture(res.result().body().stream().map(o -> new @{resultType.args[0].simpleName}((JsonObject)o)).collect(Collectors.toList())));\n
 					@else{}
         @{lastParam.name}.handle(Future.succeededFuture(convertList(res.result().body().getList())));\n
 					@end{}
 				@else{resultKind == CLASS_SET}
 					@if{resultType.args[0].name == 'java.lang.Character'}
         @{lastParam.name}.handle(Future.succeededFuture(convertToSetChar(res.result().body())));\n
+					@else{resultType.args[0].kind == CLASS_DATA_OBJECT}
+        @{lastParam.name}.handle(Future.succeededFuture(res.result().body().stream().map(o -> new @{resultType.args[0].simpleName}((JsonObject)o)).collect(Collectors.toSet())));\n
 					@else{}
         @{lastParam.name}.handle(Future.succeededFuture(convertSet(res.result().body().getList())));\n
 					@end{}
@@ -76,7 +90,7 @@ send(_address, _json, _deliveryOptions, res -> {\n
         String addr = res.result().headers().get("proxyaddr");\n
         @{lastParam.name}.handle(Future.succeededFuture(ProxyHelper.createProxy(@{resultType.simpleName}.class, _vertx, addr)));\n
 				@else{resultKind == CLASS_DATA_OBJECT}
-        @{lastParam.name}.handle(Future.succeededFuture(new @{resultType.simpleName}(res.result().body())));\n
+        @{lastParam.name}.handle(Future.succeededFuture(res.result().body() == null ? null : new @{resultType.simpleName}(res.result().body())));\n
 				@else{}
         @{lastParam.name}.handle(Future.succeededFuture(res.result().body()));\n
 				@end{}
@@ -123,6 +137,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;\n
 import io.vertx.serviceproxy.ProxyHelper;\n
 @foreach{importedType:importedTypes}
 	@if{!importedType.packageName.equals("java.lang")}
