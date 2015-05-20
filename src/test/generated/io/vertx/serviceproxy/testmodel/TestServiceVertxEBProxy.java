@@ -237,7 +237,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _json.put("listLong", new JsonArray(listLong));
     _json.put("listJsonObject", new JsonArray(listJsonObject));
     _json.put("listJsonArray", new JsonArray(listJsonArray));
-    _json.put("listDataObject", new JsonArray(listDataObject.stream().map(d -> d.toJson()).collect(Collectors.toList())));
+    _json.put("listDataObject", new JsonArray(listDataObject.stream().map(TestDataObject::toJson).collect(Collectors.toList())));
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listParams");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
@@ -255,7 +255,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _json.put("setLong", new JsonArray(new ArrayList<>(setLong)));
     _json.put("setJsonObject", new JsonArray(new ArrayList<>(setJsonObject)));
     _json.put("setJsonArray", new JsonArray(new ArrayList<>(setJsonArray)));
-    _json.put("setDataObject", new JsonArray(setDataObject.stream().map(d -> d.toJson()).collect(Collectors.toList())));
+    _json.put("setDataObject", new JsonArray(setDataObject.stream().map(TestDataObject::toJson).collect(Collectors.toList())));
     DeliveryOptions _deliveryOptions = new DeliveryOptions();
     _deliveryOptions.addHeader("action", "setParams");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);

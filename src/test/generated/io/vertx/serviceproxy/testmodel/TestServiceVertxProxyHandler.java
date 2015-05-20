@@ -25,7 +25,13 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
-import java.util.ArrayList;import java.util.HashSet;import java.util.List;import java.util.Map;import java.util.Set;import java.util.UUID;import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.serviceproxy.ProxyHandler;
 import io.vertx.serviceproxy.testmodel.TestService;
@@ -354,7 +360,7 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
           if (res.failed()) {
             msg.fail(-1, res.cause().getMessage());
           } else {
-            msg.reply(new JsonArray(res.result().stream().map(d -> d.toJson()).collect(Collectors.toList())));
+            msg.reply(new JsonArray(res.result().stream().map(TestDataObject::toJson).collect(Collectors.toList())));
           }
        });
         break;
@@ -408,7 +414,7 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
           if (res.failed()) {
             msg.fail(-1, res.cause().getMessage());
           } else {
-            msg.reply(new JsonArray(res.result().stream().map(d -> d.toJson()).collect(Collectors.toList())));
+            msg.reply(new JsonArray(res.result().stream().map(TestDataObject::toJson).collect(Collectors.toList())));
           }
        });
         break;

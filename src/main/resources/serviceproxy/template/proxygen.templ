@@ -33,13 +33,13 @@
     _json.put("@{param.name}", @{param.name} == null ? null : @{param.name}.toString());\n
 			@else{param.type.kind == CLASS_LIST}
 				@if{param.type.args[0].kind == CLASS_DATA_OBJECT}
-    _json.put("@{param.name}", new JsonArray(@{param.name}.stream().map(d -> d.toJson()).collect(Collectors.toList())));\n
+    _json.put("@{param.name}", new JsonArray(@{param.name}.stream().map(@{param.type.args[0].simpleName}::toJson).collect(Collectors.toList())));\n
 				@else{}
     _json.put("@{param.name}", new JsonArray(@{param.name}));\n
 				@end{}
 			@else{param.type.kind == CLASS_SET}
 				@if{param.type.args[0].kind == CLASS_DATA_OBJECT}
-    _json.put("@{param.name}", new JsonArray(@{param.name}.stream().map(d -> d.toJson()).collect(Collectors.toList())));\n
+    _json.put("@{param.name}", new JsonArray(@{param.name}.stream().map(@{param.type.args[0].simpleName}::toJson).collect(Collectors.toList())));\n
 				@else{}
     _json.put("@{param.name}", new JsonArray(new ArrayList<>(@{param.name})));\n
 				@end{}
