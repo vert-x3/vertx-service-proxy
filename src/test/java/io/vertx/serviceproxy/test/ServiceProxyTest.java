@@ -16,8 +16,6 @@
 
 package io.vertx.serviceproxy.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.ReplyException;
@@ -29,13 +27,11 @@ import io.vertx.serviceproxy.testmodel.SomeEnum;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 import io.vertx.serviceproxy.testmodel.TestService;
 import io.vertx.test.core.VertxTestBase;
-
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -827,8 +823,8 @@ public class ServiceProxyTest extends VertxTestBase {
     long timeoutSeconds = 2;
     consumer = ProxyHelper.registerService(TestService.class, vertx, service, SERVICE_ADDRESS, timeoutSeconds);
 
+    long start = System.currentTimeMillis();
     proxy.createConnectionWithCloseFuture(onSuccess(conn -> {
-      long start = System.currentTimeMillis();
 
       vertx.eventBus().consumer("closeCalled").handler(msg -> {
         assertEquals("blah", msg.body());
