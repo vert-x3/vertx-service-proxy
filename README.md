@@ -1,5 +1,7 @@
 # Service Proxies
 
+[![Build Status](https://vertx.ci.cloudbees.com/buildStatus/icon?job=vert.x3-service-proxy)](https://vertx.ci.cloudbees.com/view/vert.x-3/job/vert.x3-service-proxy/)
+
 Many Vert.x applications include various services which do useful things and often can be reused from one application
 to another. An example would be a database service.
 
