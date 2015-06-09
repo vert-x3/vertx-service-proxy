@@ -20,11 +20,14 @@ import io.vertx.serviceproxy.testmodel.TestBaseImportsService;
 import io.vertx.core.Vertx;
 import io.vertx.core.Handler;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
+import java.util.Collection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -41,12 +44,22 @@ import io.vertx.serviceproxy.ProxyHandler;
 */
 public class TestBaseImportsServiceVertxProxyHandler extends ProxyHandler {
 
+  public static final long DEFAULT_CONNECTION_TIMEOUT = 5 * 60; // 5 minutes 
+
   private final Vertx vertx;
   private final TestBaseImportsService service;
   private final String address;
   private final long timerID;
   private long lastAccessed;
   private final long timeoutSeconds;
+
+  public TestBaseImportsServiceVertxProxyHandler(Vertx vertx, TestBaseImportsService service, String address) {
+    this(vertx, service, address, DEFAULT_CONNECTION_TIMEOUT);  }
+
+  public TestBaseImportsServiceVertxProxyHandler(Vertx vertx, TestBaseImportsService service, String address,
+    long timeoutInSecond) {
+    this(vertx, service, address, true, timeoutInSecond);
+  }
 
   public TestBaseImportsServiceVertxProxyHandler(Vertx vertx, TestBaseImportsService service, String address, boolean topLevel, long timeoutSeconds) {
     this.vertx = vertx;
@@ -63,6 +76,22 @@ public class TestBaseImportsServiceVertxProxyHandler extends ProxyHandler {
       this.timerID = -1;
     }
     accessed();
+  }
+
+  public <T> MessageConsumer<JsonObject> registerHandler() {
+    MessageConsumer<JsonObject> consumer = vertx.eventBus().<JsonObject>consumer(address).handler(this);
+    this.setConsumer(consumer);
+    return consumer;
+  }
+
+  public <T> Collection<MessageConsumer<JsonObject>> registerHandler(EventBus... buses) {
+    List<MessageConsumer<JsonObject>> list = new ArrayList<>();
+    for (EventBus bus : buses) {
+      MessageConsumer<JsonObject> consumer = bus.<JsonObject>consumer(address).handler(this);
+      this.setConsumer(consumer);
+      list.add(consumer);
+    }
+    return list;
   }
 
   private void checkTimedOut(long id) {
