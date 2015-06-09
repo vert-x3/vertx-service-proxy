@@ -39,7 +39,7 @@ You write your service as a Java interface and annotate it with the `@ProxyGen` 
         }
         
         static SomeDatabaseService createProxy(Vertx vertx, String address) {
-          return ProxyHelper.createProxy(SomeDatabaseService.class, vertx, address);
+          return new SomeDatabaseServiceVertxEBProxy(vertx, address);
         }
         
         // Actual service operations here...
@@ -85,7 +85,7 @@ return a connection interface, e.g.
         }
         
         static SomeDatabaseService createProxy(Vertx vertx, String address) {
-          return ProxyHelper.createProxy(SomeDatabaseService.class, vertx, address);
+          return new SomeDatabaseServiceVertxEBProxy(vertx, address);
         }
         
         // Create a connection
@@ -108,7 +108,23 @@ Where:
     
 You can also declare that a particular method unregisters the proxy by annotating it with the `@ProxyClose` annotation.    
         
+## Proxy creation
 
+Service interface must define a factory method named `createProxy`. This method returns an instance of the generated 
+proxy. The proxy class is generated during the compilation and is named as follows: `service_interface_simple_name + 
+VertxEBProxy`.
+
+So for instance, if you interface is named `MyService`, the proxy class is named `MyServiceVertxEBProxy`. 
+
+To generate this class you have to launch an initial compilation of the source.
+
+Alternatively, you can create the proxy instance using `ProxyHelper`, but this is **not the recommended way**:
+
+````
+static SomeDatabaseService createProxy(Vertx vertx, String address) {
+    return ProxyHelper.createProxy(SomeDatabaseService.class, vertx, address);
+}
+````
 
 ## Convention for invoking services over the eventbus
 

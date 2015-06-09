@@ -29,7 +29,7 @@ public class ProxyHelper {
 
   public static <T> T createProxy(Class<T> clazz, Vertx vertx, String address) {
     String proxyClassName = clazz.getName() + "VertxEBProxy";
-    Class<?> proxyClass = loadClass(proxyClassName);
+    Class<?> proxyClass = loadClass(proxyClassName, clazz);
     Constructor constructor = getConstructor(proxyClass, Vertx.class, String.class);
     Object instance = createInstance(constructor, vertx, address);
     return (T)instance;
@@ -52,7 +52,7 @@ public class ProxyHelper {
                                                                 boolean topLevel,
                                                                 long timeoutSeconds) {
     String handlerClassName = clazz.getName() + "VertxProxyHandler";
-    Class<?> handlerClass = loadClass(handlerClassName);
+    Class<?> handlerClass = loadClass(handlerClassName, clazz);
     Constructor constructor = getConstructor(handlerClass, Vertx.class, clazz, String.class, boolean.class, long.class);
     Object instance = createInstance(constructor, vertx, service, address, topLevel, timeoutSeconds);
     ProxyHandler handler = (ProxyHandler)instance;
@@ -61,9 +61,9 @@ public class ProxyHelper {
     return consumer;
   }
 
-  private static Class<?> loadClass(String name) {
+  private static Class<?> loadClass(String name, Class origin) {
     try {
-      return Class.forName(name);
+      return origin.getClassLoader().loadClass(name);
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException("Cannot find proxyClass: " + name, e);
     }
