@@ -19,11 +19,14 @@ import @{ifaceFQCN};\n
 import io.vertx.core.Vertx;\n
 import io.vertx.core.Handler;\n
 import io.vertx.core.AsyncResult;\n
+import io.vertx.core.eventbus.EventBus;\n
 import io.vertx.core.eventbus.Message;\n
+import io.vertx.core.eventbus.MessageConsumer;\n
 import io.vertx.core.eventbus.DeliveryOptions;\n
 import io.vertx.core.eventbus.ReplyException;\n
 import io.vertx.core.json.JsonObject;\n
 import io.vertx.core.json.JsonArray;\n
+import java.util.Collection;\n
 import java.util.ArrayList;\n
 import java.util.HashSet;\n
 import java.util.List;\n
@@ -45,12 +48,23 @@ import io.vertx.serviceproxy.ProxyHandler;\n
 */\n
 public class @{ifaceSimpleName}VertxProxyHandler extends ProxyHandler {\n
 \n
+  public static final long DEFAULT_CONNECTION_TIMEOUT = 5 * 60; // 5 minutes \n
+\n
   private final Vertx vertx;\n
   private final @{ifaceSimpleName} service;\n
   private final String address;\n
   private final long timerID;\n
   private long lastAccessed;\n
   private final long timeoutSeconds;\n
+\n
+  public @{ifaceSimpleName}VertxProxyHandler(Vertx vertx, @{ifaceSimpleName} service, String address) {\n
+    this(vertx, service, address, DEFAULT_CONNECTION_TIMEOUT);
+  }\n
+\n
+  public @{ifaceSimpleName}VertxProxyHandler(Vertx vertx, @{ifaceSimpleName} service, String address,\n
+    long timeoutInSecond) {\n
+    this(vertx, service, address, true, timeoutInSecond);\n
+  }\n
 \n
   public @{ifaceSimpleName}VertxProxyHandler(Vertx vertx, @{ifaceSimpleName} service, String address, boolean topLevel, long timeoutSeconds) {\n
     this.vertx = vertx;\n
@@ -67,6 +81,22 @@ public class @{ifaceSimpleName}VertxProxyHandler extends ProxyHandler {\n
       this.timerID = -1;\n
     }\n
     accessed();\n
+  }\n
+\n
+  public MessageConsumer<JsonObject> registerHandler() {\n
+    MessageConsumer<JsonObject> consumer = vertx.eventBus().<JsonObject>consumer(address).handler(this);\n
+    this.setConsumer(consumer);\n
+    return consumer;\n
+  }\n
+\n
+  public Collection<MessageConsumer<JsonObject>> registerHandler(EventBus... buses) {\n
+    List<MessageConsumer<JsonObject>> list = new ArrayList<>();\n
+    for (EventBus bus : buses) {\n
+      MessageConsumer<JsonObject> consumer = bus.<JsonObject>consumer(address).handler(this);\n
+      this.setConsumer(consumer);\n
+      list.add(consumer);\n
+    }\n
+    return list;\n
   }\n
 \n
   private void checkTimedOut(long id) {\n
