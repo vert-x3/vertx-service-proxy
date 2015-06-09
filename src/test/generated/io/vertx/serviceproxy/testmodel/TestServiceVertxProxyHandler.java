@@ -91,13 +91,13 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
     accessed();
   }
 
-  public <T> MessageConsumer<JsonObject> registerHandler() {
+  public MessageConsumer<JsonObject> registerHandler() {
     MessageConsumer<JsonObject> consumer = vertx.eventBus().<JsonObject>consumer(address).handler(this);
     this.setConsumer(consumer);
     return consumer;
   }
 
-  public <T> Collection<MessageConsumer<JsonObject>> registerHandler(EventBus... buses) {
+  public Collection<MessageConsumer<JsonObject>> registerHandler(EventBus... buses) {
     List<MessageConsumer<JsonObject>> list = new ArrayList<>();
     for (EventBus bus : buses) {
       MessageConsumer<JsonObject> consumer = bus.<JsonObject>consumer(address).handler(this);

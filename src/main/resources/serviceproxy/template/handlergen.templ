@@ -83,13 +83,13 @@ public class @{ifaceSimpleName}VertxProxyHandler extends ProxyHandler {\n
     accessed();\n
   }\n
 \n
-  public <T> MessageConsumer<JsonObject> registerHandler() {\n
+  public MessageConsumer<JsonObject> registerHandler() {\n
     MessageConsumer<JsonObject> consumer = vertx.eventBus().<JsonObject>consumer(address).handler(this);\n
     this.setConsumer(consumer);\n
     return consumer;\n
   }\n
 \n
-  public <T> Collection<MessageConsumer<JsonObject>> registerHandler(EventBus... buses) {\n
+  public Collection<MessageConsumer<JsonObject>> registerHandler(EventBus... buses) {\n
     List<MessageConsumer<JsonObject>> list = new ArrayList<>();\n
     for (EventBus bus : buses) {\n
       MessageConsumer<JsonObject> consumer = bus.<JsonObject>consumer(address).handler(this);\n
