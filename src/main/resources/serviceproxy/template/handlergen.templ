@@ -89,16 +89,6 @@ public class @{ifaceSimpleName}VertxProxyHandler extends ProxyHandler {\n
     return consumer;\n
   }\n
 \n
-  public Collection<MessageConsumer<JsonObject>> registerHandler(EventBus... buses) {\n
-    List<MessageConsumer<JsonObject>> list = new ArrayList<>();\n
-    for (EventBus bus : buses) {\n
-      MessageConsumer<JsonObject> consumer = bus.<JsonObject>consumer(address).handler(this);\n
-      this.setConsumer(consumer);\n
-      list.add(consumer);\n
-    }\n
-    return list;\n
-  }\n
-\n
   private void checkTimedOut(long id) {\n
     long now = System.nanoTime();\n
     if (now - lastAccessed > timeoutSeconds * 1000000000) {\n

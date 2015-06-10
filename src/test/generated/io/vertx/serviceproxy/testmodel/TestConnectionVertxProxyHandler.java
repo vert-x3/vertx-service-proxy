@@ -88,16 +88,6 @@ public class TestConnectionVertxProxyHandler extends ProxyHandler {
     return consumer;
   }
 
-  public Collection<MessageConsumer<JsonObject>> registerHandler(EventBus... buses) {
-    List<MessageConsumer<JsonObject>> list = new ArrayList<>();
-    for (EventBus bus : buses) {
-      MessageConsumer<JsonObject> consumer = bus.<JsonObject>consumer(address).handler(this);
-      this.setConsumer(consumer);
-      list.add(consumer);
-    }
-    return list;
-  }
-
   private void checkTimedOut(long id) {
     long now = System.nanoTime();
     if (now - lastAccessed > timeoutSeconds * 1000000000) {
