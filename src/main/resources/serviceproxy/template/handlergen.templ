@@ -52,24 +52,22 @@ public class @{ifaceSimpleName}VertxProxyHandler extends ProxyHandler {\n
 \n
   private final Vertx vertx;\n
   private final @{ifaceSimpleName} service;\n
-  private final String address;\n
   private final long timerID;\n
   private long lastAccessed;\n
   private final long timeoutSeconds;\n
 \n
-  public @{ifaceSimpleName}VertxProxyHandler(Vertx vertx, @{ifaceSimpleName} service, String address) {\n
-    this(vertx, service, address, DEFAULT_CONNECTION_TIMEOUT);
+  public @{ifaceSimpleName}VertxProxyHandler(Vertx vertx, @{ifaceSimpleName} service) {\n
+    this(vertx, service, DEFAULT_CONNECTION_TIMEOUT);
   }\n
 \n
-  public @{ifaceSimpleName}VertxProxyHandler(Vertx vertx, @{ifaceSimpleName} service, String address,\n
+  public @{ifaceSimpleName}VertxProxyHandler(Vertx vertx, @{ifaceSimpleName} service,\n
     long timeoutInSecond) {\n
-    this(vertx, service, address, true, timeoutInSecond);\n
+    this(vertx, service, true, timeoutInSecond);\n
   }\n
 \n
-  public @{ifaceSimpleName}VertxProxyHandler(Vertx vertx, @{ifaceSimpleName} service, String address, boolean topLevel, long timeoutSeconds) {\n
+  public @{ifaceSimpleName}VertxProxyHandler(Vertx vertx, @{ifaceSimpleName} service, boolean topLevel, long timeoutSeconds) {\n
     this.vertx = vertx;\n
     this.service = service;\n
-    this.address = address;\n
     this.timeoutSeconds = timeoutSeconds;\n
     if (timeoutSeconds != -1 && !topLevel) {\n
       long period = timeoutSeconds * 1000 / 2;\n
@@ -83,7 +81,7 @@ public class @{ifaceSimpleName}VertxProxyHandler extends ProxyHandler {\n
     accessed();\n
   }\n
 \n
-  public MessageConsumer<JsonObject> registerHandler() {\n
+  public MessageConsumer<JsonObject> registerHandler(String address) {\n
     MessageConsumer<JsonObject> consumer = vertx.eventBus().<JsonObject>consumer(address).handler(this);\n
     this.setConsumer(consumer);\n
     return consumer;\n

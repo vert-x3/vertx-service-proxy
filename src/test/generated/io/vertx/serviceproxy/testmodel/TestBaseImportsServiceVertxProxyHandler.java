@@ -48,23 +48,21 @@ public class TestBaseImportsServiceVertxProxyHandler extends ProxyHandler {
 
   private final Vertx vertx;
   private final TestBaseImportsService service;
-  private final String address;
   private final long timerID;
   private long lastAccessed;
   private final long timeoutSeconds;
 
-  public TestBaseImportsServiceVertxProxyHandler(Vertx vertx, TestBaseImportsService service, String address) {
-    this(vertx, service, address, DEFAULT_CONNECTION_TIMEOUT);  }
+  public TestBaseImportsServiceVertxProxyHandler(Vertx vertx, TestBaseImportsService service) {
+    this(vertx, service, DEFAULT_CONNECTION_TIMEOUT);  }
 
-  public TestBaseImportsServiceVertxProxyHandler(Vertx vertx, TestBaseImportsService service, String address,
+  public TestBaseImportsServiceVertxProxyHandler(Vertx vertx, TestBaseImportsService service,
     long timeoutInSecond) {
-    this(vertx, service, address, true, timeoutInSecond);
+    this(vertx, service, true, timeoutInSecond);
   }
 
-  public TestBaseImportsServiceVertxProxyHandler(Vertx vertx, TestBaseImportsService service, String address, boolean topLevel, long timeoutSeconds) {
+  public TestBaseImportsServiceVertxProxyHandler(Vertx vertx, TestBaseImportsService service, boolean topLevel, long timeoutSeconds) {
     this.vertx = vertx;
     this.service = service;
-    this.address = address;
     this.timeoutSeconds = timeoutSeconds;
     if (timeoutSeconds != -1 && !topLevel) {
       long period = timeoutSeconds * 1000 / 2;
@@ -78,7 +76,7 @@ public class TestBaseImportsServiceVertxProxyHandler extends ProxyHandler {
     accessed();
   }
 
-  public MessageConsumer<JsonObject> registerHandler() {
+  public MessageConsumer<JsonObject> registerHandler(String address) {
     MessageConsumer<JsonObject> consumer = vertx.eventBus().<JsonObject>consumer(address).handler(this);
     this.setConsumer(consumer);
     return consumer;

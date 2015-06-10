@@ -38,4 +38,12 @@ public abstract class ProxyHandler implements Handler<Message<JsonObject>> {
     closed = true;
   }
 
+  /**
+   * Register the proxy handle on the event bus.
+   *
+   * @param address the proxy address
+   * @return the registered message consumer
+   */
+  public abstract MessageConsumer<JsonObject> registerHandler(String address);
+
 }

@@ -53,12 +53,10 @@ public class ProxyHelper {
                                                                 long timeoutSeconds) {
     String handlerClassName = clazz.getName() + "VertxProxyHandler";
     Class<?> handlerClass = loadClass(handlerClassName, clazz);
-    Constructor constructor = getConstructor(handlerClass, Vertx.class, clazz, String.class, boolean.class, long.class);
-    Object instance = createInstance(constructor, vertx, service, address, topLevel, timeoutSeconds);
+    Constructor constructor = getConstructor(handlerClass, Vertx.class, clazz, boolean.class, long.class);
+    Object instance = createInstance(constructor, vertx, service, topLevel, timeoutSeconds);
     ProxyHandler handler = (ProxyHandler)instance;
-    MessageConsumer<JsonObject> consumer = vertx.eventBus().<JsonObject>consumer(address).handler(handler);
-    handler.setConsumer(consumer);
-    return consumer;
+    return handler.registerHandler(address);
   }
 
   private static Class<?> loadClass(String name, Class origin) {
