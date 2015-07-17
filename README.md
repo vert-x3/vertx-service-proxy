@@ -96,6 +96,7 @@ return a connection interface, e.g.
 Where:
 
     @ProxyGen
+    @VertxGen
     public interface MyDatabaseConnection {
     
         void insert(JsonObject someData);
