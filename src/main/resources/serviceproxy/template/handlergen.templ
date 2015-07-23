@@ -57,11 +57,10 @@ public class @{ifaceSimpleName}VertxProxyHandler extends ProxyHandler {\n
   private final long timeoutSeconds;\n
 \n
   public @{ifaceSimpleName}VertxProxyHandler(Vertx vertx, @{ifaceSimpleName} service) {\n
-    this(vertx, service, DEFAULT_CONNECTION_TIMEOUT);
+    this(vertx, service, DEFAULT_CONNECTION_TIMEOUT);\n
   }\n
 \n
-  public @{ifaceSimpleName}VertxProxyHandler(Vertx vertx, @{ifaceSimpleName} service,\n
-    long timeoutInSecond) {\n
+  public @{ifaceSimpleName}VertxProxyHandler(Vertx vertx, @{ifaceSimpleName} service, long timeoutInSecond) {\n
     this(vertx, service, true, timeoutInSecond);\n
   }\n
 \n
@@ -216,7 +215,7 @@ createHandler(msg)
     }\n
 
   }\n
-
+\n
   private <T> Handler<AsyncResult<T>> createHandler(Message msg) {\n
     return res -> {\n
       if (res.failed()) {\n
@@ -226,7 +225,7 @@ createHandler(msg)
       }\n
     };\n
   }\n
-
+\n
   private <T> Handler<AsyncResult<List<T>>> createListHandler(Message msg) {\n
     return res -> {\n
       if (res.failed()) {\n
@@ -236,7 +235,7 @@ createHandler(msg)
       }\n
     };\n
   }\n
-
+\n
   private <T> Handler<AsyncResult<Set<T>>> createSetHandler(Message msg) {\n
     return res -> {\n
       if (res.failed()) {\n
@@ -246,7 +245,7 @@ createHandler(msg)
       }\n
     };\n
   }\n
-
+\n
   private Handler<AsyncResult<List<Character>>> createListCharHandler(Message msg) {\n
     return res -> {\n
       if (res.failed()) {\n
@@ -260,7 +259,7 @@ createHandler(msg)
       }\n
     };\n
   }\n
-
+\n
   private Handler<AsyncResult<Set<Character>>> createSetCharHandler(Message msg) {\n
     return res -> {\n
       if (res.failed()) {\n
@@ -274,15 +273,15 @@ createHandler(msg)
       }\n
     };\n
   }\n
-
+\n
   private <T> Map<String, T> convertMap(Map map) {\n
     return (Map<String, T>)map;\n
   }\n
-
+\n
   private <T> List<T> convertList(List list) {\n
     return (List<T>)list;\n
   }\n
-
+\n
   private <T> Set<T> convertSet(List list) {\n
     return new HashSet<T>((List<T>)list);\n
   }\n
