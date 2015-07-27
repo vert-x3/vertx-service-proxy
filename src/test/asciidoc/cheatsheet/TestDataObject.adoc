@@ -10,12 +10,12 @@
 |===
 ^|Name | Type ^| Description
 
+|[[bool]]`bool`
+|`Boolean`
+|-
 |[[number]]`number`
 |`Number`
 |-
 |[[string]]`string`
 |`String`
-|-
-|[[bool]]`bool`
-|`Boolean`
 |-|===
