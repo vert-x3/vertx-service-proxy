@@ -53,7 +53,7 @@
 		@end{}
 	@end{}
 
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();\n
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();\n
     _deliveryOptions.addHeader("action", "@{method.name}");\n
 	@if{hasResultHandler}
 		@code{resultType=lastParam.type.args[0].args[0]}
@@ -153,11 +153,17 @@ public class @{ifaceSimpleName}VertxEBProxy implements @{ifaceSimpleName} {\n
 \n
   private Vertx _vertx;\n
   private String _address;\n
+  private DeliveryOptions _options;\n
   private boolean closed;\n
 \n
   public @{ifaceSimpleName}VertxEBProxy(Vertx vertx, String address) {\n
+    this(vertx, address, null);\n
+  }\n
+\n
+  public @{ifaceSimpleName}VertxEBProxy(Vertx vertx, String address, DeliveryOptions options) {\n
     this._vertx = vertx;\n
     this._address = address;\n
+    this._options = options;\n
   }\n
 \n
 @foreach{method:methods}

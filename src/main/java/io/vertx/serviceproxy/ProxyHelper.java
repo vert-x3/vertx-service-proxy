@@ -17,6 +17,7 @@
 package io.vertx.serviceproxy;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 
@@ -28,10 +29,21 @@ import java.lang.reflect.Constructor;
 public class ProxyHelper {
 
   public static <T> T createProxy(Class<T> clazz, Vertx vertx, String address) {
+    return createProxy(clazz, vertx, address, null);
+  }
+
+  public static <T> T createProxy(Class<T> clazz, Vertx vertx, String address, DeliveryOptions options) {
     String proxyClassName = clazz.getName() + "VertxEBProxy";
     Class<?> proxyClass = loadClass(proxyClassName, clazz);
-    Constructor constructor = getConstructor(proxyClass, Vertx.class, String.class);
-    Object instance = createInstance(constructor, vertx, address);
+    Constructor constructor;
+    Object instance;
+    if (options == null) {
+      constructor = getConstructor(proxyClass, Vertx.class, String.class);
+      instance = createInstance(constructor, vertx, address);
+    } else {
+      constructor = getConstructor(proxyClass, Vertx.class, String.class, DeliveryOptions.class);
+      instance = createInstance(constructor, vertx, address, options);
+    }
     return (T)instance;
   }
 

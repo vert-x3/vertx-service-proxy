@@ -845,4 +845,27 @@ public class ServiceProxyTest extends VertxTestBase {
 
     await();
   }
+
+  @Test
+  public void testLongDelivery1() {
+    TestService proxyLong = TestService.createProxyLongDelivery(vertx, SERVICE_ADDRESS);
+    proxyLong.longDeliverySuccess(onSuccess(str -> {
+      assertEquals("blah", str);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testLongDelivery2() {
+    TestService proxyLong = TestService.createProxyLongDelivery(vertx, SERVICE_ADDRESS);
+    proxyLong.longDeliveryFailed(onFailure(t -> {
+      assertNotNull(t);
+      assertTrue(t instanceof ReplyException);
+      ReplyException re = (ReplyException) t;
+      assertEquals(ReplyFailure.TIMEOUT, re.failureType());
+      testComplete();
+    }));
+    await();
+  }
 }
