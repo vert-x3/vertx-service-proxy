@@ -42,11 +42,17 @@ public class TestConnectionVertxEBProxy implements TestConnection {
 
   private Vertx _vertx;
   private String _address;
+  private DeliveryOptions _options;
   private boolean closed;
 
   public TestConnectionVertxEBProxy(Vertx vertx, String address) {
+    this(vertx, address, null);
+  }
+
+  public TestConnectionVertxEBProxy(Vertx vertx, String address, DeliveryOptions options) {
     this._vertx = vertx;
     this._address = address;
+    this._options = options;
   }
 
   public TestConnection startTransaction(Handler<AsyncResult<String>> resultHandler) {
@@ -55,7 +61,7 @@ public class TestConnectionVertxEBProxy implements TestConnection {
       return this;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "startTransaction");
     _vertx.eventBus().<String>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -75,7 +81,7 @@ public class TestConnectionVertxEBProxy implements TestConnection {
     JsonObject _json = new JsonObject();
     _json.put("name", name);
     _json.put("data", data);
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "insert");
     _vertx.eventBus().<String>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -93,7 +99,7 @@ public class TestConnectionVertxEBProxy implements TestConnection {
       return this;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "commit");
     _vertx.eventBus().<String>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -111,7 +117,7 @@ public class TestConnectionVertxEBProxy implements TestConnection {
       return this;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "rollback");
     _vertx.eventBus().<String>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -129,7 +135,7 @@ public class TestConnectionVertxEBProxy implements TestConnection {
     }
     closed = true;
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "close");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }

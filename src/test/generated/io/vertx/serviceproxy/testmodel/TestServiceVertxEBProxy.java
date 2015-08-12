@@ -51,11 +51,51 @@ public class TestServiceVertxEBProxy implements TestService {
 
   private Vertx _vertx;
   private String _address;
+  private DeliveryOptions _options;
   private boolean closed;
 
   public TestServiceVertxEBProxy(Vertx vertx, String address) {
+    this(vertx, address, null);
+  }
+
+  public TestServiceVertxEBProxy(Vertx vertx, String address, DeliveryOptions options) {
     this._vertx = vertx;
     this._address = address;
+    this._options = options;
+  }
+
+  public void longDeliverySuccess(Handler<AsyncResult<String>> resultHandler) {
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "longDeliverySuccess");
+    _vertx.eventBus().<String>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(res.result().body()));
+      }
+    });
+  }
+
+  public void longDeliveryFailed(Handler<AsyncResult<String>> resultHandler) {
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "longDeliveryFailed");
+    _vertx.eventBus().<String>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(res.result().body()));
+      }
+    });
   }
 
   public void createConnection(String str, Handler<AsyncResult<TestConnection>> resultHandler) {
@@ -65,7 +105,7 @@ public class TestServiceVertxEBProxy implements TestService {
     }
     JsonObject _json = new JsonObject();
     _json.put("str", str);
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "createConnection");
     _vertx.eventBus().<TestConnection>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -83,7 +123,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "createConnectionWithCloseFuture");
     _vertx.eventBus().<TestConnectionWithCloseFuture>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -100,7 +140,7 @@ public class TestServiceVertxEBProxy implements TestService {
       throw new IllegalStateException("Proxy is closed");
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "noParams");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
@@ -119,7 +159,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _json.put("d", d);
     _json.put("c", (int)c);
     _json.put("bool", bool);
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "basicTypes");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
@@ -138,7 +178,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _json.put("d", d);
     _json.put("c", c == null ? null : (int)c);
     _json.put("bool", bool);
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "basicBoxedTypes");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
@@ -157,7 +197,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _json.put("d", d);
     _json.put("c", c == null ? null : (int)c);
     _json.put("bool", bool);
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "basicBoxedTypesNull");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
@@ -169,7 +209,7 @@ public class TestServiceVertxEBProxy implements TestService {
     JsonObject _json = new JsonObject();
     _json.put("jsonObject", jsonObject);
     _json.put("jsonArray", jsonArray);
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "jsonTypes");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
@@ -181,7 +221,7 @@ public class TestServiceVertxEBProxy implements TestService {
     JsonObject _json = new JsonObject();
     _json.put("jsonObject", jsonObject);
     _json.put("jsonArray", jsonArray);
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "jsonTypesNull");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
@@ -192,7 +232,7 @@ public class TestServiceVertxEBProxy implements TestService {
     }
     JsonObject _json = new JsonObject();
     _json.put("someEnum", someEnum == null ? null : someEnum.toString());
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "enumType");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
@@ -203,7 +243,7 @@ public class TestServiceVertxEBProxy implements TestService {
     }
     JsonObject _json = new JsonObject();
     _json.put("someEnum", someEnum == null ? null : someEnum.toString());
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "enumTypeNull");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
@@ -214,7 +254,7 @@ public class TestServiceVertxEBProxy implements TestService {
     }
     JsonObject _json = new JsonObject();
     _json.put("options", options == null ? null : options.toJson());
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "dataObjectType");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
@@ -225,7 +265,7 @@ public class TestServiceVertxEBProxy implements TestService {
     }
     JsonObject _json = new JsonObject();
     _json.put("options", options == null ? null : options.toJson());
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "dataObjectTypeNull");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
@@ -243,7 +283,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _json.put("listJsonObject", new JsonArray(listJsonObject));
     _json.put("listJsonArray", new JsonArray(listJsonArray));
     _json.put("listDataObject", new JsonArray(listDataObject.stream().map(TestDataObject::toJson).collect(Collectors.toList())));
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listParams");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
@@ -261,7 +301,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _json.put("setJsonObject", new JsonArray(new ArrayList<>(setJsonObject)));
     _json.put("setJsonArray", new JsonArray(new ArrayList<>(setJsonArray)));
     _json.put("setDataObject", new JsonArray(setDataObject.stream().map(TestDataObject::toJson).collect(Collectors.toList())));
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "setParams");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
@@ -278,7 +318,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _json.put("mapLong", new JsonObject(convertMap(mapLong)));
     _json.put("mapJsonObject", new JsonObject(convertMap(mapJsonObject)));
     _json.put("mapJsonArray", new JsonObject(convertMap(mapJsonArray)));
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "mapParams");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
@@ -289,7 +329,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "stringHandler");
     _vertx.eventBus().<String>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -306,7 +346,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "stringNullHandler");
     _vertx.eventBus().<String>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -323,7 +363,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "byteHandler");
     _vertx.eventBus().<Byte>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -340,7 +380,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "byteNullHandler");
     _vertx.eventBus().<Byte>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -357,7 +397,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "shortHandler");
     _vertx.eventBus().<Short>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -374,7 +414,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "shortNullHandler");
     _vertx.eventBus().<Short>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -391,7 +431,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "intHandler");
     _vertx.eventBus().<Integer>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -408,7 +448,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "intNullHandler");
     _vertx.eventBus().<Integer>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -425,7 +465,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "longHandler");
     _vertx.eventBus().<Long>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -442,7 +482,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "longNullHandler");
     _vertx.eventBus().<Long>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -459,7 +499,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "floatHandler");
     _vertx.eventBus().<Float>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -476,7 +516,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "floatNullHandler");
     _vertx.eventBus().<Float>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -493,7 +533,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "doubleHandler");
     _vertx.eventBus().<Double>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -510,7 +550,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "doubleNullHandler");
     _vertx.eventBus().<Double>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -527,7 +567,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "charHandler");
     _vertx.eventBus().<Character>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -544,7 +584,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "charNullHandler");
     _vertx.eventBus().<Character>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -561,7 +601,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "booleanHandler");
     _vertx.eventBus().<Boolean>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -578,7 +618,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "booleanNullHandler");
     _vertx.eventBus().<Boolean>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -595,7 +635,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "jsonObjectHandler");
     _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -612,7 +652,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "jsonObjectNullHandler");
     _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -629,7 +669,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "jsonArrayHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -646,7 +686,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "jsonArrayNullHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -663,7 +703,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "dataObjectHandler");
     _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -680,7 +720,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "dataObjectNullHandler");
     _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -697,7 +737,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "voidHandler");
     _vertx.eventBus().<Void>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -715,7 +755,7 @@ public class TestServiceVertxEBProxy implements TestService {
     }
     JsonObject _json = new JsonObject();
     _json.put("str", str);
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "fluentMethod");
     _vertx.eventBus().<String>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -732,7 +772,7 @@ public class TestServiceVertxEBProxy implements TestService {
       throw new IllegalStateException("Proxy is closed");
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "fluentNoParams");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
     return this;
@@ -744,7 +784,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "failingMethod");
     _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -766,7 +806,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _json.put("i", i);
     _json.put("chr", (int)chr);
     _json.put("senum", senum == null ? null : senum.toString());
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "invokeWithMessage");
     _vertx.eventBus().<String>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -783,7 +823,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listStringHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -800,7 +840,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listByteHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -817,7 +857,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listShortHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -834,7 +874,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listIntHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -851,7 +891,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listLongHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -868,7 +908,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listFloatHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -885,7 +925,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listDoubleHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -902,7 +942,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listCharHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -919,7 +959,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listBoolHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -936,7 +976,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listJsonObjectHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -953,7 +993,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listJsonArrayHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -970,7 +1010,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "listDataObjectHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -987,7 +1027,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "setStringHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -1004,7 +1044,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "setByteHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -1021,7 +1061,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "setShortHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -1038,7 +1078,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "setIntHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -1055,7 +1095,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "setLongHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -1072,7 +1112,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "setFloatHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -1089,7 +1129,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "setDoubleHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -1106,7 +1146,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "setCharHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -1123,7 +1163,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "setBoolHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -1140,7 +1180,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "setJsonObjectHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -1157,7 +1197,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "setJsonArrayHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
@@ -1174,7 +1214,7 @@ public class TestServiceVertxEBProxy implements TestService {
       return;
     }
     JsonObject _json = new JsonObject();
-    DeliveryOptions _deliveryOptions = new DeliveryOptions();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "setDataObjectHandler");
     _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {

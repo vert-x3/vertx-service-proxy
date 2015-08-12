@@ -124,6 +124,15 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
     switch (action) {
 
 
+
+      case "longDeliverySuccess": {
+        service.longDeliverySuccess(createHandler(msg));
+        break;
+      }
+      case "longDeliveryFailed": {
+        service.longDeliveryFailed(createHandler(msg));
+        break;
+      }
       case "createConnection": {
         service.createConnection((java.lang.String)json.getValue("str"), res -> {
           if (res.failed()) {

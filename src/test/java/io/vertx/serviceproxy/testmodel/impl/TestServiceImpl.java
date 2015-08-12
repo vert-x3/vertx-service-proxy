@@ -517,4 +517,18 @@ public class TestServiceImpl implements TestService {
         new HashSet<>(Arrays.asList(new TestDataObject().setNumber(1).setString("String 1").setBool(false), new TestDataObject().setNumber(2).setString("String 2").setBool(true)));
     resultHandler.handle(Future.succeededFuture(set));
   }
+
+  @Override
+  public void longDeliverySuccess(Handler<AsyncResult<String>> resultHandler) {
+    vertx.setTimer(10*1000L, tid -> {
+      resultHandler.handle(Future.succeededFuture("blah"));
+    });
+  }
+
+  @Override
+  public void longDeliveryFailed(Handler<AsyncResult<String>> resultHandler) {
+    vertx.setTimer(30*1000L, tid -> {
+      resultHandler.handle(Future.succeededFuture("blah"));
+    });
+  }
 }
