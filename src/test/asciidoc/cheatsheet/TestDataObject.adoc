@@ -14,7 +14,7 @@
 |`Boolean`
 |-
 |[[number]]`number`
-|`Number`
+|`Number (int)`
 |-
 |[[string]]`string`
 |`String`
