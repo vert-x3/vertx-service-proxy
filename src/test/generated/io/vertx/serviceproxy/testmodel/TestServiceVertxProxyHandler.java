@@ -162,15 +162,15 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
         break;
       }
       case "basicTypes": {
-        service.basicTypes((java.lang.String)json.getValue("str"), (byte)json.getValue("b"), (short)json.getValue("s"), (int)json.getValue("i"), (long)json.getValue("l"), (float)json.getValue("f"), (double)json.getValue("d"), json.getInteger("c") == null ? null : (char)(json.getInteger("c").intValue()), (boolean)json.getValue("bool"));
+        service.basicTypes((java.lang.String)json.getValue("str"), json.getValue("b") == null ? null : (json.getLong("b").byteValue()), json.getValue("s") == null ? null : (json.getLong("s").shortValue()), json.getValue("i") == null ? null : (json.getLong("i").intValue()), json.getValue("l") == null ? null : (json.getLong("l").longValue()), json.getValue("f") == null ? null : (json.getDouble("f").floatValue()), json.getValue("d") == null ? null : (json.getDouble("d").doubleValue()), json.getInteger("c") == null ? null : (char)(int)(json.getInteger("c")), (boolean)json.getValue("bool"));
         break;
       }
       case "basicBoxedTypes": {
-        service.basicBoxedTypes((java.lang.String)json.getValue("str"), (java.lang.Byte)json.getValue("b"), (java.lang.Short)json.getValue("s"), (java.lang.Integer)json.getValue("i"), (java.lang.Long)json.getValue("l"), (java.lang.Float)json.getValue("f"), (java.lang.Double)json.getValue("d"), json.getInteger("c") == null ? null : (char)(json.getInteger("c").intValue()), (java.lang.Boolean)json.getValue("bool"));
+        service.basicBoxedTypes((java.lang.String)json.getValue("str"), json.getValue("b") == null ? null : (json.getLong("b").byteValue()), json.getValue("s") == null ? null : (json.getLong("s").shortValue()), json.getValue("i") == null ? null : (json.getLong("i").intValue()), json.getValue("l") == null ? null : (json.getLong("l").longValue()), json.getValue("f") == null ? null : (json.getDouble("f").floatValue()), json.getValue("d") == null ? null : (json.getDouble("d").doubleValue()), json.getInteger("c") == null ? null : (char)(int)(json.getInteger("c")), (java.lang.Boolean)json.getValue("bool"));
         break;
       }
       case "basicBoxedTypesNull": {
-        service.basicBoxedTypesNull((java.lang.String)json.getValue("str"), (java.lang.Byte)json.getValue("b"), (java.lang.Short)json.getValue("s"), (java.lang.Integer)json.getValue("i"), (java.lang.Long)json.getValue("l"), (java.lang.Float)json.getValue("f"), (java.lang.Double)json.getValue("d"), json.getInteger("c") == null ? null : (char)(json.getInteger("c").intValue()), (java.lang.Boolean)json.getValue("bool"));
+        service.basicBoxedTypesNull((java.lang.String)json.getValue("str"), json.getValue("b") == null ? null : (json.getLong("b").byteValue()), json.getValue("s") == null ? null : (json.getLong("s").shortValue()), json.getValue("i") == null ? null : (json.getLong("i").intValue()), json.getValue("l") == null ? null : (json.getLong("l").longValue()), json.getValue("f") == null ? null : (json.getDouble("f").floatValue()), json.getValue("d") == null ? null : (json.getDouble("d").doubleValue()), json.getInteger("c") == null ? null : (char)(int)(json.getInteger("c")), (java.lang.Boolean)json.getValue("bool"));
         break;
       }
       case "jsonTypes": {
@@ -198,15 +198,15 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
         break;
       }
       case "listParams": {
-        service.listParams(convertList(json.getJsonArray("listString").getList()), convertList(json.getJsonArray("listByte").getList()), convertList(json.getJsonArray("listShort").getList()), convertList(json.getJsonArray("listInt").getList()), convertList(json.getJsonArray("listLong").getList()), convertList(json.getJsonArray("listJsonObject").getList()), convertList(json.getJsonArray("listJsonArray").getList()), json.getJsonArray("listDataObject").stream().map(o -> new TestDataObject((JsonObject)o)).collect(Collectors.toList()));
+        service.listParams(convertList(json.getJsonArray("listString").getList()), json.getJsonArray("listByte").stream().map(o -> ((Number)o).byteValue()).collect(Collectors.toList()), json.getJsonArray("listShort").stream().map(o -> ((Number)o).shortValue()).collect(Collectors.toList()), json.getJsonArray("listInt").stream().map(o -> ((Number)o).intValue()).collect(Collectors.toList()), json.getJsonArray("listLong").stream().map(o -> ((Number)o).longValue()).collect(Collectors.toList()), convertList(json.getJsonArray("listJsonObject").getList()), convertList(json.getJsonArray("listJsonArray").getList()), json.getJsonArray("listDataObject").stream().map(o -> new TestDataObject((JsonObject)o)).collect(Collectors.toList()));
         break;
       }
       case "setParams": {
-        service.setParams(convertSet(json.getJsonArray("setString").getList()), convertSet(json.getJsonArray("setByte").getList()), convertSet(json.getJsonArray("setShort").getList()), convertSet(json.getJsonArray("setInt").getList()), convertSet(json.getJsonArray("setLong").getList()), convertSet(json.getJsonArray("setJsonObject").getList()), convertSet(json.getJsonArray("setJsonArray").getList()), json.getJsonArray("setDataObject").stream().map(o -> new TestDataObject((JsonObject)o)).collect(Collectors.toSet()));
+        service.setParams(convertSet(json.getJsonArray("setString").getList()), json.getJsonArray("setByte").stream().map(o -> ((Number)o).byteValue()).collect(Collectors.toSet()), json.getJsonArray("setShort").stream().map(o -> ((Number)o).shortValue()).collect(Collectors.toSet()), json.getJsonArray("setInt").stream().map(o -> ((Number)o).intValue()).collect(Collectors.toSet()), json.getJsonArray("setLong").stream().map(o -> ((Number)o).longValue()).collect(Collectors.toSet()), convertSet(json.getJsonArray("setJsonObject").getList()), convertSet(json.getJsonArray("setJsonArray").getList()), json.getJsonArray("setDataObject").stream().map(o -> new TestDataObject((JsonObject)o)).collect(Collectors.toSet()));
         break;
       }
       case "mapParams": {
-        service.mapParams(convertMap(json.getJsonObject("mapString").getMap()), convertMap(json.getJsonObject("mapByte").getMap()), convertMap(json.getJsonObject("mapShort").getMap()), convertMap(json.getJsonObject("mapInt").getMap()), convertMap(json.getJsonObject("mapLong").getMap()), convertMap(json.getJsonObject("mapJsonObject").getMap()), convertMap(json.getJsonObject("mapJsonArray").getMap()));
+        service.mapParams(convertMap(json.getJsonObject("mapString").getMap()), json.getJsonObject("mapByte").getMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> ((java.lang.Number)entry.getValue()).byteValue())), json.getJsonObject("mapShort").getMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> ((java.lang.Number)entry.getValue()).shortValue())), json.getJsonObject("mapInt").getMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> ((java.lang.Number)entry.getValue()).intValue())), json.getJsonObject("mapLong").getMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> ((java.lang.Number)entry.getValue()).longValue())), convertMap(json.getJsonObject("mapJsonObject").getMap()), convertMap(json.getJsonObject("mapJsonArray").getMap()));
         break;
       }
       case "stringHandler": {
@@ -334,7 +334,7 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
         break;
       }
       case "invokeWithMessage": {
-        service.invokeWithMessage((io.vertx.core.json.JsonObject)json.getValue("object"), (java.lang.String)json.getValue("str"), (int)json.getValue("i"), json.getInteger("chr") == null ? null : (char)(json.getInteger("chr").intValue()), json.getString("senum") == null ? null : io.vertx.serviceproxy.testmodel.SomeEnum.valueOf(json.getString("senum")), createHandler(msg));
+        service.invokeWithMessage((io.vertx.core.json.JsonObject)json.getValue("object"), (java.lang.String)json.getValue("str"), json.getValue("i") == null ? null : (json.getLong("i").intValue()), json.getInteger("chr") == null ? null : (char)(int)(json.getInteger("chr")), json.getString("senum") == null ? null : io.vertx.serviceproxy.testmodel.SomeEnum.valueOf(json.getString("senum")), createHandler(msg));
         break;
       }
       case "listStringHandler": {
@@ -492,7 +492,7 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
       } else {
         JsonArray arr = new JsonArray();
         for (Character chr: res.result()) {
-          arr.add((int)chr);
+          arr.add((int) chr);
         }
         msg.reply(arr);
       }
@@ -506,7 +506,7 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
       } else {
         JsonArray arr = new JsonArray();
         for (Character chr: res.result()) {
-          arr.add((int)chr);
+          arr.add((int) chr);
         }
         msg.reply(arr);
       }

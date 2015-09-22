@@ -413,6 +413,9 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testFluentNoParams() {
+    vertx.eventBus().consumer("fluentReceived").handler(msg -> {
+      testComplete();
+    });
     assertSame(proxy, proxy.fluentNoParams());
     await();
   }
