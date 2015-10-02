@@ -107,37 +107,42 @@ public class TestConnectionVertxProxyHandler extends ProxyHandler {
   }
 
   public void handle(Message<JsonObject> msg) {
-    JsonObject json = msg.body();
-    String action = msg.headers().get("action");
-    if (action == null) {
-      throw new IllegalStateException("action not specified");
-    }
-    accessed();
-    switch (action) {
-      case "startTransaction": {
-        service.startTransaction(createHandler(msg));
-        break;
+    try {
+      JsonObject json = msg.body();
+      String action = msg.headers().get("action");
+      if (action == null) {
+        throw new IllegalStateException("action not specified");
       }
-      case "insert": {
-        service.insert((java.lang.String)json.getValue("name"), (io.vertx.core.json.JsonObject)json.getValue("data"), createHandler(msg));
-        break;
+      accessed();
+      switch (action) {
+        case "startTransaction": {
+          service.startTransaction(createHandler(msg));
+          break;
+        }
+        case "insert": {
+          service.insert((java.lang.String)json.getValue("name"), (io.vertx.core.json.JsonObject)json.getValue("data"), createHandler(msg));
+          break;
+        }
+        case "commit": {
+          service.commit(createHandler(msg));
+          break;
+        }
+        case "rollback": {
+          service.rollback(createHandler(msg));
+          break;
+        }
+        case "close": {
+          service.close();
+          close();
+          break;
+        }
+        default: {
+          throw new IllegalStateException("Invalid action: " + action);
+        }
       }
-      case "commit": {
-        service.commit(createHandler(msg));
-        break;
-      }
-      case "rollback": {
-        service.rollback(createHandler(msg));
-        break;
-      }
-      case "close": {
-        service.close();
-        close();
-        break;
-      }
-      default: {
-        throw new IllegalStateException("Invalid action: " + action);
-      }
+    } catch (Throwable t) {
+      msg.fail(-1, t.getMessage());
+      throw t;
     }
   }
 
