@@ -21,5 +21,3 @@ test-results
 test-tmp
 *.class
 src/gen
-src/main/resources/vertx-js/*.js
-src/test/resources/vertx-js/*.js
