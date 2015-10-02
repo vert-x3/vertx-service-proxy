@@ -15,113 +15,132 @@
  */
 
 /** @module test-js/test_connection */
+!function (factory) {
+  if (typeof require === 'function' && typeof module !== 'undefined') {
+    factory();
+  } else if (typeof define === 'function' && define.amd) {
+    // AMD loader
+    define('processor_service', [], factory);
+  } else {
+    // plain old include
+    TestConnection = factory();
+  }
+}(function () {
 
-/**
+  /**
 
  @class
-*/
-var TestConnection = function(eb, address) {
+  */
+  var TestConnection = function(eb, address) {
 
-  var j_eb = eb;
-  var j_address = address;
-  var closed = false;
-  var that = this;
-  var convCharCollection = function(coll) {
-    var ret = [];
-    for (var i = 0;i < coll.length;i++) {
-      ret.push(String.fromCharCode(coll[i]));
+    var j_eb = eb;
+    var j_address = address;
+    var closed = false;
+    var that = this;
+    var convCharCollection = function(coll) {
+      var ret = [];
+      for (var i = 0;i < coll.length;i++) {
+        ret.push(String.fromCharCode(coll[i]));
+      }
+      return ret;
+    };
+
+    /**
+
+     @public
+     @param resultHandler {function} 
+     @return {TestConnection}
+     */
+    this.startTransaction = function(resultHandler) {
+      var __args = arguments;
+      if (__args.length === 1 && typeof __args[0] === 'function') {
+        if (closed) {
+          throw new Error('Proxy is closed');
+        }
+        j_eb.send(j_address, {}, {"action":"startTransaction"}, __args[0]);
+        return that;
+      } else throw new TypeError('function invoked with invalid arguments');
+    };
+
+    /**
+
+     @public
+     @param name {string} 
+     @param data {Object} 
+     @param resultHandler {function} 
+     @return {TestConnection}
+     */
+    this.insert = function(name, data, resultHandler) {
+      var __args = arguments;
+      if (__args.length === 3 && typeof __args[0] === 'string' && typeof __args[1] === 'object' && typeof __args[2] === 'function') {
+        if (closed) {
+          throw new Error('Proxy is closed');
+        }
+        j_eb.send(j_address, {"name":__args[0], "data":__args[1]}, {"action":"insert"}, __args[2]);
+        return that;
+      } else throw new TypeError('function invoked with invalid arguments');
+    };
+
+    /**
+
+     @public
+     @param resultHandler {function} 
+     @return {TestConnection}
+     */
+    this.commit = function(resultHandler) {
+      var __args = arguments;
+      if (__args.length === 1 && typeof __args[0] === 'function') {
+        if (closed) {
+          throw new Error('Proxy is closed');
+        }
+        j_eb.send(j_address, {}, {"action":"commit"}, __args[0]);
+        return that;
+      } else throw new TypeError('function invoked with invalid arguments');
+    };
+
+    /**
+
+     @public
+     @param resultHandler {function} 
+     @return {TestConnection}
+     */
+    this.rollback = function(resultHandler) {
+      var __args = arguments;
+      if (__args.length === 1 && typeof __args[0] === 'function') {
+        if (closed) {
+          throw new Error('Proxy is closed');
+        }
+        j_eb.send(j_address, {}, {"action":"rollback"}, __args[0]);
+        return that;
+      } else throw new TypeError('function invoked with invalid arguments');
+    };
+
+    /**
+
+     @public
+
+     */
+    this.close = function() {
+      var __args = arguments;
+      if (__args.length === 0) {
+        if (closed) {
+          throw new Error('Proxy is closed');
+        }
+        j_eb.send(j_address, {}, {"action":"close"});
+        closed = true;
+        return;
+      } else throw new TypeError('function invoked with invalid arguments');
+    };
+
+  };
+
+  if (typeof exports !== 'undefined') {
+    if (typeof module !== 'undefined' && module.exports) {
+      exports = module.exports = TestConnection;
+    } else {
+      exports.TestConnection = TestConnection;
     }
-    return ret;
-  };
-
-  /**
-
-   @public
-   @param resultHandler {function} 
-   @return {TestConnection}
-   */
-  this.startTransaction = function(resultHandler) {
-    var __args = arguments;
-    if (__args.length === 1 && typeof __args[0] === 'function') {
-      if (closed) {
-        throw new Error('Proxy is closed');
-      }
-      j_eb.send(j_address, {}, {"action":"startTransaction"}, function(result) { __args[0](result.body); }, function(failure) { __args[0](null, failure); });
-      return that;
-    } else throw new TypeError('function invoked with invalid arguments');
-  };
-
-  /**
-
-   @public
-   @param name {string} 
-   @param data {Object} 
-   @param resultHandler {function} 
-   @return {TestConnection}
-   */
-  this.insert = function(name, data, resultHandler) {
-    var __args = arguments;
-    if (__args.length === 3 && typeof __args[0] === 'string' && typeof __args[1] === 'object' && typeof __args[2] === 'function') {
-      if (closed) {
-        throw new Error('Proxy is closed');
-      }
-      j_eb.send(j_address, {"name":__args[0], "data":__args[1]}, {"action":"insert"}, function(result) { __args[2](result.body); }, function(failure) { __args[2](null, failure); });
-      return that;
-    } else throw new TypeError('function invoked with invalid arguments');
-  };
-
-  /**
-
-   @public
-   @param resultHandler {function} 
-   @return {TestConnection}
-   */
-  this.commit = function(resultHandler) {
-    var __args = arguments;
-    if (__args.length === 1 && typeof __args[0] === 'function') {
-      if (closed) {
-        throw new Error('Proxy is closed');
-      }
-      j_eb.send(j_address, {}, {"action":"commit"}, function(result) { __args[0](result.body); }, function(failure) { __args[0](null, failure); });
-      return that;
-    } else throw new TypeError('function invoked with invalid arguments');
-  };
-
-  /**
-
-   @public
-   @param resultHandler {function} 
-   @return {TestConnection}
-   */
-  this.rollback = function(resultHandler) {
-    var __args = arguments;
-    if (__args.length === 1 && typeof __args[0] === 'function') {
-      if (closed) {
-        throw new Error('Proxy is closed');
-      }
-      j_eb.send(j_address, {}, {"action":"rollback"}, function(result) { __args[0](result.body); }, function(failure) { __args[0](null, failure); });
-      return that;
-    } else throw new TypeError('function invoked with invalid arguments');
-  };
-
-  /**
-
-   @public
-
-   */
-  this.close = function() {
-    var __args = arguments;
-    if (__args.length === 0) {
-      if (closed) {
-        throw new Error('Proxy is closed');
-      }
-      j_eb.send(j_address, {}, {"action":"close"});
-      closed = true;
-      return;
-    } else throw new TypeError('function invoked with invalid arguments');
-  };
-
-};
-
-// We export the Constructor function
-module.exports = TestConnection;
+  } else {
+    return TestConnection;
+  }
+});

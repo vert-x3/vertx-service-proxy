@@ -21,17 +21,7 @@
 	@end{", "}
 	}, {"action":"@{method.name}"}
 	@if{hasResultHandler}
-		, function(result) { __args[@{psize}](
-		@code{resultType=lastParam.type.args[0].args[0]}
-		@if{resultType.kind==CLASS_API}
-		new @{resultType.simpleName}(j_eb, result.headers.proxyaddr)
-		@else{(resultType.kind==CLASS_LIST || resultType.kind==CLASS_SET) && resultType.args[0].name=='java.lang.Character'}
-		convCharCollection(result.body)
-		@else{}
-		result.body
-		@end{}
-		); }
-		, function(failure) { __args[@{psize}](null, failure); }
+		, __args[@{psize}]
 	@end{})
 @end{}
 
@@ -76,43 +66,57 @@
  * under the License.\n
  */\n\n
 
-@comment{"Generate the requires"}
-
 /** @module @{genModuleName(type)} */\n
 
 @code{ifaceName = helper.decapitaliseFirstLetter(ifaceSimpleName)}
 
+@comment{"Generate the module loader shim"}
+
+!function (factory) {\n
+  if (typeof require === 'function' && typeof module !== 'undefined') {\n
+    factory();\n
+  } else if (typeof define === 'function' && define.amd) {\n
+    // AMD loader\n
+    define('@{genModuleName(type)}-proxy', [], factory);\n
+  } else {\n
+    // plain old include\n
+    @{ifaceSimpleName} = factory();\n
+  }\n
+}(function () {\n
+
+@comment{"Generate the requires"}
+
 @foreach{referencedType : referencedTypes}
 	@if{referencedType.proxyGen}
 		@code{refedType=referencedType.simpleName;}
-var @{refedType} = require('@{genModuleName(referencedType)}-proxy');\n
+  var @{refedType} = require('@{genModuleName(referencedType)}-proxy');\n
 	@end{}
 @end{}
 \n
 
 @comment{"The main comment"}
 
-/**\n
+  /**\n
 @if{ifaceComment != null}
 @{helper.removeTags(ifaceComment)}\n
 @end{}
  @class\n
-*/\n
+  */\n
 
 @comment{"The constructor"}
 
-var @{ifaceSimpleName} = function(eb, address) {\n\n
-  var j_eb = eb;\n
-  var j_address = address;\n
-  var closed = false;\n
-  var that = this;\n
-  var convCharCollection = function(coll) {\n
-    var ret = [];\n
-    for (var i = 0;i < coll.length;i++) {\n
-      ret.push(String.fromCharCode(coll[i]));\n
-    }\n
-    return ret;\n
-  };\n
+  var @{ifaceSimpleName} = function(eb, address) {\n\n
+    var j_eb = eb;\n
+    var j_address = address;\n
+    var closed = false;\n
+    var that = this;\n
+    var convCharCollection = function(coll) {\n
+      var ret = [];\n
+      for (var i = 0;i < coll.length;i++) {\n
+        ret.push(String.fromCharCode(coll[i]));\n
+      }\n
+      return ret;\n
+    };\n
 
 @comment{"Apply any supertypes"}
 
@@ -133,11 +137,10 @@ var @{ifaceSimpleName} = function(eb, address) {\n\n
 
 @comment{"Call out to actually generate the method, we only consider non static methods here"}
 @code{methods}
-@includeNamed{'genMethod';static=false;ind="  "}
+@includeNamed{'genMethod';static=false;ind="    "}
 
 @end{}
-
-};\n
+  };\n
 \n
 
 @comment{"Iterate through the methods again, this time only considering the static ones"}
@@ -145,9 +148,17 @@ var @{ifaceSimpleName} = function(eb, address) {\n\n
 @foreach{methodName:methodsByName.keySet()}
 
 @comment{"Call out to generate the static method"}
-@includeNamed{'genMethod';static=true;ind=""}
+@includeNamed{'genMethod';static=true;ind="  "}
 
 @end{}
 
-// We export the Constructor function\n
-module.exports = @{ifaceSimpleName};
+  if (typeof exports !== 'undefined') {\n
+    if (typeof module !== 'undefined' && module.exports) {\n
+      exports = module.exports = @{ifaceSimpleName};\n
+    } else {\n
+      exports.@{ifaceSimpleName} = @{ifaceSimpleName};\n
+    }\n
+  } else {\n
+    return @{ifaceSimpleName};\n
+  }\n
+});

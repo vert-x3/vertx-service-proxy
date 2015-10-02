@@ -15,43 +15,62 @@
  */
 
 /** @module test-js/test_base_imports_service */
+!function (factory) {
+  if (typeof require === 'function' && typeof module !== 'undefined') {
+    factory();
+  } else if (typeof define === 'function' && define.amd) {
+    // AMD loader
+    define('processor_service', [], factory);
+  } else {
+    // plain old include
+    TestBaseImportsService = factory();
+  }
+}(function () {
 
-/**
+  /**
  Test base imports are corrects.
 
  @class
-*/
-var TestBaseImportsService = function(eb, address) {
+  */
+  var TestBaseImportsService = function(eb, address) {
 
-  var j_eb = eb;
-  var j_address = address;
-  var closed = false;
-  var that = this;
-  var convCharCollection = function(coll) {
-    var ret = [];
-    for (var i = 0;i < coll.length;i++) {
-      ret.push(String.fromCharCode(coll[i]));
-    }
-    return ret;
-  };
-
-  /**
-
-   @public
-
-   */
-  this.m = function() {
-    var __args = arguments;
-    if (__args.length === 0) {
-      if (closed) {
-        throw new Error('Proxy is closed');
+    var j_eb = eb;
+    var j_address = address;
+    var closed = false;
+    var that = this;
+    var convCharCollection = function(coll) {
+      var ret = [];
+      for (var i = 0;i < coll.length;i++) {
+        ret.push(String.fromCharCode(coll[i]));
       }
-      j_eb.send(j_address, {}, {"action":"m"});
-      return;
-    } else throw new TypeError('function invoked with invalid arguments');
+      return ret;
+    };
+
+    /**
+
+     @public
+
+     */
+    this.m = function() {
+      var __args = arguments;
+      if (__args.length === 0) {
+        if (closed) {
+          throw new Error('Proxy is closed');
+        }
+        j_eb.send(j_address, {}, {"action":"m"});
+        return;
+      } else throw new TypeError('function invoked with invalid arguments');
+    };
+
   };
 
-};
-
-// We export the Constructor function
-module.exports = TestBaseImportsService;
+  if (typeof exports !== 'undefined') {
+    if (typeof module !== 'undefined' && module.exports) {
+      exports = module.exports = TestBaseImportsService;
+    } else {
+      exports.TestBaseImportsService = TestBaseImportsService;
+    }
+  } else {
+    return TestBaseImportsService;
+  }
+});
