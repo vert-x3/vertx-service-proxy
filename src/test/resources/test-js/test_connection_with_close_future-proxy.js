@@ -56,7 +56,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"close"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"close"}, function(err, result) { __args[0](err, result &&result.body); });
         closed = true;
         return;
       } else throw new TypeError('function invoked with invalid arguments');
@@ -73,7 +73,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"someMethod"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"someMethod"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };

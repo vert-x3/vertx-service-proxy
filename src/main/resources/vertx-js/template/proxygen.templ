@@ -21,7 +21,16 @@
 	@end{", "}
 	}, {"action":"@{method.name}"}
 	@if{hasResultHandler}
-		, __args[@{psize}]
+		, function(err, result) { __args[@{psize}](err, result &&
+		@code{resultType=lastParam.type.args[0].args[0]}
+		@if{resultType.kind==CLASS_API}
+		new @{resultType.simpleName}(j_eb, result.headers.proxyaddr)
+		@else{(resultType.kind==CLASS_LIST || resultType.kind==CLASS_SET) && resultType.args[0].name=='java.lang.Character'}
+		convCharCollection(result.body)
+		@else{}
+		result.body
+		@end{}
+		); }
 	@end{})
 @end{}
 

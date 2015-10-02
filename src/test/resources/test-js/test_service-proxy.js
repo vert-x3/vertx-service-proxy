@@ -58,7 +58,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"longDeliverySuccess"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"longDeliverySuccess"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -74,7 +74,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"longDeliveryFailed"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"longDeliveryFailed"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -91,7 +91,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {"str":__args[0]}, {"action":"createConnection"}, __args[1]);
+        j_eb.send(j_address, {"str":__args[0]}, {"action":"createConnection"}, function(err, result) { __args[1](err, result &&new TestConnection(j_eb, result.headers.proxyaddr)); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -107,7 +107,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"createConnectionWithCloseFuture"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"createConnectionWithCloseFuture"}, function(err, result) { __args[0](err, result &&new TestConnectionWithCloseFuture(j_eb, result.headers.proxyaddr)); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -377,7 +377,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"stringHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"stringHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -393,7 +393,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"stringNullHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"stringNullHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -409,7 +409,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"byteHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"byteHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -425,7 +425,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"byteNullHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"byteNullHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -441,7 +441,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"shortHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"shortHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -457,7 +457,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"shortNullHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"shortNullHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -473,7 +473,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"intHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"intHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -489,7 +489,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"intNullHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"intNullHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -505,7 +505,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"longHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"longHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -521,7 +521,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"longNullHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"longNullHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -537,7 +537,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"floatHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"floatHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -553,7 +553,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"floatNullHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"floatNullHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -569,7 +569,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"doubleHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"doubleHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -585,7 +585,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"doubleNullHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"doubleNullHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -601,7 +601,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"charHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"charHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -617,7 +617,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"charNullHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"charNullHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -633,7 +633,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"booleanHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"booleanHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -649,7 +649,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"booleanNullHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"booleanNullHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -665,7 +665,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"jsonObjectHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"jsonObjectHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -681,7 +681,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"jsonObjectNullHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"jsonObjectNullHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -697,7 +697,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"jsonArrayHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"jsonArrayHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -713,7 +713,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"jsonArrayNullHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"jsonArrayNullHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -729,7 +729,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"dataObjectHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"dataObjectHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -745,7 +745,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"dataObjectNullHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"dataObjectNullHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -761,7 +761,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"voidHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"voidHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -779,7 +779,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {"str":__args[0]}, {"action":"fluentMethod"}, __args[1]);
+        j_eb.send(j_address, {"str":__args[0]}, {"action":"fluentMethod"}, function(err, result) { __args[1](err, result &&result.body); });
         return that;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -812,7 +812,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"failingMethod"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"failingMethod"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -833,7 +833,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {"object":__args[0], "str":__args[1], "i":__args[2], "chr":__args[3].charCodeAt(0), "senum":__args[4]}, {"action":"invokeWithMessage"}, __args[5]);
+        j_eb.send(j_address, {"object":__args[0], "str":__args[1], "i":__args[2], "chr":__args[3].charCodeAt(0), "senum":__args[4]}, {"action":"invokeWithMessage"}, function(err, result) { __args[5](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -849,7 +849,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"listStringHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"listStringHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -865,7 +865,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"listByteHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"listByteHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -881,7 +881,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"listShortHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"listShortHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -897,7 +897,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"listIntHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"listIntHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -913,7 +913,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"listLongHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"listLongHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -929,7 +929,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"listFloatHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"listFloatHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -945,7 +945,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"listDoubleHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"listDoubleHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -961,7 +961,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"listCharHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"listCharHandler"}, function(err, result) { __args[0](err, result &&convCharCollection(result.body)); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -977,7 +977,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"listBoolHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"listBoolHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -993,7 +993,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"listJsonObjectHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"listJsonObjectHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -1009,7 +1009,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"listJsonArrayHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"listJsonArrayHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -1025,7 +1025,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"listDataObjectHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"listDataObjectHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -1041,7 +1041,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"setStringHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"setStringHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -1057,7 +1057,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"setByteHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"setByteHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -1073,7 +1073,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"setShortHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"setShortHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -1089,7 +1089,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"setIntHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"setIntHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -1105,7 +1105,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"setLongHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"setLongHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -1121,7 +1121,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"setFloatHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"setFloatHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -1137,7 +1137,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"setDoubleHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"setDoubleHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -1153,7 +1153,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"setCharHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"setCharHandler"}, function(err, result) { __args[0](err, result &&convCharCollection(result.body)); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -1169,7 +1169,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"setBoolHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"setBoolHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -1185,7 +1185,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"setJsonObjectHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"setJsonObjectHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -1201,7 +1201,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"setJsonArrayHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"setJsonArrayHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -1217,7 +1217,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"setDataObjectHandler"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"setDataObjectHandler"}, function(err, result) { __args[0](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };

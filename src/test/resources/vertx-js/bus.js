@@ -83,7 +83,7 @@ bus.send = function (address, message, headers, callback) {
         err = unwrapError(ar.cause());
       }
       if (ar.succeeded()) {
-        result = unwrapMsg(ar.result()).body;
+        result = unwrapMsg(ar.result());
       }
 
       callback(err, result);

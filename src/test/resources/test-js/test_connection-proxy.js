@@ -57,7 +57,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"startTransaction"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"startTransaction"}, function(err, result) { __args[0](err, result &&result.body); });
         return that;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -76,7 +76,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {"name":__args[0], "data":__args[1]}, {"action":"insert"}, __args[2]);
+        j_eb.send(j_address, {"name":__args[0], "data":__args[1]}, {"action":"insert"}, function(err, result) { __args[2](err, result &&result.body); });
         return that;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -93,7 +93,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"commit"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"commit"}, function(err, result) { __args[0](err, result &&result.body); });
         return that;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -110,7 +110,7 @@
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {}, {"action":"rollback"}, __args[0]);
+        j_eb.send(j_address, {}, {"action":"rollback"}, function(err, result) { __args[0](err, result &&result.body); });
         return that;
       } else throw new TypeError('function invoked with invalid arguments');
     };

@@ -410,7 +410,7 @@ public class JSServiceProxyTest extends VertxTestBase {
     await();
   }
 
-    @Test
+  @Test
   public void testConnection() {
     deploy("test_service_connection.js");
     await();
