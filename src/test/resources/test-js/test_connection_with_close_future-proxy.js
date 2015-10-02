@@ -20,7 +20,7 @@
     factory();
   } else if (typeof define === 'function' && define.amd) {
     // AMD loader
-    define('processor_service', [], factory);
+    define('test-js/test_connection_with_close_future-proxy', [], factory);
   } else {
     // plain old include
     TestConnectionWithCloseFuture = factory();

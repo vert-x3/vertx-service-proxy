@@ -3,7 +3,7 @@ var TestService = require('test-js/test_service-proxy');
 var testService = new TestService(eb, 'someaddress');
 
 var s = null;
-vertx.eventBus().consumer("fluentReceived").handler(function(res, err) {
+vertx.eventBus().consumer("fluentReceived").handler(function(err, res) {
   if (s == testService) {
     vertx.eventBus().send("testaddress", "ok");
   } else {

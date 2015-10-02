@@ -54,54 +54,48 @@ function unwrapError(err) {
   }
 }
 
-bus.send = function (/*address, message, headers, replyHandler, failureHandler*/) {
-  var eb = vertx._jdel.eventBus();
+bus.send = function (address, message, headers, callback) {
+
   var arity = arguments.length;
+
   if (arity < 2) {
     throw new Error('At least 2 arguments [address, message] are required!');
-  } else if (arity === 2) {
-    eb.send(arguments[0], wrapBody(arguments[1]));
-  } else if (arity === 3) {
-    if (typeof arguments[2] === 'function') {
-      var replyHandler = arguments[2];
-      eb.send(arguments[0], wrapBody(arguments[1]), function (ar) {
-        if (ar.succeeded()) {
-          replyHandler(unwrapMsg(ar.result()));
-        }
-      });
-    } else {
-      eb.send(arguments[0], wrapBody(arguments[1]), wrapHeaders(arguments[2]));
-    }
-  } else if (arity === 4) {
-    if (typeof arguments[2] === 'function' && typeof arguments[3] === 'function') {
-      var replyHandler = arguments[2];
-      var failureHandler = arguments[3];
-      eb.send(arguments[0], wrapBody(arguments[1]), function (ar) {
-        if (ar.succeeded()) {
-          replyHandler(unwrapMsg(ar.result()));
-        } else {
-          failureHandler(unwrapError(ar.cause()));
-        }
-      });
-    } else if (typeof arguments[3] === 'function') {
-      var replyHandler = arguments[3];
-      eb.send(arguments[0], wrapBody(arguments[1]), wrapHeaders(arguments[2]), function (ar) {
-        if (ar.succeeded()) {
-          replyHandler(unwrapMsg(ar.result()));
-        }
-      });
-    }
-  } else {
-    var replyHandler = arguments[3];
-    var failureHandler = arguments[4];
-    eb.send(arguments[0], wrapBody(arguments[1]), wrapHeaders(arguments[2]), function (ar) {
-      if (ar.succeeded()) {
-          replyHandler(unwrapMsg(ar.result()));
-      } else {
-        failureHandler(unwrapError(ar.cause()));
-      }
-    });
   }
+
+  var eb = vertx._jdel.eventBus();
+
+  message = wrapBody(message);
+
+  if (typeof headers === 'function') {
+    callback = headers;
+    headers = null;
+  }
+
+  if (headers) {
+    // wrap it in a delivery options
+    headers = wrapHeaders(headers);
+  }
+
+  var handler = function (ar) {
+    if (callback) {
+      var err, result;
+      if (ar.failed()) {
+        err = unwrapError(ar.cause());
+      }
+      if (ar.succeeded()) {
+        result = unwrapMsg(ar.result()).body;
+      }
+
+      callback(err, result);
+    }
+  };
+
+  if (headers) {
+    eb.send(address, message, headers, handler);
+  } else {
+    eb.send(address, message, handler);
+  }
+
   return bus;
 };
 
