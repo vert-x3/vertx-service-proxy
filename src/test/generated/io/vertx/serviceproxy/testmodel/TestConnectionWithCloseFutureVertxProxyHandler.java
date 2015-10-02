@@ -105,25 +105,30 @@ public class TestConnectionWithCloseFutureVertxProxyHandler extends ProxyHandler
   }
 
   public void handle(Message<JsonObject> msg) {
-    JsonObject json = msg.body();
-    String action = msg.headers().get("action");
-    if (action == null) {
-      throw new IllegalStateException("action not specified");
-    }
-    accessed();
-    switch (action) {
-      case "close": {
-        service.close(createHandler(msg));
-        close();
-        break;
+    try {
+      JsonObject json = msg.body();
+      String action = msg.headers().get("action");
+      if (action == null) {
+        throw new IllegalStateException("action not specified");
       }
-      case "someMethod": {
-        service.someMethod(createHandler(msg));
-        break;
+      accessed();
+      switch (action) {
+        case "close": {
+          service.close(createHandler(msg));
+          close();
+          break;
+        }
+        case "someMethod": {
+          service.someMethod(createHandler(msg));
+          break;
+        }
+        default: {
+          throw new IllegalStateException("Invalid action: " + action);
+        }
       }
-      default: {
-        throw new IllegalStateException("Invalid action: " + action);
-      }
+    } catch (Throwable t) {
+      msg.fail(-1, t.getMessage());
+      throw t;
     }
   }
 

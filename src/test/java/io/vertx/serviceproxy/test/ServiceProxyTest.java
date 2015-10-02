@@ -454,7 +454,7 @@ public class ServiceProxyTest extends VertxTestBase {
       assertTrue(t instanceof ReplyException);
       ReplyException re = (ReplyException) t;
       // This will as operation will fail to be invoked
-      assertEquals(ReplyFailure.TIMEOUT, re.failureType());
+      assertEquals(ReplyFailure.RECIPIENT_FAILURE, re.failureType());
       testComplete();
     }));
     await();
@@ -472,7 +472,7 @@ public class ServiceProxyTest extends VertxTestBase {
       assertTrue(t instanceof ReplyException);
       ReplyException re = (ReplyException) t;
       // This will as operation will fail to be invoked
-      assertEquals(ReplyFailure.TIMEOUT, re.failureType());
+      assertEquals(ReplyFailure.RECIPIENT_FAILURE, re.failureType());
       testComplete();
     }));
     await();
