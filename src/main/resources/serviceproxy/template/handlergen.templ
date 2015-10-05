@@ -131,17 +131,18 @@ public class @{ifaceSimpleName}VertxProxyHandler extends ProxyHandler {\n
   }\n
 \n
   public void handle(Message<JsonObject> msg) {\n
-    JsonObject json = msg.body();\n
-    String action = msg.headers().get("action");\n
-    if (action == null) {\n
-      throw new IllegalStateException("action not specified");\n
-    }\n
-    accessed();\n
-    switch (action) {\n
+    try {\n
+      JsonObject json = msg.body();\n
+      String action = msg.headers().get("action");\n
+      if (action == null) {\n
+        throw new IllegalStateException("action not specified");\n
+      }\n
+      accessed();\n
+      switch (action) {\n
 @foreach{method:methods}
 	@if{!method.staticMethod}
-      case "@{method.name}": {\n
-        service.@{method.name}(
+        case "@{method.name}": {\n
+          service.@{method.name}(
 		@code{hasParams = !method.params.isEmpty()}
 		@code{lastParam = hasParams? method.params.get(method.params.size() - 1) : null}
 		@code{hasResultHandler=(lastParam != null) && (lastParam.type.kind == CLASS_HANDLER) && (lastParam.type.args[0].kind==CLASS_ASYNC_RESULT)}
@@ -182,59 +183,64 @@ json.getJsonObject("@{param.name}") == null ? null : new @{param.type.name}(json
 createListCharHandler(msg)
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_LIST && lastParam.type.args[0].args[0].args[0].kind==CLASS_DATA_OBJECT}
 res -> {\n
-          if (res.failed()) {\n
-            msg.fail(-1, res.cause().getMessage());\n
-          } else {\n
-            msg.reply(new JsonArray(res.result().stream().map(@{lastParam.type.args[0].args[0].args[0].simpleName}::toJson).collect(Collectors.toList())));\n
-          }\n
-       }
+            if (res.failed()) {\n
+              msg.fail(-1, res.cause().getMessage());\n
+            } else {\n
+              msg.reply(new JsonArray(res.result().stream().map(@{lastParam.type.args[0].args[0].args[0].simpleName}::toJson).collect(Collectors.toList())));\n
+            }\n
+         }
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_LIST}
 createListHandler(msg)
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_SET && lastParam.type.args[0].args[0].args[0].name=='java.lang.Character'}
 createSetCharHandler(msg)
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_SET && lastParam.type.args[0].args[0].args[0].kind==CLASS_DATA_OBJECT}
 res -> {\n
-          if (res.failed()) {\n
-            msg.fail(-1, res.cause().getMessage());\n
-          } else {\n
-            msg.reply(new JsonArray(res.result().stream().map(@{lastParam.type.args[0].args[0].args[0].simpleName}::toJson).collect(Collectors.toList())));\n
-          }\n
-       }
+            if (res.failed()) {\n
+              msg.fail(-1, res.cause().getMessage());\n
+            } else {\n
+              msg.reply(new JsonArray(res.result().stream().map(@{lastParam.type.args[0].args[0].args[0].simpleName}::toJson).collect(Collectors.toList())));\n
+            }\n
+         }
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_SET}
 createSetHandler(msg)
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_DATA_OBJECT}
 res -> {\n
-          if (res.failed()) {\n
-            msg.fail(-1, res.cause().getMessage());\n
-          } else {\n
-            msg.reply(res.result() == null ? null : res.result().toJson());\n
-          }\n
-       }
+            if (res.failed()) {\n
+              msg.fail(-1, res.cause().getMessage());\n
+            } else {\n
+              msg.reply(res.result() == null ? null : res.result().toJson());\n
+            }\n
+         }
 			@else{hasResultHandler && lastParam.type.args[0].args[0].kind==CLASS_API && lastParam.type.args[0].args[0].proxyGen}
 res -> {\n
-          if (res.failed()) {\n
-            msg.fail(-1, res.cause().getMessage());\n
-          } else {\n
-            String proxyAddress = UUID.randomUUID().toString();\n
-            ProxyHelper.registerService(@{lastParam.type.args[0].args[0].simpleName}.class, vertx, res.result(), proxyAddress, false, timeoutSeconds);\n
-            msg.reply(null, new DeliveryOptions().addHeader("proxyaddr", proxyAddress));\n
-          }\n
-        }
+            if (res.failed()) {\n
+              msg.fail(-1, res.cause().getMessage());\n
+            } else {\n
+              String proxyAddress = UUID.randomUUID().toString();\n
+              ProxyHelper.registerService(@{lastParam.type.args[0].args[0].simpleName}.class, vertx, res.result(), proxyAddress, false, timeoutSeconds);\n
+              msg.reply(null, new DeliveryOptions().addHeader("proxyaddr", proxyAddress));\n
+            }\n
+          }
 			@else{}
 createHandler(msg)
 			@end{}
 		@end{", "});\n
 		@if{method.proxyClose}
-        close();\n
+          close();\n
 		@end{}
-        break;\n
-      }
+          break;\n
+        }
 	@end{}
 \n
 @end{}
-      default: {\n
-        throw new IllegalStateException("Invalid action: " + action);\n
+        default: {\n
+          throw new IllegalStateException("Invalid action: " + action);\n
+        }\n
       }\n
+
+    } catch (Throwable t) {\n
+      msg.fail(-1, t.getMessage());\n
+      throw t;\n
     }\n
 
   }\n

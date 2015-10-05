@@ -1016,7 +1016,7 @@ public class TestServiceVertxEBProxy implements TestService {
       if (res.failed()) {
         resultHandler.handle(Future.failedFuture(res.cause()));
       } else {
-        resultHandler.handle(Future.succeededFuture(res.result().body().stream().map(o -> new TestDataObject((JsonObject)o)).collect(Collectors.toList())));
+        resultHandler.handle(Future.succeededFuture(res.result().body().stream().map(o -> o instanceof Map ? new TestDataObject(new JsonObject((Map) o)) : new TestDataObject((JsonObject) o)).collect(Collectors.toList())));
       }
     });
   }
@@ -1220,7 +1220,7 @@ public class TestServiceVertxEBProxy implements TestService {
       if (res.failed()) {
         resultHandler.handle(Future.failedFuture(res.cause()));
       } else {
-        resultHandler.handle(Future.succeededFuture(res.result().body().stream().map(o -> new TestDataObject((JsonObject)o)).collect(Collectors.toSet())));
+        resultHandler.handle(Future.succeededFuture(res.result().body().stream().map(o -> o instanceof Map ? new TestDataObject(new JsonObject((Map) o)) : new TestDataObject((JsonObject) o)).collect(Collectors.toSet())));
       }
     });
   }

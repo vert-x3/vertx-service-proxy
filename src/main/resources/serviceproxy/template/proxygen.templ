@@ -74,7 +74,7 @@ send(_address, _json, _deliveryOptions, res -> {\n
 					@if{resultType.args[0].name == 'java.lang.Character'}
         @{lastParam.name}.handle(Future.succeededFuture(convertToListChar(res.result().body())));\n
 					@else{resultType.args[0].kind == CLASS_DATA_OBJECT}
-        @{lastParam.name}.handle(Future.succeededFuture(res.result().body().stream().map(o -> new @{resultType.args[0].simpleName}((JsonObject)o)).collect(Collectors.toList())));\n
+        @{lastParam.name}.handle(Future.succeededFuture(res.result().body().stream().map(o -> o instanceof Map ? new @{resultType.args[0].simpleName}(new JsonObject((Map) o)) : new @{resultType.args[0].simpleName}((JsonObject) o)).collect(Collectors.toList())));\n
 					@else{}
         @{lastParam.name}.handle(Future.succeededFuture(convertList(res.result().body().getList())));\n
 					@end{}
@@ -82,7 +82,7 @@ send(_address, _json, _deliveryOptions, res -> {\n
 					@if{resultType.args[0].name == 'java.lang.Character'}
         @{lastParam.name}.handle(Future.succeededFuture(convertToSetChar(res.result().body())));\n
 					@else{resultType.args[0].kind == CLASS_DATA_OBJECT}
-        @{lastParam.name}.handle(Future.succeededFuture(res.result().body().stream().map(o -> new @{resultType.args[0].simpleName}((JsonObject)o)).collect(Collectors.toSet())));\n
+        @{lastParam.name}.handle(Future.succeededFuture(res.result().body().stream().map(o -> o instanceof Map ? new @{resultType.args[0].simpleName}(new JsonObject((Map) o)) : new @{resultType.args[0].simpleName}((JsonObject) o)).collect(Collectors.toSet())));\n
 					@else{}
         @{lastParam.name}.handle(Future.succeededFuture(convertSet(res.result().body().getList())));\n
 					@end{}
