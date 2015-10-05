@@ -183,7 +183,7 @@ public class @{ifaceSimpleName}VertxEBProxy implements @{ifaceSimpleName} {\n
     List<Character> list = new ArrayList<>();\n
     for (Object obj: arr) {\n
       Integer jobj = (Integer)obj;\n
-      list.add((char)jobj.intValue());\n
+      list.add((char)(int)jobj);\n
     }\n
     return list;\n
   }\n\n
@@ -192,7 +192,7 @@ public class @{ifaceSimpleName}VertxEBProxy implements @{ifaceSimpleName} {\n
     Set<Character> set = new HashSet<>();\n
     for (Object obj: arr) {\n
       Integer jobj = (Integer)obj;\n
-      set.add((char)jobj.intValue());\n
+      set.add((char)(int)jobj);\n
     }\n
     return set;\n
   }\n\n

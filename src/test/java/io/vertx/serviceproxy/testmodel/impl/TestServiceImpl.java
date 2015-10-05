@@ -32,6 +32,7 @@ import io.vertx.serviceproxy.testmodel.TestService;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -344,7 +345,7 @@ public class TestServiceImpl implements TestService {
 
   @Override
   public TestService fluentNoParams() {
-    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+    vertx.eventBus().send("fluentReceived", "ok");
     return this;
   }
 
@@ -433,68 +434,68 @@ public class TestServiceImpl implements TestService {
 
   @Override
   public void setStringHandler(Handler<AsyncResult<Set<String>>> resultHandler) {
-    Set<String> set = new HashSet<>(Arrays.asList("foo", "bar", "wibble"));
+    Set<String> set = new LinkedHashSet<>(Arrays.asList("foo", "bar", "wibble"));
     resultHandler.handle(Future.succeededFuture(set));
   }
 
   @Override
   public void setByteHandler(Handler<AsyncResult<Set<Byte>>> resultHandler) {
-    Set<Byte> set = new HashSet<>(Arrays.asList((byte)1, (byte)2, (byte)3));
+    Set<Byte> set = new LinkedHashSet<>(Arrays.asList((byte)1, (byte)2, (byte)3));
     resultHandler.handle(Future.succeededFuture(set));
   }
 
   @Override
   public void setShortHandler(Handler<AsyncResult<Set<Short>>> resultHandler) {
-    Set<Short> set = new HashSet<>(Arrays.asList((short)11, (short)12, (short)13));
+    Set<Short> set = new LinkedHashSet<>(Arrays.asList((short)11, (short)12, (short)13));
     resultHandler.handle(Future.succeededFuture(set));
   }
 
   @Override
   public void setIntHandler(Handler<AsyncResult<Set<Integer>>> resultHandler) {
-    Set<Integer> set = new HashSet<>(Arrays.asList(100, 101, 102));
+    Set<Integer> set = new LinkedHashSet<>(Arrays.asList(100, 101, 102));
     resultHandler.handle(Future.succeededFuture(set));
   }
 
   @Override
   public void setLongHandler(Handler<AsyncResult<Set<Long>>> resultHandler) {
-    Set<Long> set = new HashSet<>(Arrays.asList(1000l, 1001l, 1002l));
+    Set<Long> set = new LinkedHashSet<>(Arrays.asList(1000l, 1001l, 1002l));
     resultHandler.handle(Future.succeededFuture(set));
   }
 
   @Override
   public void setFloatHandler(Handler<AsyncResult<Set<Float>>> resultHandler) {
-    Set<Float> set = new HashSet<>(Arrays.asList(1.1f, 1.2f, 1.3f));
+    Set<Float> set = new LinkedHashSet<>(Arrays.asList(1.1f, 1.2f, 1.3f));
     resultHandler.handle(Future.succeededFuture(set));
   }
 
   @Override
   public void setDoubleHandler(Handler<AsyncResult<Set<Double>>> resultHandler) {
-    Set<Double> set = new HashSet<>(Arrays.asList(1.11d, 1.12d, 1.13d));
+    Set<Double> set = new LinkedHashSet<>(Arrays.asList(1.11d, 1.12d, 1.13d));
     resultHandler.handle(Future.succeededFuture(set));
   }
 
   @Override
   public void setCharHandler(Handler<AsyncResult<Set<Character>>> resultHandler) {
-    Set<Character> set = new HashSet<>(Arrays.asList('X', 'Y', 'Z'));
+    Set<Character> set = new LinkedHashSet<>(Arrays.asList('X', 'Y', 'Z'));
     resultHandler.handle(Future.succeededFuture(set));
   }
 
   @Override
   public void setBoolHandler(Handler<AsyncResult<Set<Boolean>>> resultHandler) {
-    Set<Boolean> set = new HashSet<>(Arrays.asList(true, false, true));
+    Set<Boolean> set = new LinkedHashSet<>(Arrays.asList(true, false, true));
     resultHandler.handle(Future.succeededFuture(set));
   }
 
   @Override
   public void setJsonObjectHandler(Handler<AsyncResult<Set<JsonObject>>> resultHandler) {
-    Set<JsonObject> set = new HashSet<>(Arrays.asList(new JsonObject().put("a", "foo"),
+    Set<JsonObject> set = new LinkedHashSet<>(Arrays.asList(new JsonObject().put("a", "foo"),
       new JsonObject().put("b", "bar"), new JsonObject().put("c", "wibble")));
     resultHandler.handle(Future.succeededFuture(set));
   }
 
   @Override
   public void setJsonArrayHandler(Handler<AsyncResult<Set<JsonArray>>> resultHandler) {
-    Set<JsonArray> set = new HashSet<>(Arrays.asList(new JsonArray().add("foo"),
+    Set<JsonArray> set = new LinkedHashSet<>(Arrays.asList(new JsonArray().add("foo"),
       new JsonArray().add("bar"), new JsonArray().add("wibble")));
     resultHandler.handle(Future.succeededFuture(set));
   }
@@ -514,7 +515,7 @@ public class TestServiceImpl implements TestService {
   @Override
   public void setDataObjectHandler(Handler<AsyncResult<Set<TestDataObject>>> resultHandler) {
     Set<TestDataObject> set = 
-        new HashSet<>(Arrays.asList(new TestDataObject().setNumber(1).setString("String 1").setBool(false), new TestDataObject().setNumber(2).setString("String 2").setBool(true)));
+        new LinkedHashSet<>(Arrays.asList(new TestDataObject().setNumber(1).setString("String 1").setBool(false), new TestDataObject().setNumber(2).setString("String 2").setBool(true)));
     resultHandler.handle(Future.succeededFuture(set));
   }
 

@@ -66,7 +66,7 @@ public class TestBaseImportsServiceVertxEBProxy implements TestBaseImportsServic
     List<Character> list = new ArrayList<>();
     for (Object obj: arr) {
       Integer jobj = (Integer)obj;
-      list.add((char)jobj.intValue());
+      list.add((char)(int)jobj);
     }
     return list;
   }
@@ -75,7 +75,7 @@ public class TestBaseImportsServiceVertxEBProxy implements TestBaseImportsServic
     Set<Character> set = new HashSet<>();
     for (Object obj: arr) {
       Integer jobj = (Integer)obj;
-      set.add((char)jobj.intValue());
+      set.add((char)(int)jobj);
     }
     return set;
   }

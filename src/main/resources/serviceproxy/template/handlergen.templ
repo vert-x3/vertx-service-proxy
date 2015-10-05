@@ -1,3 +1,19 @@
+@code{
+numericMapping = [
+  "byte":"byte",
+  "java.lang.Byte":"byte",
+  "short":"short",
+  "java.lang.Short":"short",
+  "int":"int",
+  "java.lang.Integer":"int",
+  "long":"long",
+  "java.lang.Long":"long",
+  "float":"float",
+  "java.lang.Float":"float",
+  "double":"double",
+  "java.lang.Double":"double"
+]
+}
 /*\n
 * Copyright 2014 Red Hat, Inc.\n
 *\n
@@ -134,23 +150,30 @@ public class @{ifaceSimpleName}VertxProxyHandler extends ProxyHandler {\n
 		@foreach{param: method.params}
 			@if{!hasResultHandler || (count++ != method.params.size() - 1)}
 				@if{param.type.name == 'char' || param.type.name == 'java.lang.Character'}
-json.getInteger("@{param.name}") == null ? null : (char)(json.getInteger("@{param.name}").intValue())
+json.getInteger("@{param.name}") == null ? null : (char)(int)(json.getInteger("@{param.name}"))
+				@else{param.type.name == 'byte' || param.type.name == 'java.lang.Byte' || param.type.name == 'short' || param.type.name == 'java.lang.Short' || param.type.name == 'int' || param.type.name == 'java.lang.Integer' || param.type.name == 'long' || param.type.name == 'java.lang.Long'}
+json.getValue("@{param.name}") == null ? null : (json.getLong("@{param.name}").@{numericMapping[param.type.name]}Value())
+				@else{param.type.name == 'float' || param.type.name == 'java.lang.Float' || param.type.name == 'double' || param.type.name == 'java.lang.Double'}
+json.getValue("@{param.name}") == null ? null : (json.getDouble("@{param.name}").@{numericMapping[param.type.name]}Value())
 				@else{param.type.kind == CLASS_ENUM}
 json.getString("@{param.name}") == null ? null : @{param.type.name}.valueOf(json.getString("@{param.name}"))
-				@else{param.type.kind == CLASS_LIST}
+				@else{param.type.kind == CLASS_LIST || param.type.kind == CLASS_SET}
+					@code{collection=param.type.kind == CLASS_LIST ? 'List' : 'Set'}
 					@if{param.type.args[0].kind == CLASS_DATA_OBJECT}
-json.getJsonArray("@{param.name}").stream().map(o -> new @{param.type.args[0].simpleName}((JsonObject)o)).collect(Collectors.toList())
-					@else{}		
-convertList(json.getJsonArray("@{param.name}").getList())
-					@end{}
-				@else{param.type.kind == CLASS_SET}
-					@if{param.type.args[0].kind == CLASS_DATA_OBJECT}
-json.getJsonArray("@{param.name}").stream().map(o -> new @{param.type.args[0].simpleName}((JsonObject)o)).collect(Collectors.toSet())
-					@else{}		
-convertSet(json.getJsonArray("@{param.name}").getList())
+json.getJsonArray("@{param.name}").stream().map(o -> new @{param.type.args[0].simpleName}((JsonObject)o)).collect(Collectors.to@{collection}())
+					@else{param.type.args[0].name == 'java.lang.Byte' || param.type.args[0].name == 'java.lang.Short' || param.type.args[0].name == 'java.lang.Integer' || param.type.args[0].name == 'java.lang.Long'}
+					@code{abc=param.type.args[0].name}
+json.getJsonArray("@{param.name}").stream().map(o -> ((Number)o).@{numericMapping[abc]}Value()).collect(Collectors.to@{collection}())
+					@else{}
+convert@{collection}(json.getJsonArray("@{param.name}").getList())
 					@end{}
 				@else{param.type.kind == CLASS_MAP}
+					@code{abc=param.type.args[1].name}
+					@if{abc == 'java.lang.Byte' || abc == 'java.lang.Short' || abc == 'java.lang.Integer' || abc == 'java.lang.Long' || abc == 'java.lang.Float' || abc == 'java.lang.Double'}
+json.getJsonObject("@{param.name}").getMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> ((java.lang.Number)entry.getValue()).@{numericMapping[abc]}Value()))
+					@else{}
 convertMap(json.getJsonObject("@{param.name}").getMap())
+					@end{}
 				@else{param.type.kind == CLASS_DATA_OBJECT}
 json.getJsonObject("@{param.name}") == null ? null : new @{param.type.name}(json.getJsonObject("@{param.name}"))
 				@else{}
@@ -259,7 +282,7 @@ createHandler(msg)
       } else {\n
         JsonArray arr = new JsonArray();\n
         for (Character chr: res.result()) {\n
-          arr.add((int)chr);\n
+          arr.add((int) chr);\n
         }\n
         msg.reply(arr);\n
       }\n
@@ -273,7 +296,7 @@ createHandler(msg)
       } else {\n
         JsonArray arr = new JsonArray();\n
         for (Character chr: res.result()) {\n
-          arr.add((int)chr);\n
+          arr.add((int) chr);\n
         }\n
         msg.reply(arr);\n
       }\n
