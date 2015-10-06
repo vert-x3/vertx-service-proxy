@@ -59,6 +59,16 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <!-- the vertx-eventbus client is copied to src/test/resources to always be in sync -->
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web</artifactId>
+      <classifier>client</classifier>
+      <version>${project.version}</version>
+      <scope>test</scope>
+      <type>js</type>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -84,6 +94,47 @@
         </plugin>
       </plugins>
     </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.10</version>
+        <executions>
+          <execution>
+            <id>copy-vertx-eventbus</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>process-test-resources</phase>
+            <configuration>
+              <includeArtifactIds>vertx-web</includeArtifactIds>
+              <includeClassifiers>client</includeClassifiers>
+              <outputDirectory>${project.basedir}/src/test/resources/vertx-js</outputDirectory>
+              <stripVersion>true</stripVersion>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.8</version>
+        <executions>
+          <execution>
+            <id>rename-vertx-eventbus</id>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <phase>process-test-resources</phase>
+            <configuration>
+              <target>
+                <move file="${project.basedir}/src/test/resources/vertx-js/vertx-web-client.js"
+                      tofile="${project.basedir}/src/test/resources/vertx-js/vertx-eventbus.js"/>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
 
 </project>
