@@ -138,7 +138,7 @@ A JS proxy module is generated during the compilation and is named as follows: `
 So for instance, if your interface is named `MyService`, the proxy module is named `my_service-proxy.js`.
 
 The generated proxy is a *client* proxy and should be used in a remote client (i.e *not* in Vert.x) using an event bus
-bridge. At the moment clients work with the _vertx-web_ event bus bridge `vertxbus.js` and can be used in Web browsers
+bridge. At the moment clients work with the _vertx-web_ event bus bridge `vertx-eventbus.js` and can be used in Web browsers
 and Node.JS. 
 
 To generate this class you have to launch an initial compilation of the source.
@@ -148,9 +148,9 @@ The generated proxy is a JavaScript module compatible with CommonJS, AMD and Web
 
 ````
 <script src="http://cdn.sockjs.org/sockjs-0.3.4.min.js"></script>
-<script src="vertxbus.js"></script>
+<script src="vertx-eventbus.js"></script>
 <script>
-  var eb = new vertx.EventBus('http://localhost:8080/eventbus');
+  var eb = new EventBus('http://localhost:8080/eventbus');
   eb.onopen = function() {
     var SomeDatabaseService = require('vertx-database-js/some_database_service-proxy.js');
     var someDatabaseService = new SomeDatabaseService(eb, 'someaddress');
