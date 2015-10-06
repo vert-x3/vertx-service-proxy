@@ -62,13 +62,12 @@ SockJS.prototype.send = function(string) {
   var handler = function (ar) {
     if (ar.failed()) {
       var err = unwrapError(ar.cause());
+      err.type = 'err';
 
       if (json.replyAddress) {
         err.address = json.replyAddress;
-      } else {
-        err.type = 'err';
       }
-
+      // error messages are always delivered
       self.onmessage && self.onmessage({data: JSON.stringify(err)});
     } else {
       var result = unwrapMsg(ar.result());
