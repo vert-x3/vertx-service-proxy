@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.function.Function;
 import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -111,7 +112,22 @@ public class TestConnectionWithCloseFutureVertxEBProxy implements TestConnection
     return (Map<String, T>)map;
   }
   private <T> List<T> convertList(List list) {
-    return (List<T>)list;
+    if (list.isEmpty()) { 
+          return (List<T>) list; 
+        } 
+     
+    Object elem = list.get(0); 
+    if (!(elem instanceof Map) && !(elem instanceof List)) { 
+      return (List<T>) list; 
+    } else { 
+      Function<Object, T> converter; 
+      if (elem instanceof List) { 
+        converter = object -> (T) new JsonArray((List) elem); 
+      } else { 
+        converter = object -> (T) new JsonObject((Map) elem); 
+      } 
+      return (List<T>) list.stream().map(converter).collect(Collectors.toList()); 
+    } 
   }
   private <T> Set<T> convertSet(List list) {
     return new HashSet<T>((List<T>)list);
