@@ -60,7 +60,7 @@ var TestConnection = function(j_val) {
    */
   this.insert = function(name, data, resultHandler) {
     var __args = arguments;
-    if (__args.length === 3 && typeof __args[0] === 'string' && typeof __args[1] === 'object' && typeof __args[2] === 'function') {
+    if (__args.length === 3 && typeof __args[0] === 'string' && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'function') {
       j_testConnection["insert(java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](name, utils.convParamJsonObject(data), function(ar) {
       if (ar.succeeded()) {
         resultHandler(ar.result(), null);

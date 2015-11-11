@@ -187,7 +187,7 @@ var TestService = function(j_val) {
    */
   this.jsonTypes = function(jsonObject, jsonArray) {
     var __args = arguments;
-    if (__args.length === 2 && typeof __args[0] === 'object' && typeof __args[1] === 'object' && __args[1] instanceof Array) {
+    if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'object' && __args[1] instanceof Array) {
       j_testService["jsonTypes(io.vertx.core.json.JsonObject,io.vertx.core.json.JsonArray)"](utils.convParamJsonObject(jsonObject), utils.convParamJsonArray(jsonArray));
     } else throw new TypeError('function invoked with invalid arguments');
   };
@@ -200,7 +200,7 @@ var TestService = function(j_val) {
    */
   this.jsonTypesNull = function(jsonObject, jsonArray) {
     var __args = arguments;
-    if (__args.length === 2 && typeof __args[0] === 'object' && typeof __args[1] === 'object' && __args[1] instanceof Array) {
+    if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'object' && __args[1] instanceof Array) {
       j_testService["jsonTypesNull(io.vertx.core.json.JsonObject,io.vertx.core.json.JsonArray)"](utils.convParamJsonObject(jsonObject), utils.convParamJsonArray(jsonArray));
     } else throw new TypeError('function invoked with invalid arguments');
   };
@@ -236,7 +236,7 @@ var TestService = function(j_val) {
    */
   this.dataObjectType = function(options) {
     var __args = arguments;
-    if (__args.length === 1 && typeof __args[0] === 'object') {
+    if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
       j_testService["dataObjectType(io.vertx.serviceproxy.testmodel.TestDataObject)"](options != null ? new TestDataObject(new JsonObject(JSON.stringify(options))) : null);
     } else throw new TypeError('function invoked with invalid arguments');
   };
@@ -248,7 +248,7 @@ var TestService = function(j_val) {
    */
   this.dataObjectTypeNull = function(options) {
     var __args = arguments;
-    if (__args.length === 1 && typeof __args[0] === 'object') {
+    if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
       j_testService["dataObjectTypeNull(io.vertx.serviceproxy.testmodel.TestDataObject)"](options != null ? new TestDataObject(new JsonObject(JSON.stringify(options))) : null);
     } else throw new TypeError('function invoked with invalid arguments');
   };
@@ -304,7 +304,7 @@ var TestService = function(j_val) {
    */
   this.mapParams = function(mapString, mapByte, mapShort, mapInt, mapLong, mapJsonObject, mapJsonArray) {
     var __args = arguments;
-    if (__args.length === 7 && typeof __args[0] === 'object' && typeof __args[1] === 'object' && typeof __args[2] === 'object' && typeof __args[3] === 'object' && typeof __args[4] === 'object' && typeof __args[5] === 'object' && typeof __args[6] === 'object') {
+    if (__args.length === 7 && (typeof __args[0] === 'object' && __args[0] != null) && (typeof __args[1] === 'object' && __args[1] != null) && (typeof __args[2] === 'object' && __args[2] != null) && (typeof __args[3] === 'object' && __args[3] != null) && (typeof __args[4] === 'object' && __args[4] != null) && (typeof __args[5] === 'object' && __args[5] != null) && (typeof __args[6] === 'object' && __args[6] != null)) {
       j_testService["mapParams(java.util.Map,java.util.Map,java.util.Map,java.util.Map,java.util.Map,java.util.Map,java.util.Map)"](mapString, utils.convParamMapByte(mapByte), utils.convParamMapShort(mapShort), mapInt, utils.convParamMapLong(mapLong), utils.convParamMapJsonObject(mapJsonObject), utils.convParamMapJsonArray(mapJsonArray));
     } else throw new TypeError('function invoked with invalid arguments');
   };
@@ -824,7 +824,7 @@ var TestService = function(j_val) {
    */
   this.invokeWithMessage = function(object, str, i, chr, senum, resultHandler) {
     var __args = arguments;
-    if (__args.length === 6 && typeof __args[0] === 'object' && typeof __args[1] === 'string' && typeof __args[2] ==='number' && typeof __args[3] ==='string' && typeof __args[4] === 'string' && typeof __args[5] === 'function') {
+    if (__args.length === 6 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'string' && typeof __args[2] ==='number' && typeof __args[3] ==='string' && typeof __args[4] === 'string' && typeof __args[5] === 'function') {
       j_testService["invokeWithMessage(io.vertx.core.json.JsonObject,java.lang.String,int,char,io.vertx.serviceproxy.testmodel.SomeEnum,io.vertx.core.Handler)"](utils.convParamJsonObject(object), str, i, chr, io.vertx.serviceproxy.testmodel.SomeEnum.valueOf(__args[4]), function(ar) {
       if (ar.succeeded()) {
         resultHandler(ar.result(), null);
