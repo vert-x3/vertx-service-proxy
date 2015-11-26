@@ -7,8 +7,14 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
+import io.vertx.serviceproxy.testmodel.TestDataObject;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -29,5 +35,22 @@ public interface Service {
 
   @Fluent
   Service methodReturningEnum(Handler<AsyncResult<SomeEnum>> result);
+
+  @Fluent
+  Service methodWithJsonObject(JsonObject json, Handler<AsyncResult<JsonObject>> result);
+
+  @Fluent
+  Service methodWithJsonArray(JsonArray json, Handler<AsyncResult<JsonArray>> result);
+
+  @Fluent
+  Service methodWithList(List<String> list, Handler<AsyncResult<List<String>>> result);
+
+  @Fluent
+  Service methodWithDataObject(TestDataObject data,
+                                     Handler<AsyncResult<TestDataObject>> result);
+
+  @Fluent
+  Service methodWithListOfDataObject(List<TestDataObject> list,
+                                     Handler<AsyncResult<List<TestDataObject>>> result);
 
 }

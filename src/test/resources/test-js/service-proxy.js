@@ -98,6 +98,96 @@
       } else throw new TypeError('function invoked with invalid arguments');
     };
 
+    /**
+
+     @public
+     @param json {Object} 
+     @param result {function} 
+     @return {Service}
+     */
+    this.methodWithJsonObject = function(json, result) {
+      var __args = arguments;
+      if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
+        if (closed) {
+          throw new Error('Proxy is closed');
+        }
+        j_eb.send(j_address, {"json":__args[0]}, {"action":"methodWithJsonObject"}, function(err, result) { __args[1](err, result &&result.body); });
+        return that;
+      } else throw new TypeError('function invoked with invalid arguments');
+    };
+
+    /**
+
+     @public
+     @param json {todo} 
+     @param result {function} 
+     @return {Service}
+     */
+    this.methodWithJsonArray = function(json, result) {
+      var __args = arguments;
+      if (__args.length === 2 && typeof __args[0] === 'object' && __args[0] instanceof Array && typeof __args[1] === 'function') {
+        if (closed) {
+          throw new Error('Proxy is closed');
+        }
+        j_eb.send(j_address, {"json":__args[0]}, {"action":"methodWithJsonArray"}, function(err, result) { __args[1](err, result &&result.body); });
+        return that;
+      } else throw new TypeError('function invoked with invalid arguments');
+    };
+
+    /**
+
+     @public
+     @param list {Array.<string>} 
+     @param result {function} 
+     @return {Service}
+     */
+    this.methodWithList = function(list, result) {
+      var __args = arguments;
+      if (__args.length === 2 && typeof __args[0] === 'object' && __args[0] instanceof Array && typeof __args[1] === 'function') {
+        if (closed) {
+          throw new Error('Proxy is closed');
+        }
+        j_eb.send(j_address, {"list":__args[0]}, {"action":"methodWithList"}, function(err, result) { __args[1](err, result &&result.body); });
+        return that;
+      } else throw new TypeError('function invoked with invalid arguments');
+    };
+
+    /**
+
+     @public
+     @param data {Object} 
+     @param result {function} 
+     @return {Service}
+     */
+    this.methodWithDataObject = function(data, result) {
+      var __args = arguments;
+      if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
+        if (closed) {
+          throw new Error('Proxy is closed');
+        }
+        j_eb.send(j_address, {"data":__args[0]}, {"action":"methodWithDataObject"}, function(err, result) { __args[1](err, result &&result.body); });
+        return that;
+      } else throw new TypeError('function invoked with invalid arguments');
+    };
+
+    /**
+
+     @public
+     @param list {Array.<Object>} 
+     @param result {function} 
+     @return {Service}
+     */
+    this.methodWithListOfDataObject = function(list, result) {
+      var __args = arguments;
+      if (__args.length === 2 && typeof __args[0] === 'object' && __args[0] instanceof Array && typeof __args[1] === 'function') {
+        if (closed) {
+          throw new Error('Proxy is closed');
+        }
+        j_eb.send(j_address, {"list":__args[0]}, {"action":"methodWithListOfDataObject"}, function(err, result) { __args[1](err, result &&result.body); });
+        return that;
+      } else throw new TypeError('function invoked with invalid arguments');
+    };
+
   };
 
   /**

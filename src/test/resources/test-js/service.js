@@ -21,6 +21,7 @@ var Vertx = require('vertx-js/vertx');
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
 var JService = io.vertx.serviceproxy.clustered.Service;
+var TestDataObject = io.vertx.serviceproxy.testmodel.TestDataObject;
 
 /**
 
@@ -85,6 +86,111 @@ var Service = function(j_val) {
       j_service["methodReturningEnum(io.vertx.core.Handler)"](function(ar) {
       if (ar.succeeded()) {
         result(utils.convReturnEnum(ar.result()), null);
+      } else {
+        result(null, ar.cause());
+      }
+    });
+      return that;
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
+   @param json {Object} 
+   @param result {function} 
+   @return {Service}
+   */
+  this.methodWithJsonObject = function(json, result) {
+    var __args = arguments;
+    if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
+      j_service["methodWithJsonObject(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(json), function(ar) {
+      if (ar.succeeded()) {
+        result(utils.convReturnJson(ar.result()), null);
+      } else {
+        result(null, ar.cause());
+      }
+    });
+      return that;
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
+   @param json {todo} 
+   @param result {function} 
+   @return {Service}
+   */
+  this.methodWithJsonArray = function(json, result) {
+    var __args = arguments;
+    if (__args.length === 2 && typeof __args[0] === 'object' && __args[0] instanceof Array && typeof __args[1] === 'function') {
+      j_service["methodWithJsonArray(io.vertx.core.json.JsonArray,io.vertx.core.Handler)"](utils.convParamJsonArray(json), function(ar) {
+      if (ar.succeeded()) {
+        result(utils.convReturnJson(ar.result()), null);
+      } else {
+        result(null, ar.cause());
+      }
+    });
+      return that;
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
+   @param list {Array.<string>} 
+   @param result {function} 
+   @return {Service}
+   */
+  this.methodWithList = function(list, result) {
+    var __args = arguments;
+    if (__args.length === 2 && typeof __args[0] === 'object' && __args[0] instanceof Array && typeof __args[1] === 'function') {
+      j_service["methodWithList(java.util.List,io.vertx.core.Handler)"](list, function(ar) {
+      if (ar.succeeded()) {
+        result(ar.result(), null);
+      } else {
+        result(null, ar.cause());
+      }
+    });
+      return that;
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
+   @param data {Object} 
+   @param result {function} 
+   @return {Service}
+   */
+  this.methodWithDataObject = function(data, result) {
+    var __args = arguments;
+    if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
+      j_service["methodWithDataObject(io.vertx.serviceproxy.testmodel.TestDataObject,io.vertx.core.Handler)"](data != null ? new TestDataObject(new JsonObject(JSON.stringify(data))) : null, function(ar) {
+      if (ar.succeeded()) {
+        result(utils.convReturnDataObject(ar.result()), null);
+      } else {
+        result(null, ar.cause());
+      }
+    });
+      return that;
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
+   @param list {Array.<Object>} 
+   @param result {function} 
+   @return {Service}
+   */
+  this.methodWithListOfDataObject = function(list, result) {
+    var __args = arguments;
+    if (__args.length === 2 && typeof __args[0] === 'object' && __args[0] instanceof Array && typeof __args[1] === 'function') {
+      j_service["methodWithListOfDataObject(java.util.List,io.vertx.core.Handler)"](utils.convParamListDataObject(list, function(json) { return new TestDataObject(json); }), function(ar) {
+      if (ar.succeeded()) {
+        result(utils.convReturnListSetDataObject(ar.result()), null);
       } else {
         result(null, ar.cause());
       }

@@ -38,8 +38,12 @@ import java.util.stream.Collectors;
 import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.serviceproxy.ProxyHandler;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
+import io.vertx.core.json.JsonArray;
+import java.util.List;
+import io.vertx.serviceproxy.testmodel.TestDataObject;
 import io.vertx.serviceproxy.clustered.Service;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 
@@ -126,6 +130,38 @@ public class ServiceVertxProxyHandler extends ProxyHandler {
         }
         case "methodReturningEnum": {
           service.methodReturningEnum(createHandler(msg));
+          break;
+        }
+        case "methodWithJsonObject": {
+          service.methodWithJsonObject((io.vertx.core.json.JsonObject)json.getValue("json"), createHandler(msg));
+          break;
+        }
+        case "methodWithJsonArray": {
+          service.methodWithJsonArray((io.vertx.core.json.JsonArray)json.getValue("json"), createHandler(msg));
+          break;
+        }
+        case "methodWithList": {
+          service.methodWithList(convertList(json.getJsonArray("list").getList()), createListHandler(msg));
+          break;
+        }
+        case "methodWithDataObject": {
+          service.methodWithDataObject(json.getJsonObject("data") == null ? null : new io.vertx.serviceproxy.testmodel.TestDataObject(json.getJsonObject("data")), res -> {
+            if (res.failed()) {
+              msg.fail(-1, res.cause().getMessage());
+            } else {
+              msg.reply(res.result() == null ? null : res.result().toJson());
+            }
+         });
+          break;
+        }
+        case "methodWithListOfDataObject": {
+          service.methodWithListOfDataObject(json.getJsonArray("list").stream().map(o -> new TestDataObject((JsonObject)o)).collect(Collectors.toList()), res -> {
+            if (res.failed()) {
+              msg.fail(-1, res.cause().getMessage());
+            } else {
+              msg.reply(new JsonArray(res.result().stream().map(TestDataObject::toJson).collect(Collectors.toList())));
+            }
+         });
           break;
         }
         default: {

@@ -3,12 +3,18 @@ package io.vertx.serviceproxy.clustered;
 import com.jayway.awaitility.Awaitility;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
+import io.vertx.core.json.JsonArray;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
+import io.vertx.serviceproxy.testmodel.TestDataObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -68,5 +74,80 @@ public class ClusteredTest {
     });
 
     Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> result.get() == SomeEnum.WIBBLE);
+  }
+
+  @Test
+  public void testWithDataObject() {
+    AtomicReference<TestDataObject> result = new AtomicReference<>();
+    Service service = Service.createProxy(consumerNode.get(), "my.service");
+    TestDataObject data = new TestDataObject().setBool(true).setNumber(25).setString("vert.x");
+    service.methodWithDataObject(data, ar -> {
+      result.set(ar.result());
+    });
+
+    Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> result.get() != null);
+    TestDataObject out = result.get();
+    assertThat(out.getNumber()).isEqualTo(25);
+    assertThat(out.isBool()).isTrue();
+    assertThat(out.getString()).isEqualTo("vert.x");
+  }
+
+  @Test
+  public void testWithListOfDataObject() {
+    AtomicReference<List<TestDataObject>> result = new AtomicReference<>();
+    Service service = Service.createProxy(consumerNode.get(), "my.service");
+    TestDataObject data = new TestDataObject().setBool(true).setNumber(25).setString("vert.x");
+    TestDataObject data2 = new TestDataObject().setBool(true).setNumber(26).setString("vert.x");
+    service.methodWithListOfDataObject(Arrays.asList(data, data2),ar -> {
+      if (ar.failed()) {
+        ar.cause().printStackTrace();
+      }
+      result.set(ar.result());
+    });
+
+    Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> result.get() != null);
+    List<TestDataObject> out = result.get();
+    assertThat(out.get(0).getNumber()).isEqualTo(25);
+    assertThat(out.get(0).isBool()).isTrue();
+    assertThat(out.get(0).getString()).isEqualTo("vert.x");
+    assertThat(out.get(1).getNumber()).isEqualTo(26);
+    assertThat(out.get(1).isBool()).isTrue();
+    assertThat(out.get(1).getString()).isEqualTo("vert.x");
+  }
+
+  @Test
+  public void testWithJsonObject() {
+    AtomicReference<TestDataObject> result = new AtomicReference<>();
+    Service service = Service.createProxy(consumerNode.get(), "my.service");
+    TestDataObject data = new TestDataObject().setBool(true).setNumber(25).setString("vert.x");
+    service.methodWithJsonObject(data.toJson(), ar -> {
+      result.set(new TestDataObject(ar.result()));
+    });
+
+    Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> result.get() != null);
+    TestDataObject out = result.get();
+    assertThat(out.getNumber()).isEqualTo(25);
+    assertThat(out.isBool()).isTrue();
+    assertThat(out.getString()).isEqualTo("vert.x");
+  }
+
+  @Test
+  public void testWithJsonArray() {
+    AtomicReference<JsonArray> result = new AtomicReference<>();
+    Service service = Service.createProxy(consumerNode.get(), "my.service");
+    TestDataObject data = new TestDataObject().setBool(true).setNumber(25).setString("vert.x");
+    JsonArray array = new JsonArray();
+    array.add("vert.x").add(data.toJson());
+
+    service.methodWithJsonArray(array, ar -> {
+      result.set(ar.result());
+    });
+
+    Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> result.get() != null);
+    TestDataObject out = new TestDataObject(result.get().getJsonObject(1));
+    assertThat(array.getString(0)).isEqualToIgnoringCase("vert.x");
+    assertThat(out.getNumber()).isEqualTo(25);
+    assertThat(out.isBool()).isTrue();
+    assertThat(out.getString()).isEqualTo("vert.x");
   }
 }
