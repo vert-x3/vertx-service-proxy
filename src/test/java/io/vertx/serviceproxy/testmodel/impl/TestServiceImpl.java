@@ -127,6 +127,16 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
+  public void enumTypeAsResult(Handler<AsyncResult<SomeEnum>> handler) {
+    handler.handle(Future.succeededFuture(SomeEnum.WIBBLE));
+  }
+
+  @Override
+  public void enumTypeAsResultNull(Handler<AsyncResult<SomeEnum>> handler) {
+    handler.handle(Future.succeededFuture(null));
+  }
+
+  @Override
   public void dataObjectType(TestDataObject options) {
     assertEquals(new TestDataObject().setString("foo").setNumber(123).setBool(true), options);
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");

@@ -114,6 +114,32 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
+  public void testEnumTypeAsResult() {
+    proxy.enumTypeAsResult(ar -> {
+      if (ar.failed()) {
+        fail("Failure not expected");
+      } else {
+        assertEquals(ar.result(), SomeEnum.WIBBLE);
+      }
+      testComplete();
+    });
+    await();
+  }
+
+  @Test
+  public void testEnumTypeAsResultWithNull() {
+    proxy.enumTypeAsResultNull(ar -> {
+      if (ar.failed()) {
+        fail("Failure not expected");
+      } else {
+        assertNull(ar.result());
+      }
+      testComplete();
+    });
+    await();
+  }
+
+  @Test
   public void testDataObjectType() {
     proxy.dataObjectType(new TestDataObject().setString("foo").setNumber(123).setBool(true));
     await();

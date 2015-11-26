@@ -248,6 +248,40 @@ public class TestServiceVertxEBProxy implements TestService {
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
 
+  public void enumTypeAsResult(Handler<AsyncResult<SomeEnum>> someEnum) {
+    if (closed) {
+      someEnum.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "enumTypeAsResult");
+    _vertx.eventBus().<String>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        someEnum.handle(Future.failedFuture(res.cause()));
+      } else {
+        someEnum.handle(Future.succeededFuture(res.result().body() == null ? null : SomeEnum.valueOf(res.result().body())));
+      }
+    });
+  }
+
+  public void enumTypeAsResultNull(Handler<AsyncResult<SomeEnum>> someEnum) {
+    if (closed) {
+      someEnum.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "enumTypeAsResultNull");
+    _vertx.eventBus().<String>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        someEnum.handle(Future.failedFuture(res.cause()));
+      } else {
+        someEnum.handle(Future.succeededFuture(res.result().body() == null ? null : SomeEnum.valueOf(res.result().body())));
+      }
+    });
+  }
+
   public void dataObjectType(TestDataObject options) {
     if (closed) {
       throw new IllegalStateException("Proxy is closed");
@@ -710,7 +744,7 @@ public class TestServiceVertxEBProxy implements TestService {
         resultHandler.handle(Future.failedFuture(res.cause()));
       } else {
         resultHandler.handle(Future.succeededFuture(res.result().body() == null ? null : new TestDataObject(res.result().body())));
-      }
+                      }
     });
   }
 
@@ -727,7 +761,7 @@ public class TestServiceVertxEBProxy implements TestService {
         resultHandler.handle(Future.failedFuture(res.cause()));
       } else {
         resultHandler.handle(Future.succeededFuture(res.result().body() == null ? null : new TestDataObject(res.result().body())));
-      }
+                      }
     });
   }
 

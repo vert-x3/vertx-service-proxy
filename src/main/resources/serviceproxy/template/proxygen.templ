@@ -63,9 +63,12 @@
 <JsonArray>
 @else{resultKind == CLASS_DATA_OBJECT}
 <JsonObject>
+@else{resultKind == CLASS_ENUM}
+<String>
 @else{}
 <@{resultType.simpleName}>
 @end{}
+
 send(_address, _json, _deliveryOptions, res -> {\n
       if (res.failed()) {\n
         @{lastParam.name}.handle(Future.failedFuture(res.cause()));\n
@@ -91,6 +94,8 @@ send(_address, _json, _deliveryOptions, res -> {\n
         @{lastParam.name}.handle(Future.succeededFuture(ProxyHelper.createProxy(@{resultType.simpleName}.class, _vertx, addr)));\n
 				@else{resultKind == CLASS_DATA_OBJECT}
         @{lastParam.name}.handle(Future.succeededFuture(res.result().body() == null ? null : new @{resultType.simpleName}(res.result().body())));\n
+                @else{resultKind == CLASS_ENUM}
+        @{lastParam.name}.handle(Future.succeededFuture(res.result().body() == null ? null : @{resultType.simpleName}.valueOf(res.result().body())));\n
 				@else{}
         @{lastParam.name}.handle(Future.succeededFuture(res.result().body()));\n
 				@end{}
