@@ -241,8 +241,6 @@ If an asynchronous result is required a final parameter of type `Handler<AsyncRe
 * `List<B>`
 * `Set<J>`
 * `Set<B>`
-* `Map<String, J>`
-* `Map<String, B>`
 * Any `@DataObject` class
 
 #### Overloaded methods
