@@ -73,4 +73,16 @@ public class ServiceProvider implements Service {
     result.handle(Future.succeededFuture(list));
     return this;
   }
+
+  @Override
+  public Service methodWithListOfJsonObject(List<JsonObject> list, Handler<AsyncResult<List<JsonObject>>> result) {
+    result.handle(Future.succeededFuture(list));
+    return this;
+  }
+
+  /*@Override
+  public Service methodWithMapOfJsonObject(Map<String, JsonObject> map, Handler<AsyncResult<Map<String, JsonObject>>> result) {
+    result.handle(Future.succeededFuture(map));
+    return this;
+  }*/
 }

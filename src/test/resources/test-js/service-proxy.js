@@ -205,6 +205,24 @@
       } else throw new TypeError('function invoked with invalid arguments');
     };
 
+    /**
+
+     @public
+     @param list {Array.<Object>} 
+     @param result {function} 
+     @return {Service}
+     */
+    this.methodWithListOfJsonObject = function(list, result) {
+      var __args = arguments;
+      if (__args.length === 2 && typeof __args[0] === 'object' && __args[0] instanceof Array && typeof __args[1] === 'function') {
+        if (closed) {
+          throw new Error('Proxy is closed');
+        }
+        j_eb.send(j_address, {"list":__args[0]}, {"action":"methodWithListOfJsonObject"}, function(err, result) { __args[1](err, result &&result.body); });
+        return that;
+      } else throw new TypeError('function invoked with invalid arguments');
+    };
+
   };
 
   /**

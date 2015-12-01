@@ -219,6 +219,27 @@ var Service = function(j_val) {
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
+  /**
+
+   @public
+   @param list {Array.<Object>} 
+   @param result {function} 
+   @return {Service}
+   */
+  this.methodWithListOfJsonObject = function(list, result) {
+    var __args = arguments;
+    if (__args.length === 2 && typeof __args[0] === 'object' && __args[0] instanceof Array && typeof __args[1] === 'function') {
+      j_service["methodWithListOfJsonObject(java.util.List,io.vertx.core.Handler)"](utils.convParamListJsonObject(list), function(ar) {
+      if (ar.succeeded()) {
+        result(utils.convReturnListSetJson(ar.result()), null);
+      } else {
+        result(null, ar.cause());
+      }
+    });
+      return that;
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
   // If you rely on this property your code is likely to break if we change it / remove it without warning.
