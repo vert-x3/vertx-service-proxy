@@ -190,6 +190,14 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
           service.enumTypeNull(json.getString("someEnum") == null ? null : io.vertx.serviceproxy.testmodel.SomeEnum.valueOf(json.getString("someEnum")));
           break;
         }
+        case "enumTypeAsResult": {
+          service.enumTypeAsResult(createHandler(msg));
+          break;
+        }
+        case "enumTypeAsResultNull": {
+          service.enumTypeAsResultNull(createHandler(msg));
+          break;
+        }
         case "dataObjectType": {
           service.dataObjectType(json.getJsonObject("options") == null ? null : new io.vertx.serviceproxy.testmodel.TestDataObject(json.getJsonObject("options")));
           break;
@@ -465,8 +473,7 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
       if (res.failed()) {
         msg.fail(-1, res.cause().getMessage());
       } else {
-        msg.reply(res.result());
-      }
+        if (res.result() != null  && res.result().getClass().isEnum()) {          msg.reply(((Enum) res.result()).name());        } else {          msg.reply(res.result());        }      }
     };
   }
 

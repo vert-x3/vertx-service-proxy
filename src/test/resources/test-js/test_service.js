@@ -232,6 +232,42 @@ var TestService = function(j_val) {
   /**
 
    @public
+   @param someEnum {function} 
+   */
+  this.enumTypeAsResult = function(someEnum) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'function') {
+      j_testService["enumTypeAsResult(io.vertx.core.Handler)"](function(ar) {
+      if (ar.succeeded()) {
+        someEnum(utils.convReturnEnum(ar.result()), null);
+      } else {
+        someEnum(null, ar.cause());
+      }
+    });
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
+   @param someEnum {function} 
+   */
+  this.enumTypeAsResultNull = function(someEnum) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'function') {
+      j_testService["enumTypeAsResultNull(io.vertx.core.Handler)"](function(ar) {
+      if (ar.succeeded()) {
+        someEnum(utils.convReturnEnum(ar.result()), null);
+      } else {
+        someEnum(null, ar.cause());
+      }
+    });
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
    @param options {Object} 
    */
   this.dataObjectType = function(options) {

@@ -14,9 +14,9 @@
 * under the License.
 */
 
-package io.vertx.serviceproxy.testmodel;
+package io.vertx.serviceproxy.clustered;
 
-import io.vertx.serviceproxy.testmodel.TestConnection;
+import io.vertx.serviceproxy.clustered.Service;
 import io.vertx.core.Vertx;
 import io.vertx.core.Handler;
 import io.vertx.core.AsyncResult;
@@ -37,8 +37,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.serviceproxy.ProxyHandler;
+import io.vertx.serviceproxy.testmodel.SomeEnum;
+import io.vertx.serviceproxy.testmodel.SomeVertxEnum;
+import io.vertx.core.json.JsonArray;
+import java.util.List;
+import io.vertx.serviceproxy.testmodel.TestDataObject;
+import io.vertx.serviceproxy.clustered.Service;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.serviceproxy.testmodel.TestConnection;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 
@@ -46,25 +52,25 @@ import io.vertx.core.Handler;
   Generated Proxy code - DO NOT EDIT
   @author Roger the Robot
 */
-public class TestConnectionVertxProxyHandler extends ProxyHandler {
+public class ServiceVertxProxyHandler extends ProxyHandler {
 
   public static final long DEFAULT_CONNECTION_TIMEOUT = 5 * 60; // 5 minutes 
 
   private final Vertx vertx;
-  private final TestConnection service;
+  private final Service service;
   private final long timerID;
   private long lastAccessed;
   private final long timeoutSeconds;
 
-  public TestConnectionVertxProxyHandler(Vertx vertx, TestConnection service) {
+  public ServiceVertxProxyHandler(Vertx vertx, Service service) {
     this(vertx, service, DEFAULT_CONNECTION_TIMEOUT);
   }
 
-  public TestConnectionVertxProxyHandler(Vertx vertx, TestConnection service, long timeoutInSecond) {
+  public ServiceVertxProxyHandler(Vertx vertx, Service service, long timeoutInSecond) {
     this(vertx, service, true, timeoutInSecond);
   }
 
-  public TestConnectionVertxProxyHandler(Vertx vertx, TestConnection service, boolean topLevel, long timeoutSeconds) {
+  public ServiceVertxProxyHandler(Vertx vertx, Service service, boolean topLevel, long timeoutSeconds) {
     this.vertx = vertx;
     this.service = service;
     this.timeoutSeconds = timeoutSeconds;
@@ -89,7 +95,6 @@ public class TestConnectionVertxProxyHandler extends ProxyHandler {
   private void checkTimedOut(long id) {
     long now = System.nanoTime();
     if (now - lastAccessed > timeoutSeconds * 1000000000) {
-      service.close();
       close();
     }
   }
@@ -115,25 +120,53 @@ public class TestConnectionVertxProxyHandler extends ProxyHandler {
       }
       accessed();
       switch (action) {
-        case "startTransaction": {
-          service.startTransaction(createHandler(msg));
+
+        case "hello": {
+          service.hello((java.lang.String)json.getValue("name"), createHandler(msg));
           break;
         }
-        case "insert": {
-          service.insert((java.lang.String)json.getValue("name"), (io.vertx.core.json.JsonObject)json.getValue("data"), createHandler(msg));
+        case "methodUsingEnum": {
+          service.methodUsingEnum(json.getString("e") == null ? null : io.vertx.serviceproxy.testmodel.SomeEnum.valueOf(json.getString("e")), createHandler(msg));
           break;
         }
-        case "commit": {
-          service.commit(createHandler(msg));
+        case "methodReturningEnum": {
+          service.methodReturningEnum(createHandler(msg));
           break;
         }
-        case "rollback": {
-          service.rollback(createHandler(msg));
+        case "methodReturningVertxEnum": {
+          service.methodReturningVertxEnum(createHandler(msg));
           break;
         }
-        case "close": {
-          service.close();
-          close();
+        case "methodWithJsonObject": {
+          service.methodWithJsonObject((io.vertx.core.json.JsonObject)json.getValue("json"), createHandler(msg));
+          break;
+        }
+        case "methodWithJsonArray": {
+          service.methodWithJsonArray((io.vertx.core.json.JsonArray)json.getValue("json"), createHandler(msg));
+          break;
+        }
+        case "methodWithList": {
+          service.methodWithList(convertList(json.getJsonArray("list").getList()), createListHandler(msg));
+          break;
+        }
+        case "methodWithDataObject": {
+          service.methodWithDataObject(json.getJsonObject("data") == null ? null : new io.vertx.serviceproxy.testmodel.TestDataObject(json.getJsonObject("data")), res -> {
+            if (res.failed()) {
+              msg.fail(-1, res.cause().getMessage());
+            } else {
+              msg.reply(res.result() == null ? null : res.result().toJson());
+            }
+         });
+          break;
+        }
+        case "methodWithListOfDataObject": {
+          service.methodWithListOfDataObject(json.getJsonArray("list").stream().map(o -> new TestDataObject((JsonObject)o)).collect(Collectors.toList()), res -> {
+            if (res.failed()) {
+              msg.fail(-1, res.cause().getMessage());
+            } else {
+              msg.reply(new JsonArray(res.result().stream().map(TestDataObject::toJson).collect(Collectors.toList())));
+            }
+         });
           break;
         }
         default: {

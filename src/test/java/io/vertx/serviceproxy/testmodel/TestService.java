@@ -80,6 +80,10 @@ public interface TestService {
 
   void enumTypeNull(SomeEnum someEnum);
 
+  void enumTypeAsResult(Handler<AsyncResult<SomeEnum>> someEnum);
+
+  void enumTypeAsResultNull(Handler<AsyncResult<SomeEnum>> someEnum);
+
   void dataObjectType(TestDataObject options);
 
   void dataObjectTypeNull(TestDataObject options);

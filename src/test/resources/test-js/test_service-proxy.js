@@ -269,6 +269,38 @@
     /**
 
      @public
+     @param someEnum {function} 
+     */
+    this.enumTypeAsResult = function(someEnum) {
+      var __args = arguments;
+      if (__args.length === 1 && typeof __args[0] === 'function') {
+        if (closed) {
+          throw new Error('Proxy is closed');
+        }
+        j_eb.send(j_address, {}, {"action":"enumTypeAsResult"}, function(err, result) { __args[0](err, result &&result.body); });
+        return;
+      } else throw new TypeError('function invoked with invalid arguments');
+    };
+
+    /**
+
+     @public
+     @param someEnum {function} 
+     */
+    this.enumTypeAsResultNull = function(someEnum) {
+      var __args = arguments;
+      if (__args.length === 1 && typeof __args[0] === 'function') {
+        if (closed) {
+          throw new Error('Proxy is closed');
+        }
+        j_eb.send(j_address, {}, {"action":"enumTypeAsResultNull"}, function(err, result) { __args[0](err, result &&result.body); });
+        return;
+      } else throw new TypeError('function invoked with invalid arguments');
+    };
+
+    /**
+
+     @public
      @param options {Object} 
      */
     this.dataObjectType = function(options) {
