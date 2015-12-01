@@ -210,10 +210,12 @@ can be created using the `ProxyHelper` class:
 
 [source, java]
 ----
-SomeDatabaseService service = ProxyHelper.createProxy(SomeDatabaseService.class, vertx,
+SomeDatabaseService service = ProxyHelper.createProxy(SomeDatabaseService.class,
+    vertx,
     "database-service-address");
 // or with delivery options:
-SomeDatabaseService service2 = ProxyHelper.createProxy(SomeDatabaseService.class, vertx,
+SomeDatabaseService service2 = ProxyHelper.createProxy(SomeDatabaseService.class,
+    vertx,
     "database-service-address", options);
 ----
 
@@ -286,7 +288,8 @@ The generated proxy is a JavaScript module compatible with CommonJS, AMD and Web
 <script>
   var eb = new EventBus('http://localhost:8080/eventbus');
   eb.onopen = function() {
-    var SomeDatabaseService = require('vertx-database-js/some_database_service-proxy.js');
+    var SomeDatabaseService =
+      require('vertx-database-js/some_database_service-proxy.js');
     var svc = new SomeDatabaseService(eb, "database-service-address");
   };
 </script>
@@ -306,7 +309,7 @@ Must be one of
 
 [source,java]
 ----
-&64;Fluent
+@Fluent
 SomeDatabaseService doSomething();
 ----
 
