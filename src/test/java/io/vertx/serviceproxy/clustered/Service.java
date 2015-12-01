@@ -58,4 +58,12 @@ public interface Service {
   Service methodWithListOfDataObject(List<TestDataObject> list,
                                      Handler<AsyncResult<List<TestDataObject>>> result);
 
+  @Fluent
+  Service methodWithListOfJsonObject(List<JsonObject> list,
+                                     Handler<AsyncResult<List<JsonObject>>> result);
+
+  /*@Fluent
+  Service methodWithMapOfJsonObject(Map<String, JsonObject> map,
+                                    Handler<AsyncResult<Map<String, JsonObject>>> result);
+*/
 }

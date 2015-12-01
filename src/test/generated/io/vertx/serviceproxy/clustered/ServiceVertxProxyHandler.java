@@ -169,6 +169,10 @@ public class ServiceVertxProxyHandler extends ProxyHandler {
          });
           break;
         }
+        case "methodWithListOfJsonObject": {
+          service.methodWithListOfJsonObject(convertList(json.getJsonArray("list").getList()), createListHandler(msg));
+          break;
+        }
         default: {
           throw new IllegalStateException("Invalid action: " + action);
         }
