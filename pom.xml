@@ -16,6 +16,7 @@
 
   <properties>
     <stack.version>3.2.0-SNAPSHOT</stack.version>
+    <asciidoc.dir>${project.basedir}/src/main/asciidoc</asciidoc.dir>
   </properties>
 
   <dependencyManagement>
@@ -47,6 +48,17 @@
     </dependency>
 
     <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-docgen</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-codetrans</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.11</version>
@@ -57,6 +69,13 @@
       <artifactId>vertx-core</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- just here because of the documentation -->
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web</artifactId>
+      <scope>provided</scope>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
@@ -87,10 +106,47 @@
   <build>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>default-clean</id>
+              <configuration>
+                <filesets>
+                  <fileset>
+                    <directory>src/main/asciidoc</directory>
+                  </fileset>
+                  <fileset>
+                    <directory>${asciidoc.dir}</directory>
+                  </fileset>
+                </filesets>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
         <!-- Configure the execution of the compiler to execute the codegen processor -->
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
           <executions>
+            <execution>
+              <id>default-compile</id>
+              <configuration>
+                <annotationProcessors>
+                  <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
+                  <annotationProcessor>io.vertx.docgen.JavaDocGenProcessor</annotationProcessor>
+                  <annotationProcessor>io.vertx.docgen.DocGenProcessor</annotationProcessor>
+                </annotationProcessors>
+                <generatedSourcesDirectory>${project.basedir}/target/generated-for-docs</generatedSourcesDirectory>
+                <compilerArgs>
+                  <arg>-AoutputDirectory=${project.basedir}/target/generated-for-docs</arg>
+                  <arg>-Adocgen.output=${asciidoc.dir}</arg>
+
+                  <arg>-Amaven.groupId=${project.groupId}</arg>
+                  <arg>-Amaven.artifactId=${project.artifactId}</arg>
+                  <arg>-Amaven.version=${project.version}</arg>
+                </compilerArgs>
+              </configuration>
+            </execution>
             <execution>
               <id>default-testCompile</id>
               <configuration>
@@ -106,9 +162,33 @@
           </executions>
         </plugin>
       </plugins>
+
     </pluginManagement>
 
     <plugins>
+      <plugin>
+        <groupId>org.asciidoctor</groupId>
+        <artifactId>asciidoctor-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>asciidoctor</id>
+            <goals>
+              <goal>process-asciidoc</goal>
+            </goals>
+            <configuration>
+              <sourceDirectory>${asciidoc.dir}</sourceDirectory>
+              <outputDirectory>${project.build.directory}/docs/${project.artifactId}</outputDirectory>
+              <sourceHighlighter>coderay</sourceHighlighter>
+              <preserveDirectories>true</preserveDirectories>
+              <relativeBaseDir>true</relativeBaseDir>
+              <skip>${doc.skip}</skip>
+              <backend>html</backend>
+              <doctype>book</doctype>
+            </configuration>
+            <phase>prepare-package</phase>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
         <version>2.10</version>
@@ -143,6 +223,25 @@
                 <move file="${project.basedir}/src/test/resources/vertx-js/vertx-web-client.js"
                       tofile="${project.basedir}/src/test/resources/vertx-js/vertx-eventbus.js"/>
               </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.6</version>
+        <executions>
+          <execution>
+            <id>doc</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <attach>true</attach>
+              <descriptors>
+                <descriptor>${basedir}/src/main/assembly/docs.xml</descriptor>
+              </descriptors>
             </configuration>
           </execution>
         </executions>
