@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
+import io.vertx.serviceproxy.testmodel.SomeVertxEnum;
 import io.vertx.core.json.JsonArray;
 import java.util.List;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
@@ -111,6 +112,24 @@ public class ServiceVertxEBProxy implements Service {
         result.handle(Future.failedFuture(res.cause()));
       } else {
         result.handle(Future.succeededFuture(res.result().body() == null ? null : SomeEnum.valueOf(res.result().body())));
+      }
+    });
+    return this;
+  }
+
+  public Service methodReturningVertxEnum(Handler<AsyncResult<SomeVertxEnum>> result) {
+    if (closed) {
+      result.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return this;
+    }
+    JsonObject _json = new JsonObject();
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "methodReturningVertxEnum");
+    _vertx.eventBus().<String>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        result.handle(Future.failedFuture(res.cause()));
+      } else {
+        result.handle(Future.succeededFuture(res.result().body() == null ? null : SomeVertxEnum.valueOf(res.result().body())));
       }
     });
     return this;

@@ -11,6 +11,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
+import io.vertx.serviceproxy.testmodel.SomeVertxEnum;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 
 import java.util.List;
@@ -35,6 +36,10 @@ public interface Service {
 
   @Fluent
   Service methodReturningEnum(Handler<AsyncResult<SomeEnum>> result);
+
+  @Fluent
+  Service methodReturningVertxEnum(Handler<AsyncResult<SomeVertxEnum>> result);
+
 
   @Fluent
   Service methodWithJsonObject(JsonObject json, Handler<AsyncResult<JsonObject>> result);

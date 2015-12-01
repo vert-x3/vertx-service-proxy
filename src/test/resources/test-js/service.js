@@ -97,6 +97,26 @@ var Service = function(j_val) {
   /**
 
    @public
+   @param result {function} 
+   @return {Service}
+   */
+  this.methodReturningVertxEnum = function(result) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'function') {
+      j_service["methodReturningVertxEnum(io.vertx.core.Handler)"](function(ar) {
+      if (ar.succeeded()) {
+        result(utils.convReturnEnum(ar.result()), null);
+      } else {
+        result(null, ar.cause());
+      }
+    });
+      return that;
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
    @param json {Object} 
    @param result {function} 
    @return {Service}

@@ -101,6 +101,23 @@
     /**
 
      @public
+     @param result {function} 
+     @return {Service}
+     */
+    this.methodReturningVertxEnum = function(result) {
+      var __args = arguments;
+      if (__args.length === 1 && typeof __args[0] === 'function') {
+        if (closed) {
+          throw new Error('Proxy is closed');
+        }
+        j_eb.send(j_address, {}, {"action":"methodReturningVertxEnum"}, function(err, result) { __args[0](err, result &&result.body); });
+        return that;
+      } else throw new TypeError('function invoked with invalid arguments');
+    };
+
+    /**
+
+     @public
      @param json {Object} 
      @param result {function} 
      @return {Service}

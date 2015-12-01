@@ -5,6 +5,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
+import io.vertx.serviceproxy.testmodel.SomeVertxEnum;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,6 +76,18 @@ public class ClusteredTest {
 
     Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> result.get() == SomeEnum.WIBBLE);
   }
+
+  @Test
+  public void testVertxEnumAsResult() {
+    AtomicReference<SomeVertxEnum> result = new AtomicReference<>();
+    Service service = Service.createProxy(consumerNode.get(), "my.service");
+    service.methodReturningVertxEnum(ar -> {
+      result.set(ar.result());
+    });
+
+    Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> result.get() == SomeVertxEnum.BAR);
+  }
+
 
   @Test
   public void testWithDataObject() {

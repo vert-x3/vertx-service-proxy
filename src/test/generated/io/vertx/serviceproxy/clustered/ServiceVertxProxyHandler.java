@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.serviceproxy.ProxyHandler;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
+import io.vertx.serviceproxy.testmodel.SomeVertxEnum;
 import io.vertx.core.json.JsonArray;
 import java.util.List;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
@@ -130,6 +131,10 @@ public class ServiceVertxProxyHandler extends ProxyHandler {
         }
         case "methodReturningEnum": {
           service.methodReturningEnum(createHandler(msg));
+          break;
+        }
+        case "methodReturningVertxEnum": {
+          service.methodReturningVertxEnum(createHandler(msg));
           break;
         }
         case "methodWithJsonObject": {

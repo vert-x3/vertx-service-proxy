@@ -6,6 +6,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
+import io.vertx.serviceproxy.testmodel.SomeVertxEnum;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 
 import java.util.List;
@@ -34,6 +35,12 @@ public class ServiceProvider implements Service {
   @Override
   public Service methodReturningEnum(Handler<AsyncResult<SomeEnum>> result) {
     result.handle(Future.succeededFuture(SomeEnum.WIBBLE));
+    return this;
+  }
+
+  @Override
+  public Service methodReturningVertxEnum(Handler<AsyncResult<SomeVertxEnum>> result) {
+    result.handle(Future.succeededFuture(SomeVertxEnum.BAR));
     return this;
   }
 
