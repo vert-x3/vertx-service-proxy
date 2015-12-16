@@ -230,42 +230,6 @@
  *}
  * ----
  *
- * ### Consuming your service from a browser or from Node.js
- *
- * The previous section has shown how you can create a service proxy in Java. However, you can consume your service
- * directly from your browser or from a node.js application using a SockJS-based proxy.
- *
- * First, you need to configure the SockJS bridge, in order to let the proxy communicate with the service. You will
- * find more details about the SockJS bridge in
- * <a href="http://vertx.io/docs/vertx-web/java/#_sockjs_event_bus_bridge">vertx-web</a>:
- *
- * [source, java]
- * ----
- * {@link examples.Examples#serviceAndSockJS(io.vertx.core.Vertx)}
- * ----
- *
- * Once you have the sockJS bridge configured, other applications developed in JavaScript can interact with your
- * service directly. During the service compilation, a JS proxy module is generated, and is named as follows:
- * `module_name-js/server-interface_simple_name` + `-proxy.js`. So for instance, if your interface is named `MyService`,
- * the proxy module is named `my_service-proxy.js`. Again, this proxy is usable from your browser or from node.js.
- *
- * The generated proxy is a JavaScript module compatible with CommonJS, AMD and Webpack. The proxy then just needs to
- *   instantiated with the EventBus bridge and the service EventBus address:
- *
- * [source, js]
- * ----
- * <script src="http://cdn.sockjs.org/sockjs-0.3.4.min.js"></script>
- * <script src="vertx-eventbus.js"></script>
- * <script>
- *   var eb = new EventBus('http://localhost:8080/eventbus');
- *   eb.onopen = function() {
- *     var SomeDatabaseService =
- *       require('vertx-database-js/some_database_service-proxy.js');
- *     var svc = new SomeDatabaseService(eb, "database-service-address");
- *   };
- * </script>
- * ----
- *
  * ## Restrictions for service interface
  *
  * There are restrictions on the types and return values that can be used in a service method so that these are easy to

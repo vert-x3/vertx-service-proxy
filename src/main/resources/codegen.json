@@ -9,10 +9,6 @@
       "kind": "proxy",
       "fileName": "ifaceFQCN + 'VertxProxyHandler.java'",
       "templateFileName": "serviceproxy/template/handlergen.templ"
-    },{
-      "kind": "proxy",
-      "fileName": "'resources/' + type.raw.moduleName + '-js/' + helper.convertCamelCaseToUnderscores(type.raw.simpleName) + '-proxy.js'",
-      "templateFileName": "vertx-js/template/proxygen.templ"
     }
   ]
 }
