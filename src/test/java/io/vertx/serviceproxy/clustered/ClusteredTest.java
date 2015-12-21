@@ -157,38 +157,6 @@ public class ClusteredTest {
     assertThat(out1.getString()).isEqualTo("vert.x");
   }
 
-  /*
-  @Test
-  public void testWithMapOfJsonObject() {
-    AtomicReference<Map<String, JsonObject>> result = new AtomicReference<>();
-    Service service = Service.createProxy(consumerNode.get(), "my.service");
-    TestDataObject data = new TestDataObject().setBool(true).setNumber(25).setString("vert.x");
-    TestDataObject data2 = new TestDataObject().setBool(true).setNumber(26).setString("vert.x");
-
-    Map<String, JsonObject> map = new HashMap<>();
-    map.put("1", data.toJson());
-    map.put("2", data2.toJson());
-    service.methodWithMapOfJsonObject(map, ar -> {
-      if (ar.failed()) {
-        ar.cause().printStackTrace();
-      }
-      result.set(ar.result());
-    });
-
-    Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> result.get() != null);
-    Map<String, JsonObject> out = result.get();
-
-    TestDataObject out0 = new TestDataObject(out.get("1"));
-    TestDataObject out1 = new TestDataObject(out.get("2"));
-    assertThat(out0.getNumber()).isEqualTo(25);
-    assertThat(out0.isBool()).isTrue();
-    assertThat(out0.getString()).isEqualTo("vert.x");
-    assertThat(out1.getNumber()).isEqualTo(26);
-    assertThat(out1.isBool()).isTrue();
-    assertThat(out1.getString()).isEqualTo("vert.x");
-  }
-  */
-
   @Test
   public void testWithJsonObject() {
     AtomicReference<TestDataObject> result = new AtomicReference<>();

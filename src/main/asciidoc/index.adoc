@@ -203,6 +203,22 @@ This can be done in a verticle, or anywhere in your code.
 Once registered, the service becomes accessible. If you are running your application on a cluster, the service is
 available from any host.
 
+To withdraw your service, use the `ProxyHelper.unregisterService`
+method:
+
+[source, java]
+----
+SomeDatabaseService service = new SomeDatabaseServiceImpl();
+// Register the handler
+MessageConsumer<JsonObject> consumer = ProxyHelper.registerService(SomeDatabaseService.class, vertx, service,
+    "database-service-address");
+
+// ....
+
+// Unregister your service.
+ProxyHelper.unregisterService(consumer);
+----
+
 ## Proxy creation
 
 Now that the service is exposed, you probably want to consume it. For this, you need to create a proxy. The proxy

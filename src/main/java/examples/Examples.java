@@ -2,6 +2,7 @@ package examples;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
+import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ProxyHelper;
 
@@ -47,6 +48,19 @@ public class Examples {
     // Register the handler
     ProxyHelper.registerService(SomeDatabaseService.class, vertx, service,
         "database-service-address");
+  }
+
+  public void unregister(Vertx vertx) {
+    // Create an instance of your service implementation
+    SomeDatabaseService service = new SomeDatabaseServiceImpl();
+    // Register the handler
+    MessageConsumer<JsonObject> consumer = ProxyHelper.registerService(SomeDatabaseService.class, vertx, service,
+        "database-service-address");
+
+    // ....
+
+    // Unregister your service.
+    ProxyHelper.unregisterService(consumer);
   }
 
   public void proxyCreation(Vertx vertx, DeliveryOptions options) {

@@ -197,6 +197,14 @@
  * Once registered, the service becomes accessible. If you are running your application on a cluster, the service is
  * available from any host.
  *
+ * To withdraw your service, use the {@link io.vertx.serviceproxy.ProxyHelper#unregisterService(io.vertx.core.eventbus.MessageConsumer)}
+ * method:
+ *
+ * [source, java]
+ * ----
+ * {@link examples.Examples#unregister(io.vertx.core.Vertx)}
+ * ----
+ *
  * ## Proxy creation
  *
  * Now that the service is exposed, you probably want to consume it. For this, you need to create a proxy. The proxy

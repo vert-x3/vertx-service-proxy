@@ -22,6 +22,7 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 
 import java.lang.reflect.Constructor;
+import java.util.Objects;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -44,11 +45,21 @@ public class ProxyHelper {
       constructor = getConstructor(proxyClass, Vertx.class, String.class, DeliveryOptions.class);
       instance = createInstance(constructor, vertx, address, options);
     }
-    return (T)instance;
+    return (T) instance;
   }
 
   public static final long DEFAULT_CONNECTION_TIMEOUT = 5 * 60; // 5 minutes
 
+  /**
+   * Registers a service on the event bus.
+   *
+   * @param clazz   the service class (interface)
+   * @param vertx   the vert.x instance
+   * @param service the service object
+   * @param address the address on which the service is published
+   * @param <T>     the type of the service interface
+   * @return the consumer used to unregister the service
+   */
   public static <T> MessageConsumer<JsonObject> registerService(Class<T> clazz, Vertx vertx, T service, String address) {
     // No timeout - used for top level services
     return registerService(clazz, vertx, service, address, DEFAULT_CONNECTION_TIMEOUT);
@@ -67,8 +78,23 @@ public class ProxyHelper {
     Class<?> handlerClass = loadClass(handlerClassName, clazz);
     Constructor constructor = getConstructor(handlerClass, Vertx.class, clazz, boolean.class, long.class);
     Object instance = createInstance(constructor, vertx, service, topLevel, timeoutSeconds);
-    ProxyHandler handler = (ProxyHandler)instance;
+    ProxyHandler handler = (ProxyHandler) instance;
     return handler.registerHandler(address);
+  }
+
+  /**
+   * Unregisters a published service.
+   *
+   * @param consumer the consumer returned by {@link #registerService(Class, Vertx, Object, String)}.
+   */
+  public static void unregisterService(MessageConsumer<JsonObject> consumer) {
+    Objects.requireNonNull(consumer);
+    if (consumer instanceof ProxyHandler) {
+      ((ProxyHandler) consumer).close();
+    } else {
+      // Fall back to plain unregister.
+      consumer.unregister();
+    }
   }
 
   private static Class<?> loadClass(String name, Class origin) {

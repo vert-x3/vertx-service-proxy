@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -896,5 +897,20 @@ public class ServiceProxyTest extends VertxTestBase {
       testComplete();
     }));
     await();
+  }
+
+  @Test
+  public void testUnregisteringTheService() {
+    proxy.booleanHandler(ar -> {
+      ProxyHelper.unregisterService(consumer);
+      testComplete();
+    });
+    await();
+
+    AtomicReference<Throwable> caughtError = new AtomicReference<>();
+    proxy.booleanHandler(ar -> {
+      caughtError.set(ar.cause());
+    });
+    waitUntil(() -> caughtError.get() != null);
   }
 }
