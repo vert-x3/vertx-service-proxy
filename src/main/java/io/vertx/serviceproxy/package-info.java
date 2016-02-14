@@ -182,6 +182,40 @@
  *
  * More constraints on the _service interfaces_ are described below.
  *
+ * ## Code generation
+ *
+ * Service annotated with `@ProxyGen` annotation trigger the generation of the service helper classes:
+ *
+ * - The service proxy: a compile time generated proxy that uses the `EventBus` to interact with the service via messages
+ * - The service handler: a compile time generated `EventBus` handler that reacts to events sent by the proxy
+ *
+ * Generated proxies and handlers are named after the service class, for example if the service is named `MyService`
+ * the handler is called `MyServiceProxyHandler` and the proxy is called `MyServiceEBProxy`.
+ *
+ * The _codegen_ annotation processor generates these classes at compilation time. It is a feature of the Java
+ * compiler so _no extra step_ is required, it is just a matter of configuring correctly the compiler.
+ *
+ *
+ * Here a configuration example for Maven:
+ *
+ * [source,xml]
+ * ----
+ * <plugin>
+ *   <artifactId>maven-compiler-plugin</artifactId>
+ *   <configuration>
+ *     <annotationProcessors>
+ *       <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
+ *     </annotationProcessors>
+ *     <compilerArgs>
+ *       <arg>-AoutputDirectory=${project.basedir}/src/main</arg>
+ *     </compilerArgs>
+ *   </configuration>
+ * </plugin>
+ * ----
+ *
+ * This feature can also be used in Gradle, or even in IDE as they provide usually support for annotation
+ * processors.
+ *
  * ## Exposing your service
  *
  * Once you have your _service interface_, compile the source to generate the stub and proxies. Then, you need some
