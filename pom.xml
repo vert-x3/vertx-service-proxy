@@ -6,7 +6,7 @@
   <parent>
     <groupId>io.vertx</groupId>
     <artifactId>vertx-parent</artifactId>
-    <version>8</version>
+    <version>9</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
@@ -16,7 +16,6 @@
 
   <properties>
     <stack.version>3.3.0-SNAPSHOT</stack.version>
-    <asciidoc.dir>${project.basedir}/src/main/asciidoc</asciidoc.dir>
   </properties>
 
   <dependencyManagement>
@@ -60,7 +59,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>4.12</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -73,13 +72,13 @@
     <dependency>
       <groupId>com.jayway.awaitility</groupId>
       <artifactId>awaitility</artifactId>
-      <version>1.6.5</version>
+      <version>1.7.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>3.2.0</version>
+      <version>3.3.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -157,14 +156,7 @@
               <goal>process-asciidoc</goal>
             </goals>
             <configuration>
-              <sourceDirectory>${asciidoc.dir}</sourceDirectory>
-              <outputDirectory>${project.build.directory}/docs/${project.artifactId}</outputDirectory>
-              <sourceHighlighter>coderay</sourceHighlighter>
-              <preserveDirectories>true</preserveDirectories>
-              <relativeBaseDir>true</relativeBaseDir>
               <skip>${doc.skip}</skip>
-              <backend>html</backend>
-              <doctype>book</doctype>
             </configuration>
             <phase>prepare-package</phase>
           </execution>
@@ -172,7 +164,6 @@
       </plugin>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.6</version>
         <executions>
           <execution>
             <id>doc</id>
