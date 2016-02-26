@@ -46,4 +46,14 @@ public abstract class ProxyHandler implements Handler<Message<JsonObject>> {
    */
   public abstract MessageConsumer<JsonObject> registerHandler(String address);
 
+
+  /**
+   * Register the local proxy handle on the event bus.
+   * The registration will not be propagated to other nodes in the cluster.
+   *
+   * @param address the proxy address
+   * @return the registered message consumer
+   */
+  public abstract MessageConsumer<JsonObject> registerLocalHandler(String address);
+
 }
