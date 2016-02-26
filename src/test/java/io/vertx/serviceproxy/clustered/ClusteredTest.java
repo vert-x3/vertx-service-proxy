@@ -208,7 +208,7 @@ public class ClusteredTest {
       assertThat(exception.failureType()).isEqualTo(ReplyFailure.NO_HANDLERS);
       result.set(ar.cause());
     });
-    Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> result.get() != null);
+    Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> result.get() != null);
   }
 
 }
