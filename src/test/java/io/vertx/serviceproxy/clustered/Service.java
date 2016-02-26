@@ -15,7 +15,6 @@ import io.vertx.serviceproxy.testmodel.SomeVertxEnum;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>

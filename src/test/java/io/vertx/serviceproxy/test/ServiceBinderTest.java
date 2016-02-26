@@ -28,9 +28,10 @@ import org.junit.Test;
 public class ServiceBinderTest extends VertxTestBase {
 
   private final static String SERVICE_ADDRESS = "someaddress";
+  private final static String SERVICE_LOCAL_ADDRESS = "someaddress.local";
 
-  private MessageConsumer<JsonObject> consumer;
-  private OKService proxy;
+  private MessageConsumer<JsonObject> consumer, localConsumer;
+  private OKService proxy, localProxy;
 
   @Override
   public void setUp() throws Exception {
@@ -38,21 +39,35 @@ public class ServiceBinderTest extends VertxTestBase {
     OKService service = new OKServiceImpl();
 
     final ServiceBinder serviceBinder = new ServiceBinder(vertx).setAddress(SERVICE_ADDRESS);
+    final ServiceBinder serviceLocalBinder = new ServiceBinder(vertx).setAddress(SERVICE_LOCAL_ADDRESS);
     final ServiceProxyBuilder serviceProxyBuilder = new ServiceProxyBuilder(vertx).setAddress(SERVICE_ADDRESS);
+    final ServiceProxyBuilder serviceLocalProxyBuilder = new ServiceProxyBuilder(vertx).setAddress(SERVICE_LOCAL_ADDRESS);
 
     consumer = serviceBinder.register(OKService.class, service);
+    localConsumer = serviceLocalBinder.registerLocal(OKService.class, service);
     proxy = serviceProxyBuilder.build(OKService.class);
+    localProxy = serviceLocalProxyBuilder.build(OKService.class);
   }
 
   @Override
   public void tearDown() throws Exception {
     consumer.unregister();
+    localConsumer.unregister();
     super.tearDown();
   }
 
   @Test
   public void testFactory() {
     proxy.ok(res -> {
+      assertFalse(res.failed());
+      testComplete();
+    });
+    await();
+  }
+
+  @Test
+  public void testLocalFactory() {
+    localProxy.ok(res -> {
       assertFalse(res.failed());
       testComplete();
     });

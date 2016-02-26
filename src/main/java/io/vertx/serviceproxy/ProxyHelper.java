@@ -81,6 +81,41 @@ public class ProxyHelper {
   }
 
   /**
+   * Registers a local service on the event bus.
+   * The registration will not be propagated to other nodes in the cluster.
+   *
+   * @param clazz   the service class (interface)
+   * @param vertx   the vert.x instance
+   * @param service the service object
+   * @param address the address on which the service is published
+   * @param <T>     the type of the service interface
+   * @return the consumer used to unregister the service
+   */
+  public static <T> MessageConsumer<JsonObject> registerLocalService(Class<T> clazz, Vertx vertx, T service, String address) {
+    return new ServiceBinder(vertx)
+      .setAddress(address)
+      .registerLocal(clazz, service);
+  }
+
+  public static <T> MessageConsumer<JsonObject> registerLocalService(Class<T> clazz, Vertx vertx, T service, String address,
+                                                                long timeoutSeconds) {
+    return new ServiceBinder(vertx)
+      .setAddress(address)
+      .setTimeoutSeconds(timeoutSeconds)
+      .registerLocal(clazz, service);
+  }
+
+  public static <T> MessageConsumer<JsonObject> registerLocalService(Class<T> clazz, Vertx vertx, T service, String address,
+                                                                boolean topLevel,
+                                                                long timeoutSeconds) {
+    return new ServiceBinder(vertx)
+      .setAddress(address)
+      .setTopLevel(topLevel)
+      .setTimeoutSeconds(timeoutSeconds)
+      .registerLocal(clazz, service);
+  }
+
+  /**
    * Unregisters a published service.
    *
    * @param consumer the consumer returned by {@link #registerService(Class, Vertx, Object, String)}.

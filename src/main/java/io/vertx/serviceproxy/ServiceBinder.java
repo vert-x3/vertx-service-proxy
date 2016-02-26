@@ -105,14 +105,23 @@ public class ServiceBinder {
    */
   public <T> MessageConsumer<JsonObject> register(Class<T> clazz, T service) {
     Objects.requireNonNull(address);
-
-    String handlerClassName = clazz.getName() + "VertxProxyHandler";
-    Class<?> handlerClass = loadClass(handlerClassName, clazz);
-    Constructor constructor = getConstructor(handlerClass, Vertx.class, clazz, boolean.class, long.class);
-    Object instance = createInstance(constructor, vertx, service, topLevel, timeoutSeconds);
-    ProxyHandler handler = (ProxyHandler) instance;
     // register
-    return handler.register(vertx.eventBus(), address, interceptors);
+    return getProxyHandler(clazz, service).register(vertx.eventBus(), address, interceptors);
+  }
+
+  /**
+   * Registers a local service on the event bus.
+   * The registration will not be propagated to other nodes in the cluster.
+   *
+   * @param clazz   the service class (interface)
+   * @param service the service object
+   * @param <T>     the type of the service interface
+   * @return the consumer used to unregister the service
+   */
+  public <T> MessageConsumer<JsonObject> registerLocal(Class<T> clazz, T service) {
+    Objects.requireNonNull(address);
+    // register
+    return getProxyHandler(clazz, service).registerLocal(vertx.eventBus(), address, interceptors);
   }
 
   /**
@@ -129,6 +138,14 @@ public class ServiceBinder {
       // Fall back to plain unregister.
       consumer.unregister();
     }
+  }
+
+  private <T> ProxyHandler getProxyHandler(Class<T> clazz, T service) {
+    String handlerClassName = clazz.getName() + "VertxProxyHandler";
+    Class<?> handlerClass = loadClass(handlerClassName, clazz);
+    Constructor constructor = getConstructor(handlerClass, Vertx.class, clazz, boolean.class, long.class);
+    Object instance = createInstance(constructor, vertx, service, topLevel, timeoutSeconds);
+    return (ProxyHandler) instance;
   }
 
   private static Class<?> loadClass(String name, Class origin) {

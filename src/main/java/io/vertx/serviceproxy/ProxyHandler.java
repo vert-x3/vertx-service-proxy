@@ -51,13 +51,45 @@ public abstract class ProxyHandler implements Handler<Message<JsonObject>> {
   }
 
   /**
-   * Register the proxy handle on the event bus.
+   * Register the local proxy handle on the event bus.
+   * The registration will not be propagated to other nodes in the cluster.
    *
    * @param eventBus the event bus
    * @param address the proxy address
    */
+  public MessageConsumer<JsonObject> registerLocal(EventBus eventBus, String address) {
+    return registerLocal(eventBus, address, null);
+  }
+
+  /**
+   * Register the proxy handle on the event bus.
+   *
+   * @param eventBus the event bus
+   * @param address the proxy address
+   * @param interceptors the interceptors
+   */
   public MessageConsumer<JsonObject> register(EventBus eventBus, String address, List<Function<Message<JsonObject>, Future<Message<JsonObject>>>> interceptors) {
-    Handler<Message<JsonObject>> handler = this::handle;
+    Handler<Message<JsonObject>> handler = configureHandler(interceptors);
+    consumer = eventBus.consumer(address, handler);
+    return consumer;
+  }
+
+  /**
+   * Register the local proxy handle on the event bus.
+   * The registration will not be propagated to other nodes in the cluster.
+   *
+   * @param eventBus the event bus
+   * @param address the proxy address
+   * @param interceptors the interceptors
+   */
+  public MessageConsumer<JsonObject> registerLocal(EventBus eventBus, String address, List<Function<Message<JsonObject>, Future<Message<JsonObject>>>> interceptors) {
+    Handler<Message<JsonObject>> handler = configureHandler(interceptors);
+    consumer = eventBus.localConsumer(address, handler);
+    return consumer;
+  }
+
+  private Handler<Message<JsonObject>> configureHandler(List<Function<Message<JsonObject>, Future<Message<JsonObject>>>> interceptors) {
+    Handler<Message<JsonObject>> handler = this;
     if (interceptors != null) {
       for (Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor : interceptors) {
         Handler<Message<JsonObject>> prev = handler;
@@ -74,7 +106,7 @@ public abstract class ProxyHandler implements Handler<Message<JsonObject>> {
         };
       }
     }
-    consumer = eventBus.consumer(address, handler);
-    return consumer;
+    return handler;
   }
+
 }
