@@ -3,22 +3,24 @@ package io.vertx.serviceproxy.clustered;
 import com.jayway.awaitility.Awaitility;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
+import io.vertx.core.eventbus.ReplyException;
+import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
 import io.vertx.serviceproxy.testmodel.SomeVertxEnum;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
+import org.assertj.core.api.Condition;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -34,6 +36,7 @@ public class ClusteredTest {
       Vertx vertx = ar.result();
       providerNode.set(vertx);
       vertx.deployVerticle(ServiceProviderVerticle.class.getName());
+      vertx.deployVerticle(LocalServiceProviderVerticle.class.getName());
     });
 
     Vertx.clusteredVertx(new VertxOptions().setClustered(true).setClusterHost("127.0.0.1"), ar -> {
@@ -192,4 +195,20 @@ public class ClusteredTest {
     assertThat(out.isBool()).isTrue();
     assertThat(out.getString()).isEqualTo("vert.x");
   }
+
+  @Test
+  public void testLocalServiceShouldBeUnreachable() {
+    AtomicReference<Throwable> result = new AtomicReference<>();
+    Service service = Service.createProxy(consumerNode.get(), "my.local.service");
+    service.hello("vert.x", (ar) -> {
+      assertThat(ar.succeeded()).isFalse().withFailMessage("Local service should not be accessible from a different node in the cluster");
+      assertThat(ar.cause()).isNotNull();
+      assertThat(ar.cause()).isInstanceOf(ReplyException.class);
+      ReplyException exception = (ReplyException) ar.cause();
+      assertThat(exception.failureType()).isEqualTo(ReplyFailure.NO_HANDLERS);
+      result.set(ar.cause());
+    });
+    Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> result.get() != null);
+  }
+
 }

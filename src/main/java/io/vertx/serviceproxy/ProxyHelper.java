@@ -83,6 +83,39 @@ public class ProxyHelper {
   }
 
   /**
+   * Registers a local service on the event bus. Such registration will not be propagated to other nodes in a cluster.
+   * All messages sent to <i>address</i> from other nodes will not reach this service.
+   *
+   * @param clazz   the service class (interface)
+   * @param vertx   the vert.x instance
+   * @param service the service object
+   * @param address the address on which the service is published
+   * @param <T>     the type of the service interface
+   * @return the consumer used to unregister the service
+   */
+  public static <T> MessageConsumer<JsonObject> registerLocalService(Class<T> clazz, Vertx vertx, T service, String address) {
+    // No timeout - used for top level services
+    return registerLocalService(clazz, vertx, service, address, DEFAULT_CONNECTION_TIMEOUT);
+  }
+
+  public static <T> MessageConsumer<JsonObject> registerLocalService(Class<T> clazz, Vertx vertx, T service, String address,
+                                                                long timeoutSeconds) {
+    // No timeout - used for top level services
+    return registerLocalService(clazz, vertx, service, address, true, timeoutSeconds);
+  }
+
+  public static <T> MessageConsumer<JsonObject> registerLocalService(Class<T> clazz, Vertx vertx, T service, String address,
+                                                                boolean topLevel,
+                                                                long timeoutSeconds) {
+    String handlerClassName = clazz.getName() + "VertxProxyHandler";
+    Class<?> handlerClass = loadClass(handlerClassName, clazz);
+    Constructor constructor = getConstructor(handlerClass, Vertx.class, clazz, boolean.class, long.class);
+    Object instance = createInstance(constructor, vertx, service, topLevel, timeoutSeconds);
+    ProxyHandler handler = (ProxyHandler) instance;
+    return handler.registerLocalHandler(address);
+  }
+
+  /**
    * Unregisters a published service.
    *
    * @param consumer the consumer returned by {@link #registerService(Class, Vertx, Object, String)}.
