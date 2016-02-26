@@ -4,7 +4,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.serviceproxy.ProxyHelper;
 
 /**
- * @author <a href="https://github.com/elR1co">elR1co</a>
+ * @author <a href="https://github.com/michalboska">Michal Boska</a>
  */
 public class LocalServiceProviderVerticle extends AbstractVerticle {
 
