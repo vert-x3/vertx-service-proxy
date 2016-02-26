@@ -42,18 +42,22 @@ import java.util.stream.Collectors;
 public class ServiceProxyTest extends VertxTestBase {
 
   public final static String SERVICE_ADDRESS = "someaddress";
+  public final static String SERVICE_LOCAL_ADDRESS = "someaddress.local";
   public final static String TEST_ADDRESS = "testaddress";
 
-  MessageConsumer<JsonObject> consumer;
-  TestService service;
-  TestService proxy;
+  MessageConsumer<JsonObject> consumer, localConsumer;
+  TestService service, localService;
+  TestService proxy, localServiceProxy;
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
     service = TestService.create(vertx);
+    localService = TestService.create(vertx);
     consumer = ProxyHelper.registerService(TestService.class, vertx, service, SERVICE_ADDRESS);
+    localConsumer = ProxyHelper.registerLocalService(TestService.class, vertx, localService, SERVICE_LOCAL_ADDRESS);
     proxy = TestService.createProxy(vertx, SERVICE_ADDRESS);
+    localServiceProxy = TestService.createProxy(vertx, SERVICE_LOCAL_ADDRESS);
     vertx.eventBus().<String>consumer(TEST_ADDRESS).handler(msg -> {
       assertEquals("ok", msg.body());
       testComplete();
@@ -896,6 +900,12 @@ public class ServiceProxyTest extends VertxTestBase {
       assertEquals(ReplyFailure.TIMEOUT, re.failureType());
       testComplete();
     }));
+    await();
+  }
+
+  @Test
+  public void testLocalServiceFromLocalSender() {
+    localServiceProxy.noParams();
     await();
   }
 
