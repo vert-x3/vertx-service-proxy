@@ -2,7 +2,7 @@
 
 [![Build Status](https://vertx.ci.cloudbees.com/buildStatus/icon?job=vert.x3-service-proxy)](https://vertx.ci.cloudbees.com/view/vert.x-3/job/vert.x3-service-proxy/)
 
-The documentation is available [here](https://github.com/vert-x3/vertx-service-proxy/blob/master/src/main/asciidoc/index.adoc).
+The documentation is available [here](https://github.com/vert-x3/vertx-service-proxy/blob/master/src/main/asciidoc/java/index.adoc).
 
 Many Vert.x applications include various services which do useful things and often can be reused from one application
 to another. An example would be a database service.
@@ -68,4 +68,4 @@ That means you can interact with your service like this:
         }
     });                
 
-The documentation is available [here](https://github.com/vert-x3/vertx-service-proxy/blob/master/src/main/asciidoc/index.adoc).
+The documentation is available [here](https://github.com/vert-x3/vertx-service-proxy/blob/master/src/main/asciidoc/java/index.adoc).
