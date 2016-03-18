@@ -70,12 +70,21 @@ public class ServiceProvider implements Service {
 
   @Override
   public Service methodWithListOfDataObject(List<TestDataObject> list, Handler<AsyncResult<List<TestDataObject>>> result) {
+    // access the data
+    if(list != null && list.size() > 0) {
+      TestDataObject data = list.get(0);
+    }
     result.handle(Future.succeededFuture(list));
     return this;
   }
 
   @Override
   public Service methodWithListOfJsonObject(List<JsonObject> list, Handler<AsyncResult<List<JsonObject>>> result) {
+    // access the data
+    if(list != null && list.size() > 0) {
+      JsonObject data = list.get(0);
+    }
+
     result.handle(Future.succeededFuture(list));
     return this;
   }
