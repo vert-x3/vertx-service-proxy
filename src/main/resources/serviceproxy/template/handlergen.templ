@@ -50,6 +50,7 @@ import java.util.Map;\n
 import java.util.Set;\n
 import java.util.UUID;\n
 import java.util.stream.Collectors;\n
+import java.util.function.Function;\n
 import io.vertx.serviceproxy.ProxyHelper;\n
 import io.vertx.serviceproxy.ProxyHandler;\n
 @foreach{importedType:importedTypes}
@@ -308,15 +309,47 @@ createHandler(msg)
   }\n
 \n
   private <T> Map<String, T> convertMap(Map map) {\n
-    return (Map<String, T>)map;\n
+    if (map.isEmpty()) { \n
+      return (Map<String, T>) map; \n
+    } \n
+     \n
+    Object elem = map.values().stream().findFirst().get(); \n
+    if (!(elem instanceof Map) && !(elem instanceof List)) { \n
+      return (Map<String, T>) map; \n
+    } else { \n
+      Function<Object, T> converter; \n
+      if (elem instanceof List) { \n
+        converter = object -> (T) new JsonArray((List) object); \n
+      } else { \n
+        converter = object -> (T) new JsonObject((Map) object); \n
+      } \n
+      return ((Map<String, T>) map).entrySet() \n
+       .stream() \n
+       .collect(Collectors.toMap(Map.Entry::getKey, converter::apply)); \n
+    } \n
   }\n
-\n
+
   private <T> List<T> convertList(List list) {\n
-    return (List<T>)list;\n
+    if (list.isEmpty()) { \n
+          return (List<T>) list; \n
+        } \n
+     \n
+    Object elem = list.get(0); \n
+    if (!(elem instanceof Map) && !(elem instanceof List)) { \n
+      return (List<T>) list; \n
+    } else { \n
+      Function<Object, T> converter; \n
+      if (elem instanceof List) { \n
+        converter = object -> (T) new JsonArray((List) object); \n
+      } else { \n
+        converter = object -> (T) new JsonObject((Map) object); \n
+      } \n
+      return (List<T>) list.stream().map(converter).collect(Collectors.toList()); \n
+    } \n
   }\n
-\n
+
   private <T> Set<T> convertSet(List list) {\n
-    return new HashSet<T>((List<T>)list);\n
+    return new HashSet<T>(convertList(list));\n
   }\n
 
 }
