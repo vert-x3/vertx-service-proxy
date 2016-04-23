@@ -63,7 +63,7 @@ var Service = function(j_val) {
   this.methodUsingEnum = function(e, result) {
     var __args = arguments;
     if (__args.length === 2 && typeof __args[0] === 'string' && typeof __args[1] === 'function') {
-      j_service["methodUsingEnum(io.vertx.serviceproxy.testmodel.SomeEnum,io.vertx.core.Handler)"](io.vertx.serviceproxy.testmodel.SomeEnum.valueOf(__args[0]), function(ar) {
+      j_service["methodUsingEnum(io.vertx.serviceproxy.testmodel.SomeEnum,io.vertx.core.Handler)"](io.vertx.serviceproxy.testmodel.SomeEnum.valueOf(e), function(ar) {
       if (ar.succeeded()) {
         result(ar.result(), null);
       } else {
@@ -166,7 +166,7 @@ var Service = function(j_val) {
   this.methodWithList = function(list, result) {
     var __args = arguments;
     if (__args.length === 2 && typeof __args[0] === 'object' && __args[0] instanceof Array && typeof __args[1] === 'function') {
-      j_service["methodWithList(java.util.List,io.vertx.core.Handler)"](list, function(ar) {
+      j_service["methodWithList(java.util.List,io.vertx.core.Handler)"](utils.convParamListBasicOther(list), function(ar) {
       if (ar.succeeded()) {
         result(ar.result(), null);
       } else {
@@ -232,6 +232,27 @@ var Service = function(j_val) {
       j_service["methodWithListOfJsonObject(java.util.List,io.vertx.core.Handler)"](utils.convParamListJsonObject(list), function(ar) {
       if (ar.succeeded()) {
         result(utils.convReturnListSetJson(ar.result()), null);
+      } else {
+        result(null, ar.cause());
+      }
+    });
+      return that;
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
+   @param input {string} 
+   @param result {function} 
+   @return {Service}
+   */
+  this.methodWthFailingResult = function(input, result) {
+    var __args = arguments;
+    if (__args.length === 2 && typeof __args[0] === 'string' && typeof __args[1] === 'function') {
+      j_service["methodWthFailingResult(java.lang.String,io.vertx.core.Handler)"](input, function(ar) {
+      if (ar.succeeded()) {
+        result(utils.convReturnJson(ar.result()), null);
       } else {
         result(null, ar.cause());
       }

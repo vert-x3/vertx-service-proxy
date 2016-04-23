@@ -3,8 +3,12 @@ package io.vertx.serviceproxy.clustered;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.eventbus.ReplyException;
+import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.serviceproxy.ServiceException;
+import io.vertx.serviceproxy.testmodel.MyServiceException;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
 import io.vertx.serviceproxy.testmodel.SomeVertxEnum;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
@@ -77,6 +81,16 @@ public class ServiceProvider implements Service {
   @Override
   public Service methodWithListOfJsonObject(List<JsonObject> list, Handler<AsyncResult<List<JsonObject>>> result) {
     result.handle(Future.succeededFuture(list));
+    return this;
+  }
+
+  @Override
+  public Service methodWthFailingResult(String input, Handler<AsyncResult<JsonObject>> result) {
+    if (input.equals("Fail")) {
+      result.handle(ServiceException.fail(30, "failed!"));
+    } else {
+      result.handle(MyServiceException.fail(30, "failed!", "some extra"));
+    }
     return this;
   }
 

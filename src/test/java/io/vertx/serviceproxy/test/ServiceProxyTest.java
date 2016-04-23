@@ -23,6 +23,9 @@ import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ProxyHelper;
+import io.vertx.serviceproxy.ServiceException;
+import io.vertx.serviceproxy.testmodel.MyServiceException;
+import io.vertx.serviceproxy.testmodel.MyServiceExceptionMessageCodec;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 import io.vertx.serviceproxy.testmodel.TestService;
@@ -53,6 +56,7 @@ public class ServiceProxyTest extends VertxTestBase {
     super.setUp();
     service = TestService.create(vertx);
     consumer = ProxyHelper.registerService(TestService.class, vertx, service, SERVICE_ADDRESS);
+
     proxy = TestService.createProxy(vertx, SERVICE_ADDRESS);
     vertx.eventBus().<String>consumer(TEST_ADDRESS).handler(msg -> {
       assertEquals("ok", msg.body());
@@ -64,6 +68,32 @@ public class ServiceProxyTest extends VertxTestBase {
   public void tearDown() throws Exception {
     consumer.unregister();
     super.tearDown();
+  }
+
+  @Test
+  public void testErrorHandling() {
+    proxy.failingCall("Fail", handler -> {
+      assertTrue(handler.cause() instanceof ServiceException);
+      assertEquals("Call has failed", handler.cause().getMessage());
+      assertEquals(25, ((ServiceException)handler.cause()).failureCode());
+      testComplete();
+    });
+    await();
+  }
+
+  @Test
+  public void testErrorHandlingServiceExceptionSubclass() {
+    vertx.eventBus().registerDefaultCodec(MyServiceException.class,
+      new MyServiceExceptionMessageCodec());
+    proxy.failingCall("Fail subclass", handler -> {
+      assertTrue(handler.cause() instanceof MyServiceException);
+      assertEquals("Call has failed", handler.cause().getMessage());
+      assertEquals(25, ((MyServiceException)handler.cause()).failureCode());
+      assertEquals("some extra", ((MyServiceException)handler.cause()).getExtra());
+      testComplete();
+    });
+    await();
+
   }
 
   @Test

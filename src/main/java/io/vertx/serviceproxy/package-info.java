@@ -325,6 +325,29 @@
  * * Any class annotated with `@DataObject`
  * * Another proxy
  *
+ * ### Error Handling
+ *
+ * Service methods may return errors to the client by passing a failed `Future` containing a {@link io.vertx.serviceproxy.ServiceException}
+ * instance to the method's `Handler`. The {@link io.vertx.serviceproxy.ServiceException#fail} factory method can be used to create an instance of
+ * `ServiceException` already wrapped in a failed `Future`. For example:
+ *
+ * [source,java]
+ * ----
+ * public class SomeDatabaseServiceImpl implements SomeDatabaseService {
+ * private static final BAD_SHOE_SIZE_ERROR = 42;
+ *
+ *   // Create a connection
+ *   void createConnection(String shoeSize, Handler<AsyncResult<MyDatabaseConnection>> resultHandler) {
+ *     if (!shoeSize.equals("9")) {
+ *       resultHandler.handle(ServiceException.fail(BAD_SHOE_SIZE_ERROR, "The shoe size must be 9!"));
+ *      } else {
+ *        // Create the connection here
+ *        resultHandler.Handle(Future.succeededFuture(myDbConnection));
+ *      }
+ *   }
+ * }
+ * ----
+ *
  * ### Overloaded methods
  *
  * There must be no overloaded service methods. (_i.e._ more than one with the same name, regardless the signature).

@@ -16,6 +16,10 @@
 
 package io.vertx.serviceproxy.testmodel;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.ProxyIgnore;
@@ -28,10 +32,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.serviceproxy.testmodel.impl.TestServiceImpl;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -201,6 +201,8 @@ public interface TestService {
   void setJsonArrayHandler(Handler<AsyncResult<Set<JsonArray>>> resultHandler);
 
   void setDataObjectHandler(Handler<AsyncResult<Set<TestDataObject>>> resultHandler);
+
+  void failingCall(String value, Handler<AsyncResult<JsonObject>> resultHandler);
 
   @ProxyIgnore
   void ignoredMethod();

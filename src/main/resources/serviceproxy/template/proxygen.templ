@@ -145,6 +145,8 @@ import java.util.Set;\n
 import java.util.stream.Collectors;\n
 import java.util.function.Function;\n
 import io.vertx.serviceproxy.ProxyHelper;\n
+import io.vertx.serviceproxy.ServiceException;\n
+import io.vertx.serviceproxy.ServiceExceptionMessageCodec;\n
 @foreach{importedType:importedTypes}
 	@if{!importedType.packageName.equals("java.lang")}
 		import @{importedType};\n
@@ -170,6 +172,10 @@ public class @{ifaceSimpleName}VertxEBProxy implements @{ifaceSimpleName} {\n
     this._vertx = vertx;\n
     this._address = address;\n
     this._options = options;\n
+    try {\n
+      this._vertx.eventBus().registerDefaultCodec(ServiceException.class,\n
+          new ServiceExceptionMessageCodec());\n
+    } catch (IllegalStateException ex) {}\n
   }\n
 \n
 @foreach{method:methods}
