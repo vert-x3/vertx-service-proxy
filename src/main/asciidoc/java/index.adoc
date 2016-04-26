@@ -368,6 +368,106 @@ private static final BAD_SHOE_SIZE_ERROR = 42;
 }
 ----
 
+Then the client side can check for the Service exception, and the specific error code inside:
+[source,java]
+----
+public void foo(String shoeSize, Handler<AsyncResult<JsonObject>> handler) {
+  service.createConnection("8", result -> {
+    if (result.succeeded()) {
+      // Do success stuff.
+    } else {
+      if (result.cause() instanceof ServiceException) {
+        ServiceException exc = (ServiceException) result.cause();
+        if (exc.failureCode() == SomeDatabaseServiceImpl.BAD_SHOE_SIZE_ERROR) {
+          handler.handle(Future.failedFuture(
+            new InvalidInputError("You provided a bad shoe size")));
+        }
+      } else {
+        // Must be a system error (e.g. No service registered for the proxy)
+        handler.handle(Future.failedFuture(
+          new SystemError("An unexpected error occurred: + " result.cause().getMessage())
+        ));
+      }
+    }
+  }
+}
+----
+
+If necessary, Service implementations may als o return a sub-class of ServiceException,
+as long as a MessageCodec is created and registered for it with EventBus instance on both
+the proxy and service sides. For example:
+
+[source,java]
+----
+class ShoeSizeException extends ServiceException {
+  public static final BAD_SHOE_SIZE_ERROR = 42;
+
+  private final String shoeSize;
+
+  public ShoeSizeException(String shoeSize) {
+    super(BAD_SHOE_SIZE_ERROR, "In invalid shoe size was received: " + shoeSize);
+    this.shoeSize = shoeSize;
+  }
+
+  public String getShoeSize() {
+    return extra;
+  }
+
+  public static <T> AsyncResult<T> fail(int failureCode, String message, String shoeSize) {
+    return Future.failedFuture(new MyServiceException(failureCode, message, shoeSize));
+  }
+}
+----
+
+Then, as long as a MessageCodec is regstered, the Service implementation can return the custom
+exception:
+[source,java]
+----
+public class SomeDatabaseServiceImpl implements SomeDatabaseService {
+  public SomeDataBaseServiceImpl(Vertx vertx) {
+    // Register on the service side. If using a local event bus, this is all
+    // that's required, since the proxy side will share the same Vertx instance.
+    vertx.eventBus().registerDefaultCodec(ShoeSizeException.class,
+      new ShoeSizeExceptionMessageCodec());
+  }
+
+  // Create a connection
+  void createConnection(String shoeSize, Handler<AsyncResult<MyDatabaseConnection>> resultHandler) {
+    if (!shoeSize.equals("9")) {
+      resultHandler.handle(ShoeSizeException.fail(shoeSize));
+    } else {
+      // Create the connection here
+      resultHandler.Handle(Future.succeededFuture(myDbConnection));
+    }
+  }
+}
+---
+Finally, the client can now check for the custom exception, too:
+
+[source,java]
+----
+public void foo(String shoeSize, Handler<AsyncResult<JsonObject>> handler) {
+  // If this code is running on a different node in the cluster, the
+  // ShoeSizeExceptionMessageCodec will need to be registered here, too.
+  service.createConnection("8", result -> {
+    if (result.succeeded()) {
+      // Do success stuff.
+    } else {
+      if (result.cause() instanceof ShoeSizeException) {
+        ShoeSizeException exc = (ShoeSizeException) result.cause();
+        handler.handle(Future.failedFuture(
+          new InvalidInputError("You provided a bad shoe size: " + exc.getShoeSize())));
+      } else {
+        // Must be a system error (e.g. No service registered for the proxy)
+        handler.handle(Future.failedFuture(
+          new SystemError("An unexpected error occurred: + " result.cause().getMessage())
+        ));
+      }
+    }
+  }
+}
+----
+
 ### Overloaded methods
 
 There must be no overloaded service methods. (_i.e._ more than one with the same name, regardless the signature).

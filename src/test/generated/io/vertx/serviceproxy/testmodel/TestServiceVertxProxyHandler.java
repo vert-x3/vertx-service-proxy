@@ -497,7 +497,7 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
         }
       }
     } catch (Throwable t) {
-      msg.reply(new ServiceException(-1, t.getMessage()));
+      msg.reply(new ServiceException(500, t.getMessage()));
       throw t;
     }
   }

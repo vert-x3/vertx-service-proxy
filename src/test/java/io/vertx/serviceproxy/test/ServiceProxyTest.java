@@ -862,6 +862,7 @@ public class ServiceProxyTest extends VertxTestBase {
           conn.startTransaction(onFailure(cause -> {
             assertNotNull(cause);
             assertTrue(cause instanceof ReplyException);
+            assertFalse(cause instanceof ServiceException);
             ReplyException re = (ReplyException) cause;
             assertEquals(ReplyFailure.NO_HANDLERS, re.failureType());
             testComplete();
@@ -896,6 +897,7 @@ public class ServiceProxyTest extends VertxTestBase {
         conn.someMethod(onFailure(cause -> {
           assertNotNull(cause);
           assertTrue(cause instanceof ReplyException);
+          assertFalse(cause instanceof ServiceException);
           ReplyException re = (ReplyException) cause;
           assertEquals(ReplyFailure.NO_HANDLERS, re.failureType());
           testComplete();
@@ -922,6 +924,7 @@ public class ServiceProxyTest extends VertxTestBase {
     proxyLong.longDeliveryFailed(onFailure(t -> {
       assertNotNull(t);
       assertTrue(t instanceof ReplyException);
+      assertFalse(t instanceof ServiceException);
       ReplyException re = (ReplyException) t;
       assertEquals(ReplyFailure.TIMEOUT, re.failureType());
       testComplete();
