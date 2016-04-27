@@ -3,6 +3,7 @@ package io.vertx.serviceproxy.testmodel;
 import io.netty.util.CharsetUtil;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageCodec;
+import io.vertx.core.json.JsonObject;
 
 /**
  * @author <a href="mailto:oreilldf@gmail.com">Dan O'Reilly</a>
@@ -28,6 +29,7 @@ public class MyServiceExceptionMessageCodec  implements
       buffer.appendInt(encoded.length);
       buffer.appendBytes(encoded);
     }
+    body.getDebugInfo().writeToBuffer(buffer);
   }
 
   @Override
@@ -47,17 +49,20 @@ public class MyServiceExceptionMessageCodec  implements
       message = null;
     }
     isNull = buffer.getByte(pos) == (byte)0;
+    pos++;
     String extra;
     if (!isNull) {
-      pos++;
       int strLength = buffer.getInt(pos);
       pos += 4;
       byte[] bytes = buffer.getBytes(pos, pos + strLength);
       extra = new String(bytes, CharsetUtil.UTF_8);
+      pos += strLength;
     } else {
       extra = null;
     }
-    return new MyServiceException(failureCode, message, extra);
+    JsonObject debugInfo = new JsonObject();
+    debugInfo.readFromBuffer(pos, buffer);
+    return new MyServiceException(failureCode, message, debugInfo, extra);
   }
 
   @Override

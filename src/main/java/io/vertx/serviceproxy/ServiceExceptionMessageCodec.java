@@ -3,6 +3,7 @@ package io.vertx.serviceproxy;
 import io.netty.util.CharsetUtil;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageCodec;
+import io.vertx.core.json.JsonObject;
 
 /**
  * A MessageCodec for ServiceException
@@ -22,6 +23,7 @@ public class ServiceExceptionMessageCodec implements MessageCodec<ServiceExcepti
       buffer.appendInt(encoded.length);
       buffer.appendBytes(encoded);
     }
+    body.getDebugInfo().writeToBuffer(buffer);
   }
 
   @Override
@@ -29,17 +31,20 @@ public class ServiceExceptionMessageCodec implements MessageCodec<ServiceExcepti
     int failureCode = buffer.getInt(pos);
     pos += 4;
     boolean isNull = buffer.getByte(pos) == (byte)0;
+    pos++;
     String message;
     if (!isNull) {
-      pos++;
       int strLength = buffer.getInt(pos);
       pos += 4;
       byte[] bytes = buffer.getBytes(pos, pos + strLength);
       message = new String(bytes, CharsetUtil.UTF_8);
+      pos += strLength;
     } else {
       message = null;
     }
-    return new ServiceException(failureCode, message);
+    JsonObject debugInfo = new JsonObject();
+    debugInfo.readFromBuffer(pos, buffer);
+    return new ServiceException(failureCode, message, debugInfo);
   }
 
   @Override

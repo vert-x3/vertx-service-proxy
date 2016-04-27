@@ -76,6 +76,7 @@ public class ServiceProxyTest extends VertxTestBase {
       assertTrue(handler.cause() instanceof ServiceException);
       assertEquals("Call has failed", handler.cause().getMessage());
       assertEquals(25, ((ServiceException)handler.cause()).failureCode());
+      assertEquals(new JsonObject().put("test", "val"), ((ServiceException)handler.cause()).getDebugInfo());
       testComplete();
     });
     await();

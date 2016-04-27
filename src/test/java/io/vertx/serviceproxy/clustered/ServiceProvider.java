@@ -87,7 +87,7 @@ public class ServiceProvider implements Service {
   @Override
   public Service methodWthFailingResult(String input, Handler<AsyncResult<JsonObject>> result) {
     if (input.equals("Fail")) {
-      result.handle(ServiceException.fail(30, "failed!"));
+      result.handle(ServiceException.fail(30, "failed!", new JsonObject().put("test", "val")));
     } else {
       result.handle(MyServiceException.fail(30, "failed!", "some extra"));
     }

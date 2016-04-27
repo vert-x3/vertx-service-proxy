@@ -275,7 +275,9 @@
  * ## Error Handling
  *
  * Service methods may return errors to the client by passing a failed `Future` containing a {@link io.vertx.serviceproxy.ServiceException}
- * instance to the method's `Handler`. The {@link io.vertx.serviceproxy.ServiceException#fail} factory method can be used to create an instance of
+ * instance to the method's `Handler`. A `ServiceException` contains an `int` failure code, a message, and an optional
+ * `JsonObject` containing any extra information deemed important to return to the caller. For convenience, the
+ * {@link io.vertx.serviceproxy.ServiceException#fail} factory method can be used to create an instance of
  * `ServiceException` already wrapped in a failed `Future`. For example:
  *
  * [source,java]
@@ -287,7 +289,8 @@
  *   // Create a connection
  *   void createConnection(String shoeSize, Handler<AsyncResult<MyDatabaseConnection>> resultHandler) {
  *     if (!shoeSize.equals("9")) {
- *       resultHandler.handle(ServiceException.fail(BAD_SHOE_SIZE, "The shoe size must be 9!"));
+ *       resultHandler.handle(ServiceException.fail(BAD_SHOE_SIZE, "The shoe size must be 9!",
+ *         new JsonObject().put("shoeSize", shoeSize));
  *      } else {
  *         doDbConnection(result -> {
  *           if (result.succeeded()) {
@@ -301,13 +304,15 @@
  * }
  * ----
  *
- * Then the client side can check for the Service exception, and the specific error code inside. It
- * can use this information to differentiate business logic errors from system errors (like the service not being
- * registered with the Event Bus), and to determine exactly which business logic error occurred.
+ * The client side can then check if the `Throwable` it receives from a failed `AsyncResult` is a `ServiceException`,
+ * and if so, check the specific error code inside. It can use this information to differentiate business logic
+ * errors from system errors (like the service not being registered with the Event Bus), and to determine exactly
+ * which business logic error occurred.
  *
  * [source,java]
  * ----
  * public void foo(String shoeSize, Handler<AsyncResult<JsonObject>> handler) {
+ *   SomeDatabaseService service = SomeDatabaseService.createProxy(vertx, SERVICE_ADDRESS);
  *   service.createConnection("8", result -> {
  *     if (result.succeeded()) {
  *       // Do success stuff.
@@ -316,7 +321,9 @@
  *         ServiceException exc = (ServiceException) result.cause();
  *         if (exc.failureCode() == SomeDatabaseServiceImpl.BAD_SHOE_SIZE) {
  *           handler.handle(Future.failedFuture(
- *             new InvalidInputError("You provided a bad shoe size")));
+ *             new InvalidInputError("You provided a bad shoe size: " +
+ *               exc.getDebugInfo().getString("shoeSize"))
+ *           ));
  *         } else if (exc.failureCode() == SomeDatabaseServiceImpl.CONNECTION) {
  *           handler.handle(Future.failedFuture(
  *             new ConnectionError("Failed to connect to the DB")));
@@ -332,9 +339,8 @@
  * }
  * ----
  *
- * If desired, Service implementations may also return a sub-class of ServiceException, as long as a
- * default MessageCodec is registered for it with Vertx instance used on both the proxy and service
- * implementation sides. For example, given the following custom Exception:
+ * If desired, service implementations may also return a sub-class of `ServiceException`, as long as a
+ * default `MessageCodec` is registered for it . For example, given the following `ServiceException` sub-class:
  *
  * [source,java]
  * ----
@@ -358,14 +364,16 @@
  * }
  * ----
  *
- * As long as a default MessageCodec is registered, the Service implementation can return the custom
+ * As long as a default `MessageCodec` is registered, the Service implementation can return the custom
  * exception directly to the caller:
+ *
  * [source,java]
  * ----
  * public class SomeDatabaseServiceImpl implements SomeDatabaseService {
  *   public SomeDataBaseServiceImpl(Vertx vertx) {
  *     // Register on the service side. If using a local event bus, this is all
  *     // that's required, since the proxy side will share the same Vertx instance.
+ *   SomeDatabaseService service = SomeDatabaseService.createProxy(vertx, SERVICE_ADDRESS);
  *     vertx.eventBus().registerDefaultCodec(ShoeSizeException.class,
  *       new ShoeSizeExceptionMessageCodec());
  *   }
@@ -380,15 +388,16 @@
  *     }
  *   }
  * }
- * ---
+ * ----
  * Finally, the client can now check for the custom exception:
  *
  * [source,java]
  * ----
  * public void foo(String shoeSize, Handler<AsyncResult<JsonObject>> handler) {
  *   // If this code is running on a different node in the cluster, the
- *   // ShoeSizeExceptionMessageCodec will need to be registered with its
- *   // Vertx instance, too.
+ *   // ShoeSizeExceptionMessageCodec will need to be registered with the
+ *   // Vertx instance on this node, too.
+ *   SomeDatabaseService service = SomeDatabaseService.createProxy(vertx, SERVICE_ADDRESS);
  *   service.createConnection("8", result -> {
  *     if (result.succeeded()) {
  *       // Do success stuff.
@@ -407,6 +416,9 @@
  *   }
  * }
  * ----
+ *
+ * Note that if you're clustering `Vertx` instances, you'll need to register the custom Exception's `MessageCodec`
+ * with each `Vertx` instance in the cluster.
  *
  * ## Restrictions for service interface
  *

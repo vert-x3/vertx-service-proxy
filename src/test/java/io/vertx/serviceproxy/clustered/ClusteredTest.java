@@ -209,6 +209,7 @@ public class ClusteredTest {
     service.methodWthFailingResult("Fail", ar -> {
       assertThat(ar.cause() instanceof ServiceException).isTrue();
       assertThat(((ServiceException)ar.cause()).failureCode()).isEqualTo(30);
+      assertThat(((ServiceException)ar.cause()).getDebugInfo()).isEqualTo(new JsonObject().put("test", "val"));
       result.set(ar.cause());
     });
     Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> result.get() != null);

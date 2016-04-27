@@ -2,6 +2,7 @@ package io.vertx.serviceproxy.testmodel;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ServiceException;
 
 /**
@@ -17,6 +18,11 @@ public class MyServiceException extends ServiceException {
    */
   public MyServiceException(int failureCode, String message, String extra) {
     super(failureCode, message);
+    this.extra = extra;
+  }
+
+  public MyServiceException(int failureCode, String message, JsonObject debugInfo, String extra) {
+    super(failureCode, message, debugInfo);
     this.extra = extra;
   }
 

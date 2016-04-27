@@ -547,7 +547,7 @@ public class TestServiceImpl implements TestService {
   @Override
   public void failingCall(String value, Handler<AsyncResult<JsonObject>> resultHandler) {
     if (value.equals("Fail")) {
-      resultHandler.handle(ServiceException.fail(25, "Call has failed"));
+      resultHandler.handle(ServiceException.fail(25, "Call has failed", new JsonObject().put("test", "val")));
     } else if (value.equals("Fail subclass")) {
       resultHandler.handle(MyServiceException.fail(25, "Call has failed", "some extra"));
     } else {
