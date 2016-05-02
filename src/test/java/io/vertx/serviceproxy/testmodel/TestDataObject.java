@@ -32,11 +32,6 @@ public class TestDataObject {
   public TestDataObject() {
   }
 
-  public TestDataObject(TestDataObject other) {
-    this.number = other.number;
-    this.string = other.string;
-    this.bool = other.bool;
-  }
 
   public TestDataObject(JsonObject json) {
     this.number = json.getInteger("number");

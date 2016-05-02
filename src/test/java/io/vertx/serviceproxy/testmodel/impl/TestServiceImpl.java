@@ -23,7 +23,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.serviceproxy.ServiceException;
 import io.vertx.serviceproxy.test.ServiceProxyTest;
+import io.vertx.serviceproxy.testmodel.MyServiceException;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
 import io.vertx.serviceproxy.testmodel.TestConnection;
 import io.vertx.serviceproxy.testmodel.TestConnectionWithCloseFuture;
@@ -31,7 +33,6 @@ import io.vertx.serviceproxy.testmodel.TestDataObject;
 import io.vertx.serviceproxy.testmodel.TestService;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -541,5 +542,16 @@ public class TestServiceImpl implements TestService {
     vertx.setTimer(30*1000L, tid -> {
       resultHandler.handle(Future.succeededFuture("blah"));
     });
+  }
+
+  @Override
+  public void failingCall(String value, Handler<AsyncResult<JsonObject>> resultHandler) {
+    if (value.equals("Fail")) {
+      resultHandler.handle(ServiceException.fail(25, "Call has failed", new JsonObject().put("test", "val")));
+    } else if (value.equals("Fail subclass")) {
+      resultHandler.handle(MyServiceException.fail(25, "Call has failed", "some extra"));
+    } else {
+      resultHandler.handle(Future.succeededFuture(new JsonObject()));
+    }
   }
 }

@@ -62,6 +62,9 @@ public interface Service {
   Service methodWithListOfJsonObject(List<JsonObject> list,
                                      Handler<AsyncResult<List<JsonObject>>> result);
 
+  @Fluent
+  Service methodWthFailingResult(String input, Handler<AsyncResult<JsonObject>> result);
+
   /*@Fluent
   Service methodWithMapOfJsonObject(Map<String, JsonObject> map,
                                     Handler<AsyncResult<Map<String, JsonObject>>> result);

@@ -30,6 +30,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.function.Function;
 import io.vertx.serviceproxy.ProxyHelper;
+import io.vertx.serviceproxy.ServiceException;
+import io.vertx.serviceproxy.ServiceExceptionMessageCodec;
 import io.vertx.serviceproxy.testmodel.TestService;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
 import io.vertx.core.Vertx;
@@ -63,6 +65,10 @@ public class TestServiceVertxEBProxy implements TestService {
     this._vertx = vertx;
     this._address = address;
     this._options = options;
+    try {
+      this._vertx.eventBus().registerDefaultCodec(ServiceException.class,
+          new ServiceExceptionMessageCodec());
+    } catch (IllegalStateException ex) {}
   }
 
   public void longDeliverySuccess(Handler<AsyncResult<String>> resultHandler) {
@@ -1256,6 +1262,24 @@ public class TestServiceVertxEBProxy implements TestService {
         resultHandler.handle(Future.failedFuture(res.cause()));
       } else {
         resultHandler.handle(Future.succeededFuture(res.result().body().stream().map(o -> o instanceof Map ? new TestDataObject(new JsonObject((Map) o)) : new TestDataObject((JsonObject) o)).collect(Collectors.toSet())));
+      }
+    });
+  }
+
+  public void failingCall(String value, Handler<AsyncResult<JsonObject>> resultHandler) {
+    if (closed) {
+      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+      return;
+    }
+    JsonObject _json = new JsonObject();
+    _json.put("value", value);
+    DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
+    _deliveryOptions.addHeader("action", "failingCall");
+    _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {
+      if (res.failed()) {
+        resultHandler.handle(Future.failedFuture(res.cause()));
+      } else {
+        resultHandler.handle(Future.succeededFuture(res.result().body()));
       }
     });
   }

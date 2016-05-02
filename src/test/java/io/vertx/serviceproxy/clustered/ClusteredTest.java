@@ -3,8 +3,13 @@ package io.vertx.serviceproxy.clustered;
 import com.jayway.awaitility.Awaitility;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
+import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.serviceproxy.ServiceException;
+import io.vertx.serviceproxy.ServiceExceptionMessageCodec;
+import io.vertx.serviceproxy.testmodel.MyServiceException;
+import io.vertx.serviceproxy.testmodel.MyServiceExceptionMessageCodec;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
 import io.vertx.serviceproxy.testmodel.SomeVertxEnum;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
@@ -32,12 +37,16 @@ public class ClusteredTest {
   public void setUp() {
     Vertx.clusteredVertx(new VertxOptions().setClustered(true).setClusterHost("127.0.0.1"), ar -> {
       Vertx vertx = ar.result();
+      vertx.eventBus().registerDefaultCodec(MyServiceException.class,
+          new MyServiceExceptionMessageCodec());
       providerNode.set(vertx);
       vertx.deployVerticle(ServiceProviderVerticle.class.getName());
     });
 
     Vertx.clusteredVertx(new VertxOptions().setClustered(true).setClusterHost("127.0.0.1"), ar -> {
       Vertx vertx = ar.result();
+      vertx.eventBus().registerDefaultCodec(MyServiceException.class,
+          new MyServiceExceptionMessageCodec());
       consumerNode.set(vertx);
     });
 
@@ -191,5 +200,31 @@ public class ClusteredTest {
     assertThat(out.getNumber()).isEqualTo(25);
     assertThat(out.isBool()).isTrue();
     assertThat(out.getString()).isEqualTo("vert.x");
+  }
+
+  @Test
+  public void testWithFailingResult() {
+    AtomicReference<Throwable> result = new AtomicReference<>();
+    Service service = Service.createProxy(consumerNode.get(), "my.service");
+    service.methodWthFailingResult("Fail", ar -> {
+      assertThat(ar.cause() instanceof ServiceException).isTrue();
+      assertThat(((ServiceException)ar.cause()).failureCode()).isEqualTo(30);
+      assertThat(((ServiceException)ar.cause()).getDebugInfo()).isEqualTo(new JsonObject().put("test", "val"));
+      result.set(ar.cause());
+    });
+    Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> result.get() != null);
+  }
+
+  @Test
+  public void testWithFailingResultServiceExceptionSubclass() {
+    AtomicReference<Throwable> result = new AtomicReference<>();
+    Service service = Service.createProxy(consumerNode.get(), "my.service");
+    service.methodWthFailingResult("cluster Fail", ar -> {
+      assertThat(ar.cause() instanceof MyServiceException).isTrue();
+      assertThat(((MyServiceException)ar.cause()).failureCode()).isEqualTo(30);
+      assertThat(((MyServiceException)ar.cause()).getExtra()).isEqualTo("some extra");
+      result.set(ar.cause());
+    });
+    Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> result.get() != null);
   }
 }

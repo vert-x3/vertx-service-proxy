@@ -37,6 +37,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.serviceproxy.ProxyHandler;
+import io.vertx.serviceproxy.ServiceException;
+import io.vertx.serviceproxy.ServiceExceptionMessageCodec;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
 import io.vertx.serviceproxy.testmodel.SomeVertxEnum;
 import io.vertx.core.json.JsonArray;
@@ -74,6 +76,10 @@ public class ServiceVertxProxyHandler extends ProxyHandler {
     this.vertx = vertx;
     this.service = service;
     this.timeoutSeconds = timeoutSeconds;
+    try {
+      this.vertx.eventBus().registerDefaultCodec(ServiceException.class,
+          new ServiceExceptionMessageCodec());
+    } catch (IllegalStateException ex) {}
     if (timeoutSeconds != -1 && !topLevel) {
       long period = timeoutSeconds * 1000 / 2;
       if (period > 10000) {
@@ -152,7 +158,11 @@ public class ServiceVertxProxyHandler extends ProxyHandler {
         case "methodWithDataObject": {
           service.methodWithDataObject(json.getJsonObject("data") == null ? null : new io.vertx.serviceproxy.testmodel.TestDataObject(json.getJsonObject("data")), res -> {
             if (res.failed()) {
-              msg.fail(-1, res.cause().getMessage());
+              if (res.cause() instanceof ServiceException) {
+                msg.reply(res.cause());
+              } else {
+                msg.reply(new ServiceException(-1, res.cause().getMessage()));
+              }
             } else {
               msg.reply(res.result() == null ? null : res.result().toJson());
             }
@@ -162,7 +172,11 @@ public class ServiceVertxProxyHandler extends ProxyHandler {
         case "methodWithListOfDataObject": {
           service.methodWithListOfDataObject(json.getJsonArray("list").stream().map(o -> new TestDataObject((JsonObject)o)).collect(Collectors.toList()), res -> {
             if (res.failed()) {
-              msg.fail(-1, res.cause().getMessage());
+              if (res.cause() instanceof ServiceException) {
+                msg.reply(res.cause());
+              } else {
+                msg.reply(new ServiceException(-1, res.cause().getMessage()));
+              }
             } else {
               msg.reply(new JsonArray(res.result().stream().map(TestDataObject::toJson).collect(Collectors.toList())));
             }
@@ -173,12 +187,16 @@ public class ServiceVertxProxyHandler extends ProxyHandler {
           service.methodWithListOfJsonObject(convertList(json.getJsonArray("list").getList()), createListHandler(msg));
           break;
         }
+        case "methodWthFailingResult": {
+          service.methodWthFailingResult((java.lang.String)json.getValue("input"), createHandler(msg));
+          break;
+        }
         default: {
           throw new IllegalStateException("Invalid action: " + action);
         }
       }
     } catch (Throwable t) {
-      msg.fail(-1, t.getMessage());
+      msg.reply(new ServiceException(500, t.getMessage()));
       throw t;
     }
   }
@@ -186,16 +204,29 @@ public class ServiceVertxProxyHandler extends ProxyHandler {
   private <T> Handler<AsyncResult<T>> createHandler(Message msg) {
     return res -> {
       if (res.failed()) {
-        msg.fail(-1, res.cause().getMessage());
+        if (res.cause() instanceof ServiceException) {
+          msg.reply(res.cause());
+        } else {
+          msg.reply(new ServiceException(-1, res.cause().getMessage()));
+        }
       } else {
-        if (res.result() != null  && res.result().getClass().isEnum()) {          msg.reply(((Enum) res.result()).name());        } else {          msg.reply(res.result());        }      }
+        if (res.result() != null  && res.result().getClass().isEnum()) {
+          msg.reply(((Enum) res.result()).name());
+        } else {
+          msg.reply(res.result());
+        }
+      }
     };
   }
 
   private <T> Handler<AsyncResult<List<T>>> createListHandler(Message msg) {
     return res -> {
       if (res.failed()) {
-        msg.fail(-1, res.cause().getMessage());
+        if (res.cause() instanceof ServiceException) {
+          msg.reply(res.cause());
+        } else {
+          msg.reply(new ServiceException(-1, res.cause().getMessage()));
+        }
       } else {
         msg.reply(new JsonArray(res.result()));
       }
@@ -205,7 +236,11 @@ public class ServiceVertxProxyHandler extends ProxyHandler {
   private <T> Handler<AsyncResult<Set<T>>> createSetHandler(Message msg) {
     return res -> {
       if (res.failed()) {
-        msg.fail(-1, res.cause().getMessage());
+        if (res.cause() instanceof ServiceException) {
+          msg.reply(res.cause());
+        } else {
+          msg.reply(new ServiceException(-1, res.cause().getMessage()));
+        }
       } else {
         msg.reply(new JsonArray(new ArrayList<>(res.result())));
       }
@@ -215,7 +250,11 @@ public class ServiceVertxProxyHandler extends ProxyHandler {
   private Handler<AsyncResult<List<Character>>> createListCharHandler(Message msg) {
     return res -> {
       if (res.failed()) {
-        msg.fail(-1, res.cause().getMessage());
+        if (res.cause() instanceof ServiceException) {
+          msg.reply(res.cause());
+        } else {
+          msg.reply(new ServiceException(-1, res.cause().getMessage()));
+        }
       } else {
         JsonArray arr = new JsonArray();
         for (Character chr: res.result()) {
@@ -229,7 +268,11 @@ public class ServiceVertxProxyHandler extends ProxyHandler {
   private Handler<AsyncResult<Set<Character>>> createSetCharHandler(Message msg) {
     return res -> {
       if (res.failed()) {
-        msg.fail(-1, res.cause().getMessage());
+        if (res.cause() instanceof ServiceException) {
+          msg.reply(res.cause());
+        } else {
+          msg.reply(new ServiceException(-1, res.cause().getMessage()));
+        }
       } else {
         JsonArray arr = new JsonArray();
         for (Character chr: res.result()) {
