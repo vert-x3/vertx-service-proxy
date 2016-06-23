@@ -25,7 +25,7 @@ your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-service-proxy</artifactId>
-  <version>3.3.0.CR2</version>
+  <version>3.3.0</version>
 </dependency>
 ----
 
@@ -33,7 +33,7 @@ your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-proxy:3.3.0.CR2'
+compile 'io.vertx:vertx-service-proxy:3.3.0'
 ----
 
 Be aware that as the service proxy mechanism relies on code generation, so modifications to the _service interface_
