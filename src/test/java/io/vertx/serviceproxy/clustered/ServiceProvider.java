@@ -9,6 +9,7 @@ import io.vertx.serviceproxy.testmodel.SomeEnum;
 import io.vertx.serviceproxy.testmodel.SomeVertxEnum;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -70,22 +71,35 @@ public class ServiceProvider implements Service {
 
   @Override
   public Service methodWithListOfDataObject(List<TestDataObject> list, Handler<AsyncResult<List<TestDataObject>>> result) {
-    // access the data
+    // create new list with same objects passed in to simulate a service call doing something with the data
+    List<TestDataObject> newList = new ArrayList<>();
+
+    // access the data and add to new list
     if(list != null && list.size() > 0) {
-      TestDataObject data = list.get(0);
+      for (int i = 0; i < list.size(); i++) {
+        TestDataObject data = list.get(i);
+        newList.add(data);
+      }
     }
-    result.handle(Future.succeededFuture(list));
+
+    result.handle(Future.succeededFuture(newList));
     return this;
   }
 
   @Override
   public Service methodWithListOfJsonObject(List<JsonObject> list, Handler<AsyncResult<List<JsonObject>>> result) {
-    // access the data
+    // create new list with same objects passed in to simulate a service call doing something with the data
+    List<JsonObject> newList = new ArrayList<>();
+
+    // access the data and add to new list
     if(list != null && list.size() > 0) {
-      JsonObject data = list.get(0);
+      for (int i = 0; i < list.size(); i++) {
+        JsonObject data = list.get(i);
+        newList.add(data);
+      }
     }
 
-    result.handle(Future.succeededFuture(list));
+    result.handle(Future.succeededFuture(newList));
     return this;
   }
 
