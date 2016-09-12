@@ -47,6 +47,7 @@ import io.vertx.core.Handler;
   Generated Proxy code - DO NOT EDIT
   @author Roger the Robot
 */
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class ServiceVertxEBProxy implements Service {
 
   private Vertx _vertx;
