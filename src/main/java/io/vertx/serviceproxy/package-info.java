@@ -30,7 +30,7 @@
  *
  * == Using vert.x service proxies
  *
- * To use the Vert.x Service Proxies, add the following dependency to the _dependencies_ section of
+ * To use the Vert.x Service Proxies, add the following dependencies to the _dependencies_ section of
  * your build descriptor:
  *
  * * Maven (in your `pom.xml`):
@@ -42,6 +42,12 @@
  *   <artifactId>${maven.artifactId}</artifactId>
  *   <version>${maven.version}</version>
  * </dependency>
+ * <dependency>
+ *   <groupId>${maven.groupId}</groupId>
+ *   <artifactId>vertx-codegen</artifactId>
+ *   <version>${maven.version}</version>
+ *   <scope>provided</scope>
+ * </dependency>
  * ----
  *
  * * Gradle (in your `build.gradle` file):
@@ -49,6 +55,7 @@
  * [source,groovy,subs="+attributes"]
  * ----
  * compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
+ * compile '${maven.groupId}:vertx-codegen:${maven.version}'
  * ----
  *
  * Be aware that as the service proxy mechanism relies on code generation, so modifications to the _service interface_
