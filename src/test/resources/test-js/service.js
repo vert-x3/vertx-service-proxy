@@ -267,6 +267,25 @@ var Service = function(j_val) {
   this._jdel = j_service;
 };
 
+Service._jclass = utils.getJavaClass("io.vertx.serviceproxy.clustered.Service");
+Service._jtype = {
+  accept: function(obj) {
+    return Service._jclass.isInstance(obj._jdel);
+  },
+  wrap: function(jdel) {
+    var obj = Object.create(Service.prototype, {});
+    Service.apply(obj, arguments);
+    return obj;
+  },
+  unwrap: function(obj) {
+    return obj._jdel;
+  }
+};
+Service._create = function(jdel) {
+  var obj = Object.create(Service.prototype, {});
+  Service.apply(obj, arguments);
+  return obj;
+}
 /**
 
  @memberof module:test-js/service
@@ -277,9 +296,8 @@ var Service = function(j_val) {
 Service.createProxy = function(vertx, address) {
   var __args = arguments;
   if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string') {
-    return utils.convReturnVertxGen(JService["createProxy(io.vertx.core.Vertx,java.lang.String)"](vertx._jdel, address), Service);
+    return utils.convReturnVertxGen(Service, JService["createProxy(io.vertx.core.Vertx,java.lang.String)"](vertx._jdel, address));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
-// We export the Constructor function
 module.exports = Service;
