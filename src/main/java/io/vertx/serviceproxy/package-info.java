@@ -18,17 +18,17 @@
  * = Vert.x Service Proxy
  * :toc: left
  *
- * When you compose a vert.x application, you may want to isolate a functionality somewhere and make it available to
+ * When you compose a Vert.x application, you may want to isolate a functionality somewhere and make it available to
  * the rest of your application. That's the main purpose of service proxies. It lets you expose a _service_ on the
- * event bus, so, any other vert.x component can consume it, as soon as they know the _address_ on which the service
+ * event bus, so, any other Vert.x component can consume it, as soon as they know the _address_ on which the service
  * is published.
  *
- * A _service_ is described with a Java interface containing methods following the _async pattern_. Behind the hood,
- * messages are sent on the event bus to invoke the service and get the response back. But to make it more easy to use
- * for you, it generates a _proxy_ that you can invoke directly (using the API  from the service interface).
+ * A _service_ is described with a Java interface containing methods following the _async pattern_. Under the hood,
+ * messages are sent on the event bus to invoke the service and get the response back. But for ease of use,
+ * it generates a _proxy_ that you can invoke directly (using the API from the service interface).
  *
  *
- * == Using vert.x service proxies
+ * == Using Vert.x service proxies
  *
  * To use the Vert.x Service Proxies, add the following dependency to the _dependencies_ section of
  * your build descriptor:
@@ -55,14 +55,14 @@
  * require to re-compile the sources to regenerate the code.
  *
  * To generate the proxies in different languages, you will need to add the _language_ dependency such as
- * `vertx-lang-groovy` for Groovy....
+ * `vertx-lang-groovy` for Groovy.
  *
  * == Introduction to service proxies
  *
- * Let's have a look to service proxies and why they can be useful. Let's imagine you have a _database service_
+ * Let's have a look at service proxies and why they can be useful. Let's imagine you have a _database service_
  * exposed on the event bus, you should do something like this:
  *
- * [source,java]
+ * [source,$lang]
  * ----
  * {@link examples.Examples#example1(io.vertx.core.Vertx)}
  * ----
@@ -102,7 +102,7 @@
  *
  * That means you can interact with your service like this:
  *
- * [source,java]
+ * [source,$lang]
  * ----
  * {@link examples.Examples#example2(io.vertx.core.Vertx)}
  * ----
@@ -124,11 +124,10 @@
  * == Async Interface
  *
  * To be used by the service-proxy generation, the _service interface_ must comply to a couple of rules. First it
- * should follow the async pattern. To return result, the method should declare a
- * `Handler<AsyncResult<ResultType>>`. `ResultType` can be another proxy (and so a proxies can be factories for other
- * proxies.
+ * should follow the async pattern. To return a result, the method should declare a `Handler<AsyncResult<ResultType>>` parameter.
+ * `ResultType` can be another proxy (and so a proxies can be factories for other proxies).
  *
- * Let's see an example
+ * Let's see an example:
  *
  * [source,java]
  * ----
@@ -182,7 +181,7 @@
  *
  * More constraints on the _service interfaces_ are described below.
  *
- * ## Code generation
+ * == Code generation
  *
  * Service annotated with `@ProxyGen` annotation trigger the generation of the service helper classes:
  *
@@ -194,7 +193,6 @@
  *
  * The _codegen_ annotation processor generates these classes at compilation time. It is a feature of the Java
  * compiler so _no extra step_ is required, it is just a matter of configuring correctly the compiler.
- *
  *
  * Here a configuration example for Maven:
  *
@@ -216,7 +214,7 @@
  * This feature can also be used in Gradle, or even in IDE as they provide usually support for annotation
  * processors.
  *
- * ## Exposing your service
+ * == Exposing your service
  *
  * Once you have your _service interface_, compile the source to generate the stub and proxies. Then, you need some
  * code to "register" your service on the event bus:
@@ -239,7 +237,7 @@
  * {@link examples.Examples#unregister(io.vertx.core.Vertx)}
  * ----
  *
- * ## Proxy creation
+ * == Proxy creation
  *
  * Now that the service is exposed, you probably want to consume it. For this, you need to create a proxy. The proxy
  * can be created using the `ProxyHelper` class:
@@ -272,7 +270,7 @@
  *}
  * ----
  *
- * ## Error Handling
+ * == Error Handling
  *
  * Service methods may return errors to the client by passing a failed `Future` containing a {@link io.vertx.serviceproxy.ServiceException}
  * instance to the method's `Handler`. A `ServiceException` contains an `int` failure code, a message, and an optional
@@ -420,14 +418,14 @@
  * Note that if you're clustering `Vertx` instances, you'll need to register the custom Exception's `MessageCodec`
  * with each `Vertx` instance in the cluster.
  *
- * ## Restrictions for service interface
+ * == Restrictions for service interface
  *
  * There are restrictions on the types and return values that can be used in a service method so that these are easy to
  * marshall over event bus messages and so they can be used asynchronously. They are:
  *
- * ### Return types
+ * === Return types
  *
- * Must be one of
+ * Must be one of:
  *
  * * `void`
  * * `@Fluent` and return reference to the service (`this`):
@@ -441,7 +439,7 @@
  * This is because methods must not block and it's not possible to return a result immediately without blocking if
  * the service is remote.
  *
- * #### Parameter types
+ * === Parameter types
  *
  * Let `JSON` = `JsonObject | JsonArray`
  * Let `PRIMITIVE` = Any primitive type or boxed primitive type
@@ -473,11 +471,11 @@
  * * Any class annotated with `@DataObject`
  * * Another proxy
  *
- * ### Overloaded methods
+ * === Overloaded methods
  *
  * There must be no overloaded service methods. (_i.e._ more than one with the same name, regardless the signature).
  *
- * ## Convention for invoking services over the event bus (without proxies)
+ * == Convention for invoking services over the event bus (without proxies)
  *
  * Service Proxies assume that event bus messages follow a certain format so they can be used to invoke services.
  *
