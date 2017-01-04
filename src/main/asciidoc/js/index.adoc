@@ -15,7 +15,7 @@ it generates a _proxy_ that you can invoke directly (using the API from the serv
 
 == Using Vert.x service proxies
 
-To use the Vert.x Service Proxies, add the following dependency to the _dependencies_ section of
+To *use* Vert.x Service Proxies, add the following dependency to the _dependencies_ section of
 your build descriptor:
 
 * Maven (in your `pom.xml`):
@@ -34,6 +34,27 @@ your build descriptor:
 [source,groovy,subs="+attributes"]
 ----
 compile 'io.vertx:vertx-service-proxy:3.4.0-SNAPSHOT'
+----
+
+To *implement* service proxies, also add:
+
+* Maven (in your `pom.xml`):
+
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>io.vertx</groupId>
+  <artifactId>vertx-codegen</artifactId>
+  <version>3.4.0-SNAPSHOT</version>
+  <scope>provided</scope>
+</dependency>
+----
+
+* Gradle (in your `build.gradle` file):
+
+[source,groovy,subs="+attributes"]
+----
+compileOnly 'io.vertx:vertx-codegen:3.4.0-SNAPSHOT'
 ----
 
 Be aware that as the service proxy mechanism relies on code generation, so modifications to the _service interface_
