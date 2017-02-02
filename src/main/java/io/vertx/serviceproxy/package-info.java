@@ -268,7 +268,7 @@
  * {@link examples.Examples#proxyCreation(io.vertx.core.Vertx, io.vertx.core.eventbus.DeliveryOptions)}
  * ----
  *
- * The second method takes an instance of {@link io.vertx.core.eventbus.DeliveryOptions} where you con configure the
+ * The second method takes an instance of {@link io.vertx.core.eventbus.DeliveryOptions} where you can configure the
  * message delivery (such as the timeout).
  *
  * Alternatively, you can use the generated proxy class. The proxy class name is the _service interface_ class name
