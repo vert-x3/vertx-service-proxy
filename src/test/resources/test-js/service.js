@@ -20,8 +20,8 @@ var Vertx = require('vertx-js/vertx');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JService = io.vertx.serviceproxy.clustered.Service;
-var TestDataObject = io.vertx.serviceproxy.testmodel.TestDataObject;
+var JService = Java.type('io.vertx.serviceproxy.clustered.Service');
+var TestDataObject = Java.type('io.vertx.serviceproxy.testmodel.TestDataObject');
 
 /**
 
@@ -187,7 +187,7 @@ var Service = function(j_val) {
   this.methodWithDataObject = function(data, result) {
     var __args = arguments;
     if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
-      j_service["methodWithDataObject(io.vertx.serviceproxy.testmodel.TestDataObject,io.vertx.core.Handler)"](data != null ? new TestDataObject(new JsonObject(JSON.stringify(data))) : null, function(ar) {
+      j_service["methodWithDataObject(io.vertx.serviceproxy.testmodel.TestDataObject,io.vertx.core.Handler)"](data != null ? new TestDataObject(new JsonObject(Java.asJSONCompatible(data))) : null, function(ar) {
       if (ar.succeeded()) {
         result(utils.convReturnDataObject(ar.result()), null);
       } else {
