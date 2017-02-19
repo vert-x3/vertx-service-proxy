@@ -25,7 +25,7 @@ your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-service-proxy</artifactId>
-  <version>3.4.0.Beta1</version>
+  <version>3.4.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -33,7 +33,7 @@ your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-proxy:3.4.0.Beta1'
+compile 'io.vertx:vertx-service-proxy:3.4.0-SNAPSHOT'
 ----
 
 To *implement* service proxies, also add:
@@ -45,7 +45,7 @@ To *implement* service proxies, also add:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-codegen</artifactId>
-  <version>3.4.0.Beta1</version>
+  <version>3.4.0-SNAPSHOT</version>
   <scope>provided</scope>
 </dependency>
 ----
@@ -54,7 +54,7 @@ To *implement* service proxies, also add:
 
 [source,groovy,subs="+attributes"]
 ----
-compileOnly 'io.vertx:vertx-codegen:3.4.0.Beta1'
+compileOnly 'io.vertx:vertx-codegen:3.4.0-SNAPSHOT'
 ----
 
 Be aware that as the service proxy mechanism relies on code generation, so modifications to the _service interface_
@@ -215,10 +215,41 @@ Service annotated with `@ProxyGen` annotation trigger the generation of the serv
 Generated proxies and handlers are named after the service class, for example if the service is named `MyService`
 the handler is called `MyServiceProxyHandler` and the proxy is called `MyServiceEBProxy`.
 
+In addition Vert.x Core provides a generator creating data object converters to ease data object usage in
+service proxies. Such converter provides a basis for the `JsonObject` constructor and the `toJson()` method
+that are necessary for using data objects in service proxies.
+
 The _codegen_ annotation processor generates these classes at compilation time. It is a feature of the Java
-compiler so _no extra step_ is required, it is just a matter of configuring correctly the compiler.
+compiler so _no extra step_ is required, it is just a matter of configuring correctly your build:
+
+Just add the `io.vertx:vertx-service-proxy:processor` dependency to your build.
 
 Here a configuration example for Maven:
+
+[source,xml]
+----
+<dependency>
+  <groupId>io.vertx</groupId>
+  <artifactId>vertx-service-proxy</artifactId>
+  <version>3.4.0-SNAPSHOT</version>
+  <classifier>processor</classifier>
+</dependency>
+----
+
+This feature can also be used in Gradle:
+
+[source]
+----
+compile "io.vertx:vertx-service-proxy:3.4.0-SNAPSHOT:processor"
+----
+
+IDE provides usually support for annotation processors.
+
+The `processor` classifier adds to the jar the automatic configuration of the service proxy annotation processor
+via the `META-INF/services` plugin mechanism.
+
+If you want you can use it too with the regular jar but you need then to declare the annotation processor
+explicitly, for instance in Maven:
 
 [source,xml]
 ----
@@ -226,17 +257,11 @@ Here a configuration example for Maven:
   <artifactId>maven-compiler-plugin</artifactId>
   <configuration>
     <annotationProcessors>
-      <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
+      <annotationProcessor>io.vertx.serviceproxy.ServiceProxyProcessor</annotationProcessor>
     </annotationProcessors>
-    <compilerArgs>
-      <arg>-AoutputDirectory=${project.basedir}/src/main</arg>
-    </compilerArgs>
   </configuration>
 </plugin>
 ----
-
-This feature can also be used in Gradle, or even in IDE as they provide usually support for annotation
-processors.
 
 == Exposing your service
 

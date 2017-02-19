@@ -1,5 +1,5 @@
 {
-  "name": "Proxy",
+  "name": "service_proxies",
   "generators": [
     {
       "kind": "proxy",

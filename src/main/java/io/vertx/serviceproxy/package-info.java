@@ -212,10 +212,41 @@
  * Generated proxies and handlers are named after the service class, for example if the service is named `MyService`
  * the handler is called `MyServiceProxyHandler` and the proxy is called `MyServiceEBProxy`.
  *
+ * In addition Vert.x Core provides a generator creating data object converters to ease data object usage in
+ * service proxies. Such converter provides a basis for the `JsonObject` constructor and the `toJson()` method
+ * that are necessary for using data objects in service proxies.
+ *
  * The _codegen_ annotation processor generates these classes at compilation time. It is a feature of the Java
- * compiler so _no extra step_ is required, it is just a matter of configuring correctly the compiler.
+ * compiler so _no extra step_ is required, it is just a matter of configuring correctly your build:
+ *
+ * Just add the `io.vertx:vertx-service-proxy:processor` dependency to your build.
  *
  * Here a configuration example for Maven:
+ *
+ * [source,xml]
+ * ----
+ * <dependency>
+ *   <groupId>io.vertx</groupId>
+ *   <artifactId>vertx-service-proxy</artifactId>
+ *   <version>${maven.version}</version>
+ *   <classifier>processor</classifier>
+ * </dependency>
+ * ----
+ *
+ * This feature can also be used in Gradle:
+ *
+ * [source]
+ * ----
+ * compile "io.vertx:vertx-service-proxy:${maven.version}:processor"
+ * ----
+ *
+ * IDE provides usually support for annotation processors.
+ *
+ * The `processor` classifier adds to the jar the automatic configuration of the service proxy annotation processor
+ * via the `META-INF/services` plugin mechanism.
+ *
+ * If you want you can use it too with the regular jar but you need then to declare the annotation processor
+ * explicitly, for instance in Maven:
  *
  * [source,xml]
  * ----
@@ -223,17 +254,11 @@
  *   <artifactId>maven-compiler-plugin</artifactId>
  *   <configuration>
  *     <annotationProcessors>
- *       <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
+ *       <annotationProcessor>io.vertx.serviceproxy.ServiceProxyProcessor</annotationProcessor>
  *     </annotationProcessors>
- *     <compilerArgs>
- *       <arg>-AoutputDirectory=${project.basedir}/src/main</arg>
- *     </compilerArgs>
  *   </configuration>
  * </plugin>
  * ----
- *
- * This feature can also be used in Gradle, or even in IDE as they provide usually support for annotation
- * processors.
  *
  * == Exposing your service
  *
