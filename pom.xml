@@ -94,6 +94,7 @@
               <configuration>
                 <excludes>
                   <exclude>META-INF/**</exclude>
+                  <exclude>examples/**</exclude>
                 </excludes>
               </configuration>
             </execution>
@@ -184,6 +185,9 @@
             </goals>
             <configuration>
               <classifier>processor</classifier>
+              <excludes>
+                <exclude>examples/**</exclude>
+              </excludes>
             </configuration>
           </execution>
         </executions>
