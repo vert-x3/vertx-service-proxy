@@ -25,7 +25,7 @@ your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-service-proxy</artifactId>
-  <version>3.4.0-SNAPSHOT</version>
+  <version>3.4.0</version>
 </dependency>
 ----
 
@@ -33,7 +33,7 @@ your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-proxy:3.4.0-SNAPSHOT'
+compile 'io.vertx:vertx-service-proxy:3.4.0'
 ----
 
 To *implement* service proxies, also add:
@@ -45,7 +45,7 @@ To *implement* service proxies, also add:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-codegen</artifactId>
-  <version>3.4.0-SNAPSHOT</version>
+  <version>3.4.0</version>
   <scope>provided</scope>
 </dependency>
 ----
@@ -54,7 +54,7 @@ To *implement* service proxies, also add:
 
 [source,groovy,subs="+attributes"]
 ----
-compileOnly 'io.vertx:vertx-codegen:3.4.0-SNAPSHOT'
+compileOnly 'io.vertx:vertx-codegen:3.4.0'
 ----
 
 Be aware that as the service proxy mechanism relies on code generation, so modifications to the _service interface_
@@ -231,7 +231,7 @@ Here a configuration example for Maven:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-service-proxy</artifactId>
-  <version>3.4.0-SNAPSHOT</version>
+  <version>3.4.0</version>
   <classifier>processor</classifier>
 </dependency>
 ----
@@ -240,7 +240,7 @@ This feature can also be used in Gradle:
 
 [source]
 ----
-compile "io.vertx:vertx-service-proxy:3.4.0-SNAPSHOT:processor"
+compile "io.vertx:vertx-service-proxy:3.4.0:processor"
 ----
 
 IDE provides usually support for annotation processors.
