@@ -369,7 +369,7 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
-  
+
   @Test
   public void testCharNullHandler() {
     proxy.charNullHandler(onSuccess(res -> {
@@ -945,6 +945,6 @@ public class ServiceProxyTest extends VertxTestBase {
     proxy.booleanHandler(ar -> {
       caughtError.set(ar.cause());
     });
-    waitUntil(() -> caughtError.get() != null);
+    assertWaitUntil(() -> caughtError.get() != null);
   }
 }
