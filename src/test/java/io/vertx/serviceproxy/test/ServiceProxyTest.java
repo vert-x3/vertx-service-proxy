@@ -32,9 +32,11 @@ import io.vertx.serviceproxy.testmodel.TestService;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -946,5 +948,18 @@ public class ServiceProxyTest extends VertxTestBase {
       caughtError.set(ar.cause());
     });
     assertWaitUntil(() -> caughtError.get() != null);
+  }
+
+  @Test
+  public void testStream() {
+    proxy.createStream("the_stream", onSuccess(stream -> {
+      List<String> items = new ArrayList<>();
+      stream.handler(items::add);
+      stream.endHandler(v -> {
+        assertEquals(Arrays.asList("foo", "bar", "juu"), items);
+        testComplete();
+      });
+    }));
+    await();
   }
 }

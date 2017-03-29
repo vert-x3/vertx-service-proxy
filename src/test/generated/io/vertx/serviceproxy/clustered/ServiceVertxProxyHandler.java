@@ -64,6 +64,7 @@ public class ServiceVertxProxyHandler extends ProxyHandler {
   private final long timerID;
   private long lastAccessed;
   private final long timeoutSeconds;
+  private final io.vertx.streams.impl.StreamProducerManager<Object> bilto;
 
   public ServiceVertxProxyHandler(Vertx vertx, Service service) {
     this(vertx, service, DEFAULT_CONNECTION_TIMEOUT);
@@ -77,6 +78,7 @@ public class ServiceVertxProxyHandler extends ProxyHandler {
     this.vertx = vertx;
     this.service = service;
     this.timeoutSeconds = timeoutSeconds;
+    this.bilto = new io.vertx.streams.impl.StreamProducerManager(vertx.eventBus());
     try {
       this.vertx.eventBus().registerDefaultCodec(ServiceException.class,
           new ServiceExceptionMessageCodec());
@@ -132,30 +134,37 @@ public class ServiceVertxProxyHandler extends ProxyHandler {
           service.hello((java.lang.String)json.getValue("name"), createHandler(msg));
           break;
         }
+
         case "methodUsingEnum": {
           service.methodUsingEnum(json.getString("e") == null ? null : io.vertx.serviceproxy.testmodel.SomeEnum.valueOf(json.getString("e")), createHandler(msg));
           break;
         }
+
         case "methodReturningEnum": {
           service.methodReturningEnum(createHandler(msg));
           break;
         }
+
         case "methodReturningVertxEnum": {
           service.methodReturningVertxEnum(createHandler(msg));
           break;
         }
+
         case "methodWithJsonObject": {
           service.methodWithJsonObject((io.vertx.core.json.JsonObject)json.getValue("json"), createHandler(msg));
           break;
         }
+
         case "methodWithJsonArray": {
           service.methodWithJsonArray((io.vertx.core.json.JsonArray)json.getValue("json"), createHandler(msg));
           break;
         }
+
         case "methodWithList": {
           service.methodWithList(convertList(json.getJsonArray("list").getList()), createListHandler(msg));
           break;
         }
+
         case "methodWithDataObject": {
           service.methodWithDataObject(json.getJsonObject("data") == null ? null : new io.vertx.serviceproxy.testmodel.TestDataObject(json.getJsonObject("data")), res -> {
             if (res.failed()) {
@@ -170,6 +179,7 @@ public class ServiceVertxProxyHandler extends ProxyHandler {
          });
           break;
         }
+
         case "methodWithListOfDataObject": {
           service.methodWithListOfDataObject(json.getJsonArray("list").stream().map(o -> new TestDataObject((JsonObject)o)).collect(Collectors.toList()), res -> {
             if (res.failed()) {
@@ -184,14 +194,17 @@ public class ServiceVertxProxyHandler extends ProxyHandler {
          });
           break;
         }
+
         case "methodWithListOfJsonObject": {
           service.methodWithListOfJsonObject(convertList(json.getJsonArray("list").getList()), createListHandler(msg));
           break;
         }
+
         case "methodWthFailingResult": {
           service.methodWthFailingResult((java.lang.String)json.getValue("input"), createHandler(msg));
           break;
         }
+
         default: {
           throw new IllegalStateException("Invalid action: " + action);
         }

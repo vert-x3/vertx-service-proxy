@@ -61,8 +61,8 @@ public class TestBaseImportsServiceVertxEBProxy implements TestBaseImportsServic
 
   public void m() {
     if (closed) {
-      throw new IllegalStateException("Proxy is closed");
-    }
+    throw new IllegalStateException("Proxy is closed");
+  }
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "m");

@@ -30,6 +30,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.streams.ReadStream;
 import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.serviceproxy.testmodel.impl.TestServiceImpl;
 
@@ -61,6 +62,8 @@ public interface TestService {
   void createConnection(String str, Handler<AsyncResult<TestConnection>> resultHandler);
 
   void createConnectionWithCloseFuture(Handler<AsyncResult<TestConnectionWithCloseFuture>> resultHandler);
+
+  void createStream(String str, Handler<AsyncResult<ReadStream<String>>> resultHandler);
 
   void noParams();
 

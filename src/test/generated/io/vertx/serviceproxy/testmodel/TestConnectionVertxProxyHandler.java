@@ -58,6 +58,7 @@ public class TestConnectionVertxProxyHandler extends ProxyHandler {
   private final long timerID;
   private long lastAccessed;
   private final long timeoutSeconds;
+  private final io.vertx.streams.impl.StreamProducerManager<Object> bilto;
 
   public TestConnectionVertxProxyHandler(Vertx vertx, TestConnection service) {
     this(vertx, service, DEFAULT_CONNECTION_TIMEOUT);
@@ -71,6 +72,7 @@ public class TestConnectionVertxProxyHandler extends ProxyHandler {
     this.vertx = vertx;
     this.service = service;
     this.timeoutSeconds = timeoutSeconds;
+    this.bilto = new io.vertx.streams.impl.StreamProducerManager(vertx.eventBus());
     try {
       this.vertx.eventBus().registerDefaultCodec(ServiceException.class,
           new ServiceExceptionMessageCodec());
@@ -126,23 +128,28 @@ public class TestConnectionVertxProxyHandler extends ProxyHandler {
           service.startTransaction(createHandler(msg));
           break;
         }
+
         case "insert": {
           service.insert((java.lang.String)json.getValue("name"), (io.vertx.core.json.JsonObject)json.getValue("data"), createHandler(msg));
           break;
         }
+
         case "commit": {
           service.commit(createHandler(msg));
           break;
         }
+
         case "rollback": {
           service.rollback(createHandler(msg));
           break;
         }
+
         case "close": {
           service.close();
           close();
           break;
         }
+
         default: {
           throw new IllegalStateException("Invalid action: " + action);
         }

@@ -65,7 +65,7 @@ public class TestConnectionVertxEBProxy implements TestConnection {
 
   public TestConnection startTransaction(Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return this;
     }
     JsonObject _json = new JsonObject();
@@ -83,7 +83,7 @@ public class TestConnectionVertxEBProxy implements TestConnection {
 
   public TestConnection insert(String name, JsonObject data, Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return this;
     }
     JsonObject _json = new JsonObject();
@@ -103,7 +103,7 @@ public class TestConnectionVertxEBProxy implements TestConnection {
 
   public TestConnection commit(Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return this;
     }
     JsonObject _json = new JsonObject();
@@ -121,7 +121,7 @@ public class TestConnectionVertxEBProxy implements TestConnection {
 
   public TestConnection rollback(Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return this;
     }
     JsonObject _json = new JsonObject();
@@ -139,10 +139,10 @@ public class TestConnectionVertxEBProxy implements TestConnection {
 
   public void close() {
     if (closed) {
-      throw new IllegalStateException("Proxy is closed");
-    }
+    throw new IllegalStateException("Proxy is closed");
+  }
     closed = true;
-    JsonObject _json = new JsonObject();
+  JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "close");
     _vertx.eventBus().send(_address, _json, _deliveryOptions);

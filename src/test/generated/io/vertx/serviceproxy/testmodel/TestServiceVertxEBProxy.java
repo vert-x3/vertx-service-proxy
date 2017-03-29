@@ -41,6 +41,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 import java.util.List;
 import java.util.Map;
+import io.vertx.core.streams.ReadStream;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.serviceproxy.testmodel.TestConnectionWithCloseFuture;
@@ -74,7 +75,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void longDeliverySuccess(Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -91,7 +92,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void longDeliveryFailed(Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -108,7 +109,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void createConnection(String str, Handler<AsyncResult<TestConnection>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -127,7 +128,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void createConnectionWithCloseFuture(Handler<AsyncResult<TestConnectionWithCloseFuture>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -143,10 +144,20 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  public void createStream(String str, Handler<AsyncResult<ReadStream<String>>> resultHandler) {
+io.vertx.streams.Consumer.consumer(_vertx.eventBus(), _address).openReadStream(new io.vertx.core.json.JsonObject(), new io.vertx.core.eventbus.DeliveryOptions().addHeader("action", "createStream"), ar -> {
+  if (ar.succeeded()) {
+    resultHandler.handle(io.vertx.core.Future.succeededFuture((io.vertx.core.streams.ReadStream)ar.result()));
+  } else {
+    resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
+  }
+});
+  }
+
   public void noParams() {
     if (closed) {
-      throw new IllegalStateException("Proxy is closed");
-    }
+    throw new IllegalStateException("Proxy is closed");
+  }
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "noParams");
@@ -155,8 +166,8 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void basicTypes(String str, byte b, short s, int i, long l, float f, double d, char c, boolean bool) {
     if (closed) {
-      throw new IllegalStateException("Proxy is closed");
-    }
+    throw new IllegalStateException("Proxy is closed");
+  }
     JsonObject _json = new JsonObject();
     _json.put("str", str);
     _json.put("b", b);
@@ -174,8 +185,8 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void basicBoxedTypes(String str, Byte b, Short s, Integer i, Long l, Float f, Double d, Character c, Boolean bool) {
     if (closed) {
-      throw new IllegalStateException("Proxy is closed");
-    }
+    throw new IllegalStateException("Proxy is closed");
+  }
     JsonObject _json = new JsonObject();
     _json.put("str", str);
     _json.put("b", b);
@@ -193,8 +204,8 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void basicBoxedTypesNull(String str, Byte b, Short s, Integer i, Long l, Float f, Double d, Character c, Boolean bool) {
     if (closed) {
-      throw new IllegalStateException("Proxy is closed");
-    }
+    throw new IllegalStateException("Proxy is closed");
+  }
     JsonObject _json = new JsonObject();
     _json.put("str", str);
     _json.put("b", b);
@@ -212,8 +223,8 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void jsonTypes(JsonObject jsonObject, JsonArray jsonArray) {
     if (closed) {
-      throw new IllegalStateException("Proxy is closed");
-    }
+    throw new IllegalStateException("Proxy is closed");
+  }
     JsonObject _json = new JsonObject();
     _json.put("jsonObject", jsonObject);
     _json.put("jsonArray", jsonArray);
@@ -224,8 +235,8 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void jsonTypesNull(JsonObject jsonObject, JsonArray jsonArray) {
     if (closed) {
-      throw new IllegalStateException("Proxy is closed");
-    }
+    throw new IllegalStateException("Proxy is closed");
+  }
     JsonObject _json = new JsonObject();
     _json.put("jsonObject", jsonObject);
     _json.put("jsonArray", jsonArray);
@@ -236,8 +247,8 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void enumType(SomeEnum someEnum) {
     if (closed) {
-      throw new IllegalStateException("Proxy is closed");
-    }
+    throw new IllegalStateException("Proxy is closed");
+  }
     JsonObject _json = new JsonObject();
     _json.put("someEnum", someEnum == null ? null : someEnum.toString());
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
@@ -247,8 +258,8 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void enumTypeNull(SomeEnum someEnum) {
     if (closed) {
-      throw new IllegalStateException("Proxy is closed");
-    }
+    throw new IllegalStateException("Proxy is closed");
+  }
     JsonObject _json = new JsonObject();
     _json.put("someEnum", someEnum == null ? null : someEnum.toString());
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
@@ -258,7 +269,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void enumTypeAsResult(Handler<AsyncResult<SomeEnum>> someEnum) {
     if (closed) {
-      someEnum.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    someEnum.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -275,7 +286,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void enumTypeAsResultNull(Handler<AsyncResult<SomeEnum>> someEnum) {
     if (closed) {
-      someEnum.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    someEnum.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -292,8 +303,8 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void dataObjectType(TestDataObject options) {
     if (closed) {
-      throw new IllegalStateException("Proxy is closed");
-    }
+    throw new IllegalStateException("Proxy is closed");
+  }
     JsonObject _json = new JsonObject();
     _json.put("options", options == null ? null : options.toJson());
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
@@ -303,8 +314,8 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void dataObjectTypeNull(TestDataObject options) {
     if (closed) {
-      throw new IllegalStateException("Proxy is closed");
-    }
+    throw new IllegalStateException("Proxy is closed");
+  }
     JsonObject _json = new JsonObject();
     _json.put("options", options == null ? null : options.toJson());
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
@@ -314,8 +325,8 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void listParams(List<String> listString, List<Byte> listByte, List<Short> listShort, List<Integer> listInt, List<Long> listLong, List<JsonObject> listJsonObject, List<JsonArray> listJsonArray, List<TestDataObject> listDataObject) {
     if (closed) {
-      throw new IllegalStateException("Proxy is closed");
-    }
+    throw new IllegalStateException("Proxy is closed");
+  }
     JsonObject _json = new JsonObject();
     _json.put("listString", new JsonArray(listString));
     _json.put("listByte", new JsonArray(listByte));
@@ -332,8 +343,8 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void setParams(Set<String> setString, Set<Byte> setByte, Set<Short> setShort, Set<Integer> setInt, Set<Long> setLong, Set<JsonObject> setJsonObject, Set<JsonArray> setJsonArray, Set<TestDataObject> setDataObject) {
     if (closed) {
-      throw new IllegalStateException("Proxy is closed");
-    }
+    throw new IllegalStateException("Proxy is closed");
+  }
     JsonObject _json = new JsonObject();
     _json.put("setString", new JsonArray(new ArrayList<>(setString)));
     _json.put("setByte", new JsonArray(new ArrayList<>(setByte)));
@@ -350,8 +361,8 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void mapParams(Map<String,String> mapString, Map<String,Byte> mapByte, Map<String,Short> mapShort, Map<String,Integer> mapInt, Map<String,Long> mapLong, Map<String,JsonObject> mapJsonObject, Map<String,JsonArray> mapJsonArray) {
     if (closed) {
-      throw new IllegalStateException("Proxy is closed");
-    }
+    throw new IllegalStateException("Proxy is closed");
+  }
     JsonObject _json = new JsonObject();
     _json.put("mapString", new JsonObject(convertMap(mapString)));
     _json.put("mapByte", new JsonObject(convertMap(mapByte)));
@@ -367,7 +378,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void stringHandler(Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -384,7 +395,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void stringNullHandler(Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -401,7 +412,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void byteHandler(Handler<AsyncResult<Byte>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -418,7 +429,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void byteNullHandler(Handler<AsyncResult<Byte>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -435,7 +446,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void shortHandler(Handler<AsyncResult<Short>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -452,7 +463,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void shortNullHandler(Handler<AsyncResult<Short>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -469,7 +480,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void intHandler(Handler<AsyncResult<Integer>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -486,7 +497,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void intNullHandler(Handler<AsyncResult<Integer>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -503,7 +514,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void longHandler(Handler<AsyncResult<Long>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -520,7 +531,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void longNullHandler(Handler<AsyncResult<Long>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -537,7 +548,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void floatHandler(Handler<AsyncResult<Float>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -554,7 +565,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void floatNullHandler(Handler<AsyncResult<Float>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -571,7 +582,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void doubleHandler(Handler<AsyncResult<Double>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -588,7 +599,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void doubleNullHandler(Handler<AsyncResult<Double>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -605,7 +616,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void charHandler(Handler<AsyncResult<Character>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -622,7 +633,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void charNullHandler(Handler<AsyncResult<Character>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -639,7 +650,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void booleanHandler(Handler<AsyncResult<Boolean>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -656,7 +667,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void booleanNullHandler(Handler<AsyncResult<Boolean>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -673,7 +684,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void jsonObjectHandler(Handler<AsyncResult<JsonObject>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -690,7 +701,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void jsonObjectNullHandler(Handler<AsyncResult<JsonObject>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -707,7 +718,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void jsonArrayHandler(Handler<AsyncResult<JsonArray>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -724,7 +735,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void jsonArrayNullHandler(Handler<AsyncResult<JsonArray>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -741,7 +752,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void dataObjectHandler(Handler<AsyncResult<TestDataObject>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -758,7 +769,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void dataObjectNullHandler(Handler<AsyncResult<TestDataObject>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -775,7 +786,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void voidHandler(Handler<AsyncResult<Void>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -792,7 +803,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public TestService fluentMethod(String str, Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return this;
     }
     JsonObject _json = new JsonObject();
@@ -811,8 +822,8 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public TestService fluentNoParams() {
     if (closed) {
-      throw new IllegalStateException("Proxy is closed");
-    }
+    throw new IllegalStateException("Proxy is closed");
+  }
     JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "fluentNoParams");
@@ -822,7 +833,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void failingMethod(Handler<AsyncResult<JsonObject>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -839,7 +850,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void invokeWithMessage(JsonObject object, String str, int i, char chr, SomeEnum senum, Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -861,7 +872,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void listStringHandler(Handler<AsyncResult<List<String>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -878,7 +889,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void listByteHandler(Handler<AsyncResult<List<Byte>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -895,7 +906,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void listShortHandler(Handler<AsyncResult<List<Short>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -912,7 +923,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void listIntHandler(Handler<AsyncResult<List<Integer>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -929,7 +940,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void listLongHandler(Handler<AsyncResult<List<Long>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -946,7 +957,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void listFloatHandler(Handler<AsyncResult<List<Float>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -963,7 +974,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void listDoubleHandler(Handler<AsyncResult<List<Double>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -980,7 +991,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void listCharHandler(Handler<AsyncResult<List<Character>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -997,7 +1008,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void listBoolHandler(Handler<AsyncResult<List<Boolean>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -1014,7 +1025,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void listJsonObjectHandler(Handler<AsyncResult<List<JsonObject>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -1031,7 +1042,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void listJsonArrayHandler(Handler<AsyncResult<List<JsonArray>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -1048,7 +1059,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void listDataObjectHandler(Handler<AsyncResult<List<TestDataObject>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -1065,7 +1076,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void setStringHandler(Handler<AsyncResult<Set<String>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -1082,7 +1093,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void setByteHandler(Handler<AsyncResult<Set<Byte>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -1099,7 +1110,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void setShortHandler(Handler<AsyncResult<Set<Short>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -1116,7 +1127,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void setIntHandler(Handler<AsyncResult<Set<Integer>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -1133,7 +1144,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void setLongHandler(Handler<AsyncResult<Set<Long>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -1150,7 +1161,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void setFloatHandler(Handler<AsyncResult<Set<Float>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -1167,7 +1178,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void setDoubleHandler(Handler<AsyncResult<Set<Double>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -1184,7 +1195,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void setCharHandler(Handler<AsyncResult<Set<Character>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -1201,7 +1212,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void setBoolHandler(Handler<AsyncResult<Set<Boolean>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -1218,7 +1229,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void setJsonObjectHandler(Handler<AsyncResult<Set<JsonObject>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -1235,7 +1246,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void setJsonArrayHandler(Handler<AsyncResult<Set<JsonArray>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -1252,7 +1263,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void setDataObjectHandler(Handler<AsyncResult<Set<TestDataObject>>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
@@ -1269,7 +1280,7 @@ public class TestServiceVertxEBProxy implements TestService {
 
   public void failingCall(String value, Handler<AsyncResult<JsonObject>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();

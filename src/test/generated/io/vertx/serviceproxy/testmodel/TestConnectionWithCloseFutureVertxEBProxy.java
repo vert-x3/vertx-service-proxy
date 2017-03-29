@@ -63,11 +63,11 @@ public class TestConnectionWithCloseFutureVertxEBProxy implements TestConnection
 
   public void close(Handler<AsyncResult<Void>> handler) {
     if (closed) {
-      handler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    handler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     closed = true;
-    JsonObject _json = new JsonObject();
+  JsonObject _json = new JsonObject();
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "close");
     _vertx.eventBus().<Void>send(_address, _json, _deliveryOptions, res -> {
@@ -81,7 +81,7 @@ public class TestConnectionWithCloseFutureVertxEBProxy implements TestConnection
 
   public void someMethod(Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
-      resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
+    resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();

@@ -23,6 +23,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.streams.ReadStream;
+import io.vertx.core.streams.WriteStream;
 import io.vertx.serviceproxy.ServiceException;
 import io.vertx.serviceproxy.test.ServiceProxyTest;
 import io.vertx.serviceproxy.testmodel.MyServiceException;
@@ -31,6 +33,7 @@ import io.vertx.serviceproxy.testmodel.TestConnection;
 import io.vertx.serviceproxy.testmodel.TestConnectionWithCloseFuture;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 import io.vertx.serviceproxy.testmodel.TestService;
+import io.vertx.streams.StreamHelper;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -60,6 +63,19 @@ public class TestServiceImpl implements TestService {
   @Override
   public void createConnectionWithCloseFuture(Handler<AsyncResult<TestConnectionWithCloseFuture>> resultHandler) {
     resultHandler.handle(Future.succeededFuture(new TestConnectionWithCloseFutureImpl(vertx)));
+  }
+
+  @Override
+  public void createStream(String str, Handler<AsyncResult<ReadStream<String>>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(StreamHelper.adapter(ar -> {
+      if (ar.succeeded()) {
+        WriteStream<String> ws = ar.result();
+        ws.write("foo");
+        ws.write("bar");
+        ws.write("juu");
+        ws.end();
+      }
+    })));
   }
 
   @Override
@@ -518,14 +534,14 @@ public class TestServiceImpl implements TestService {
 
   @Override
   public void listDataObjectHandler(Handler<AsyncResult<List<TestDataObject>>> resultHandler) {
-    List<TestDataObject> list = 
+    List<TestDataObject> list =
         Arrays.asList(new TestDataObject().setNumber(1).setString("String 1").setBool(false), new TestDataObject().setNumber(2).setString("String 2").setBool(true));
     resultHandler.handle(Future.succeededFuture(list));
   }
 
   @Override
   public void setDataObjectHandler(Handler<AsyncResult<Set<TestDataObject>>> resultHandler) {
-    Set<TestDataObject> set = 
+    Set<TestDataObject> set =
         new LinkedHashSet<>(Arrays.asList(new TestDataObject().setNumber(1).setString("String 1").setBool(false), new TestDataObject().setNumber(2).setString("String 2").setBool(true)));
     resultHandler.handle(Future.succeededFuture(set));
   }

@@ -56,6 +56,7 @@ public class TestConnectionWithCloseFutureVertxProxyHandler extends ProxyHandler
   private final long timerID;
   private long lastAccessed;
   private final long timeoutSeconds;
+  private final io.vertx.streams.impl.StreamProducerManager<Object> bilto;
 
   public TestConnectionWithCloseFutureVertxProxyHandler(Vertx vertx, TestConnectionWithCloseFuture service) {
     this(vertx, service, DEFAULT_CONNECTION_TIMEOUT);
@@ -69,6 +70,7 @@ public class TestConnectionWithCloseFutureVertxProxyHandler extends ProxyHandler
     this.vertx = vertx;
     this.service = service;
     this.timeoutSeconds = timeoutSeconds;
+    this.bilto = new io.vertx.streams.impl.StreamProducerManager(vertx.eventBus());
     try {
       this.vertx.eventBus().registerDefaultCodec(ServiceException.class,
           new ServiceExceptionMessageCodec());
@@ -125,10 +127,12 @@ public class TestConnectionWithCloseFutureVertxProxyHandler extends ProxyHandler
           close();
           break;
         }
+
         case "someMethod": {
           service.someMethod(createHandler(msg));
           break;
         }
+
         default: {
           throw new IllegalStateException("Invalid action: " + action);
         }

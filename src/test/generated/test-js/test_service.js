@@ -17,6 +17,7 @@
 /** @module test-js/test_service */
 var utils = require('vertx-js/util/utils');
 var Vertx = require('vertx-js/vertx');
+var ReadStream = require('vertx-js/read_stream');
 var TestConnection = require('test-js/test_connection');
 var TestConnectionWithCloseFuture = require('test-js/test_connection_with_close_future');
 
@@ -100,6 +101,25 @@ var TestService = function(j_val) {
       j_testService["createConnectionWithCloseFuture(io.vertx.core.Handler)"](function(ar) {
       if (ar.succeeded()) {
         resultHandler(utils.convReturnVertxGen(TestConnectionWithCloseFuture, ar.result()), null);
+      } else {
+        resultHandler(null, ar.cause());
+      }
+    });
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
+   @param str {string} 
+   @param resultHandler {function} 
+   */
+  this.createStream = function(str, resultHandler) {
+    var __args = arguments;
+    if (__args.length === 2 && typeof __args[0] === 'string' && typeof __args[1] === 'function') {
+      j_testService["createStream(java.lang.String,io.vertx.core.Handler)"](str, function(ar) {
+      if (ar.succeeded()) {
+        resultHandler(utils.convReturnVertxGen(ReadStream, ar.result(), undefined), null);
       } else {
         resultHandler(null, ar.cause());
       }

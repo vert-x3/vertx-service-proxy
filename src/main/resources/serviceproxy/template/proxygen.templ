@@ -1,3 +1,13 @@
+@code{
+  def isStream(type) {
+    return type.kind == CLASS_HANDLER &&
+       type.args[0].kind == CLASS_ASYNC_RESULT &&
+       type.args[0].args[0].kind == CLASS_API &&
+       type.args[0].args[0].parameterized &&
+       type.args[0].args[0].raw.readStream;
+  }
+}
+
 
 @declare{'methodBody'}
 	@code{hasParams = !method.params.isEmpty()}
@@ -5,7 +15,7 @@
 	@code{hasResultHandler=(lastParam != null) && (lastParam.type.kind == CLASS_HANDLER) && (lastParam.type.args[0].kind == CLASS_ASYNC_RESULT)}
 	@code{count=0}
   @if{hasResultHandler}
-  if (closed) {\n  
+  if (closed) {\n
     @{lastParam.name}.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));\n
   @if{method.fluent}
     return this;\n
@@ -14,12 +24,12 @@
   @end{}
   }\n
   @else{}
-  if (closed) {\n  
-    throw new IllegalStateException("Proxy is closed");\n  
+  if (closed) {\n
+    throw new IllegalStateException("Proxy is closed");\n
   }\n
   @end{}
 @if{method.proxyClose}
-  closed = true;\n  
+  closed = true;\n
 @end{}
 
 	  JsonObject _json = new JsonObject();\n
@@ -182,7 +192,19 @@ public class @{ifaceSimpleName}VertxEBProxy implements @{ifaceSimpleName} {\n
 @foreach{method:methods}
 	@if{!method.staticMethod}
   @includeNamed{'startMethodTemplate';method:method}\n
-		@if{!method.proxyIgnore}@includeNamed{'methodBody';method:method}@end{}
+		@if{!method.proxyIgnore}
+			@if{method.params.size() > 0 && isStream(method.params[method.params.size() - 1].type)}
+			io.vertx.streams.Consumer.consumer(_vertx.eventBus(), _address).openReadStream(new io.vertx.core.json.JsonObject(), new io.vertx.core.eventbus.DeliveryOptions().addHeader("action", "@{method.name}"), ar -> {\n
+			  if (ar.succeeded()) {\n
+			    @{method.params[method.params.size() - 1].name}.handle(io.vertx.core.Future.succeededFuture((io.vertx.core.streams.ReadStream)ar.result()));\n
+			  } else {\n
+			    @{method.params[method.params.size() - 1].name}.handle(io.vertx.core.Future.failedFuture(ar.cause()));\n
+			  }\n
+			});\n
+			@else{}
+				@includeNamed{'methodBody';method:method}
+			@end{}
+		@end{}
 		@if{method.fluent}
     return this;\n
 		@end{}
