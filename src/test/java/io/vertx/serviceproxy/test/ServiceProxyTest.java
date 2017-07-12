@@ -39,6 +39,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import static java.util.concurrent.TimeUnit.*;
+
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
@@ -848,16 +850,16 @@ public class ServiceProxyTest extends VertxTestBase {
     consumer = ProxyHelper.registerService(TestService.class, vertx, service, SERVICE_ADDRESS, timeoutSeconds);
 
     proxy.createConnection("foo", onSuccess(conn -> {
+      long start = System.nanoTime();
+
       conn.startTransaction(onSuccess(res -> {
         assertEquals("foo", res);
-
-        long start = System.currentTimeMillis();
 
         vertx.eventBus().consumer("closeCalled").handler(msg -> {
           assertEquals("blah", msg.body());
 
-          long now = System.currentTimeMillis();
-          assertTrue(now - start > timeoutSeconds * 1000);
+          long duration = System.nanoTime() - start;
+          assertTrue(String.valueOf(duration), duration >= SECONDS.toNanos(timeoutSeconds));
 
           // Should be closed now
           conn.startTransaction(onFailure(cause -> {
