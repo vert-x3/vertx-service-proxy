@@ -5,7 +5,7 @@
 	@code{hasResultHandler=(lastParam != null) && (lastParam.type.kind == CLASS_HANDLER) && (lastParam.type.args[0].kind == CLASS_ASYNC_RESULT)}
 	@code{count=0}
   @if{hasResultHandler}
-  if (closed) {\n  
+  if (closed) {\n
     @{lastParam.name}.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));\n
   @if{method.fluent}
     return this;\n
@@ -14,12 +14,12 @@
   @end{}
   }\n
   @else{}
-  if (closed) {\n  
-    throw new IllegalStateException("Proxy is closed");\n  
+  if (closed) {\n
+    throw new IllegalStateException("Proxy is closed");\n
   }\n
   @end{}
 @if{method.proxyClose}
-  closed = true;\n  
+  closed = true;\n
 @end{}
 
 	  JsonObject _json = new JsonObject();\n
@@ -33,13 +33,13 @@
     _json.put("@{param.name}", @{param.name} == null ? null : @{param.name}.toString());\n
 			@else{param.type.kind == CLASS_LIST}
 				@if{param.type.args[0].kind == CLASS_DATA_OBJECT}
-    _json.put("@{param.name}", new JsonArray(@{param.name}.stream().map(@{param.type.args[0].simpleName}::toJson).collect(Collectors.toList())));\n
+    _json.put("@{param.name}", new JsonArray(@{param.name}.stream().map(r -> r == null ? null : r.toJson()).collect(Collectors.toList())));\n
 				@else{}
     _json.put("@{param.name}", new JsonArray(@{param.name}));\n
 				@end{}
 			@else{param.type.kind == CLASS_SET}
 				@if{param.type.args[0].kind == CLASS_DATA_OBJECT}
-    _json.put("@{param.name}", new JsonArray(@{param.name}.stream().map(@{param.type.args[0].simpleName}::toJson).collect(Collectors.toList())));\n
+    _json.put("@{param.name}", new JsonArray(@{param.name}.stream().map(r -> r == null ? null : r.toJson()).collect(Collectors.toList())));\n
 				@else{}
     _json.put("@{param.name}", new JsonArray(new ArrayList<>(@{param.name})));\n
 				@end{}
@@ -77,7 +77,11 @@ send(_address, _json, _deliveryOptions, res -> {\n
 					@if{resultType.args[0].name == 'java.lang.Character'}
         @{lastParam.name}.handle(Future.succeededFuture(convertToListChar(res.result().body())));\n
 					@else{resultType.args[0].kind == CLASS_DATA_OBJECT}
-        @{lastParam.name}.handle(Future.succeededFuture(res.result().body().stream().map(o -> o instanceof Map ? new @{resultType.args[0].simpleName}(new JsonObject((Map) o)) : new @{resultType.args[0].simpleName}((JsonObject) o)).collect(Collectors.toList())));\n
+        @{lastParam.name}.handle(Future.succeededFuture(res.result().body().stream()\n
+            .map(o -> { if (o == null) return null;\n
+                        return o instanceof Map ? new @{resultType.args[0].simpleName}(new JsonObject((Map) o)) : new @{resultType.args[0].simpleName}((JsonObject) o);\n
+                 })\n
+            .collect(Collectors.toList())));\n
 					@else{}
         @{lastParam.name}.handle(Future.succeededFuture(convertList(res.result().body().getList())));\n
 					@end{}
@@ -85,7 +89,11 @@ send(_address, _json, _deliveryOptions, res -> {\n
 					@if{resultType.args[0].name == 'java.lang.Character'}
         @{lastParam.name}.handle(Future.succeededFuture(convertToSetChar(res.result().body())));\n
 					@else{resultType.args[0].kind == CLASS_DATA_OBJECT}
-        @{lastParam.name}.handle(Future.succeededFuture(res.result().body().stream().map(o -> o instanceof Map ? new @{resultType.args[0].simpleName}(new JsonObject((Map) o)) : new @{resultType.args[0].simpleName}((JsonObject) o)).collect(Collectors.toSet())));\n
+        @{lastParam.name}.handle(Future.succeededFuture(res.result().body().stream()\n
+            .map(o -> { if (o == null) return null;\n
+                        return o instanceof Map ? new @{resultType.args[0].simpleName}(new JsonObject((Map) o)) : new @{resultType.args[0].simpleName}((JsonObject) o);\n
+                })\n
+            .collect(Collectors.toSet())));\n
 					@else{}
         @{lastParam.name}.handle(Future.succeededFuture(convertSet(res.result().body().getList())));\n
 					@end{}
