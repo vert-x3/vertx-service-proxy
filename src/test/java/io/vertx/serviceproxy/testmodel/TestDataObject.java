@@ -16,16 +16,23 @@
 
 package io.vertx.serviceproxy.testmodel;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
 /**
+ *
+ * The Json properties are used to reproduce https://github.com/vert-x3/vertx-service-proxy/issues/56
+ *
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
 @DataObject
 public class TestDataObject {
 
+  @JsonProperty("number")
   private int number;
+
+  @JsonProperty("string")
   private String string;
   private boolean bool;
 

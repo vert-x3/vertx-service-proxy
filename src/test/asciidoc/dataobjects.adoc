@@ -4,6 +4,8 @@
 == TestDataObject
 
 ++++
+
+ The Json properties are used to reproduce https://github.com/vert-x3/vertx-service-proxy/issues/56
 ++++
 '''
 
