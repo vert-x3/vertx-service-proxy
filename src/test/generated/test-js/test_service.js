@@ -1325,6 +1325,42 @@ var TestService = function(j_val) {
   /**
 
    @public
+   @param resultHandler {function} 
+   */
+  this.listDataObjectContainingNullHandler = function(resultHandler) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'function') {
+      j_testService["listDataObjectContainingNullHandler(io.vertx.core.Handler)"](function(ar) {
+      if (ar.succeeded()) {
+        resultHandler(utils.convReturnListSetDataObject(ar.result()), null);
+      } else {
+        resultHandler(null, ar.cause());
+      }
+    });
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
+   @param resultHandler {function} 
+   */
+  this.setDataObjectContainingNullHandler = function(resultHandler) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'function') {
+      j_testService["setDataObjectContainingNullHandler(io.vertx.core.Handler)"](function(ar) {
+      if (ar.succeeded()) {
+        resultHandler(utils.convReturnListSetDataObject(ar.result()), null);
+      } else {
+        resultHandler(null, ar.cause());
+      }
+    });
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
 
    */
   this.ignoredMethod = function() {

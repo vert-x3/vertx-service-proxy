@@ -422,7 +422,7 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
                 msg.reply(new ServiceException(-1, res.cause().getMessage()));
               }
             } else {
-              msg.reply(new JsonArray(res.result().stream().map(TestDataObject::toJson).collect(Collectors.toList())));
+              msg.reply(new JsonArray(res.result().stream().map(r -> r == null ? null : r.toJson()).collect(Collectors.toList())));
             }
          });
           break;
@@ -480,13 +480,41 @@ public class TestServiceVertxProxyHandler extends ProxyHandler {
                 msg.reply(new ServiceException(-1, res.cause().getMessage()));
               }
             } else {
-              msg.reply(new JsonArray(res.result().stream().map(TestDataObject::toJson).collect(Collectors.toList())));
+              msg.reply(new JsonArray(res.result().stream().map(r -> r == null ? null : r.toJson()).collect(Collectors.toList())));
             }
          });
           break;
         }
         case "failingCall": {
           service.failingCall((java.lang.String)json.getValue("value"), createHandler(msg));
+          break;
+        }
+        case "listDataObjectContainingNullHandler": {
+          service.listDataObjectContainingNullHandler(res -> {
+            if (res.failed()) {
+              if (res.cause() instanceof ServiceException) {
+                msg.reply(res.cause());
+              } else {
+                msg.reply(new ServiceException(-1, res.cause().getMessage()));
+              }
+            } else {
+              msg.reply(new JsonArray(res.result().stream().map(r -> r == null ? null : r.toJson()).collect(Collectors.toList())));
+            }
+         });
+          break;
+        }
+        case "setDataObjectContainingNullHandler": {
+          service.setDataObjectContainingNullHandler(res -> {
+            if (res.failed()) {
+              if (res.cause() instanceof ServiceException) {
+                msg.reply(res.cause());
+              } else {
+                msg.reply(new ServiceException(-1, res.cause().getMessage()));
+              }
+            } else {
+              msg.reply(new JsonArray(res.result().stream().map(r -> r == null ? null : r.toJson()).collect(Collectors.toList())));
+            }
+         });
           break;
         }
         case "ignoredMethod": {

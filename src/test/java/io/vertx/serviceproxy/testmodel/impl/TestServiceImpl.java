@@ -518,14 +518,14 @@ public class TestServiceImpl implements TestService {
 
   @Override
   public void listDataObjectHandler(Handler<AsyncResult<List<TestDataObject>>> resultHandler) {
-    List<TestDataObject> list = 
+    List<TestDataObject> list =
         Arrays.asList(new TestDataObject().setNumber(1).setString("String 1").setBool(false), new TestDataObject().setNumber(2).setString("String 2").setBool(true));
     resultHandler.handle(Future.succeededFuture(list));
   }
 
   @Override
   public void setDataObjectHandler(Handler<AsyncResult<Set<TestDataObject>>> resultHandler) {
-    Set<TestDataObject> set = 
+    Set<TestDataObject> set =
         new LinkedHashSet<>(Arrays.asList(new TestDataObject().setNumber(1).setString("String 1").setBool(false), new TestDataObject().setNumber(2).setString("String 2").setBool(true)));
     resultHandler.handle(Future.succeededFuture(set));
   }
@@ -553,5 +553,25 @@ public class TestServiceImpl implements TestService {
     } else {
       resultHandler.handle(Future.succeededFuture(new JsonObject()));
     }
+  }
+
+  @Override
+  public void listDataObjectContainingNullHandler(Handler<AsyncResult<List<TestDataObject>>> resultHandler) {
+    List<TestDataObject> list =
+      Arrays.asList(
+        new TestDataObject().setNumber(1).setString("String 1").setBool(false),
+        null,
+        new TestDataObject().setNumber(2).setString("String 2").setBool(true));
+    resultHandler.handle(Future.succeededFuture(list));
+  }
+
+  @Override
+  public void setDataObjectContainingNullHandler(Handler<AsyncResult<Set<TestDataObject>>> resultHandler) {
+    Set<TestDataObject> set =
+      new LinkedHashSet<>(Arrays.asList(
+        new TestDataObject().setNumber(1).setString("String 1").setBool(false),
+        null,
+        new TestDataObject().setNumber(2).setString("String 2").setBool(true)));
+    resultHandler.handle(Future.succeededFuture(set));
   }
 }

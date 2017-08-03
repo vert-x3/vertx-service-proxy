@@ -179,7 +179,7 @@ public class ServiceVertxProxyHandler extends ProxyHandler {
                 msg.reply(new ServiceException(-1, res.cause().getMessage()));
               }
             } else {
-              msg.reply(new JsonArray(res.result().stream().map(TestDataObject::toJson).collect(Collectors.toList())));
+              msg.reply(new JsonArray(res.result().stream().map(r -> r == null ? null : r.toJson()).collect(Collectors.toList())));
             }
          });
           break;

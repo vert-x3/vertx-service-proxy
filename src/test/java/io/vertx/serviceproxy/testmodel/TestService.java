@@ -204,6 +204,10 @@ public interface TestService {
 
   void failingCall(String value, Handler<AsyncResult<JsonObject>> resultHandler);
 
+  void listDataObjectContainingNullHandler(Handler<AsyncResult<List<TestDataObject>>> resultHandler);
+
+  void setDataObjectContainingNullHandler(Handler<AsyncResult<Set<TestDataObject>>> resultHandler);
+
   @ProxyIgnore
   void ignoredMethod();
 }

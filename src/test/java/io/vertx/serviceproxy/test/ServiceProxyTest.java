@@ -29,13 +29,12 @@ import io.vertx.serviceproxy.testmodel.MyServiceExceptionMessageCodec;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 import io.vertx.serviceproxy.testmodel.TestService;
+import io.vertx.test.codegen.DataObjectTest;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -948,5 +947,47 @@ public class ServiceProxyTest extends VertxTestBase {
       caughtError.set(ar.cause());
     });
     assertWaitUntil(() -> caughtError.get() != null);
+  }
+
+  @Test
+  public void testAListContainingNullValues() {
+    proxy.listDataObjectContainingNullHandler(onSuccess(list -> {
+      // Entry 1
+      assertEquals(1, list.get(0).getNumber());
+      assertEquals("String 1", list.get(0).getString());
+      assertEquals(false, list.get(0).isBool());
+
+      // Entry 2 is null
+      assertNull(list.get(1));
+
+      // Entry 3
+      assertEquals(2, list.get(2).getNumber());
+      assertEquals("String 2", list.get(2).getString());
+      assertEquals(true, list.get(2).isBool());
+
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testASetContainingNullValues() {
+    proxy.setDataObjectContainingNullHandler(onSuccess(set -> {
+      AtomicInteger countNull = new AtomicInteger();
+      AtomicInteger countNotNull = new AtomicInteger();
+      set.forEach(t -> {
+        if (t == null) {
+          countNull.incrementAndGet();
+        } else {
+          countNotNull.incrementAndGet();
+        }
+      });
+
+      assertEquals(2, countNotNull.get());
+      assertEquals(1, countNull.get());
+
+      testComplete();
+    }));
+    await();
   }
 }
