@@ -4,7 +4,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.serviceproxy.ProxyHelper;
+import io.vertx.serviceproxy.ServiceProxyFactory;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -46,30 +46,32 @@ public class Examples {
     // Create an instance of your service implementation
     SomeDatabaseService service = new SomeDatabaseServiceImpl();
     // Register the handler
-    ProxyHelper.registerService(SomeDatabaseService.class, vertx, service,
-        "database-service-address");
+    new ServiceProxyFactory(vertx)
+      .setAddress("database-service-address")
+      .register(SomeDatabaseService.class, service);
   }
 
   public void unregister(Vertx vertx) {
+    ServiceProxyFactory factory = new ServiceProxyFactory(vertx);
+
     // Create an instance of your service implementation
     SomeDatabaseService service = new SomeDatabaseServiceImpl();
     // Register the handler
-    MessageConsumer<JsonObject> consumer = ProxyHelper.registerService(SomeDatabaseService.class, vertx, service,
-        "database-service-address");
+    MessageConsumer<JsonObject> consumer = factory
+      .setAddress("database-service-address")
+      .register(SomeDatabaseService.class, service);
 
     // ....
 
     // Unregister your service.
-    ProxyHelper.unregisterService(consumer);
+    factory.unregister(consumer);
   }
 
   public void proxyCreation(Vertx vertx, DeliveryOptions options) {
-    SomeDatabaseService service = ProxyHelper.createProxy(SomeDatabaseService.class,
-        vertx,
-        "database-service-address");
+    ServiceProxyFactory factory = new ServiceProxyFactory(vertx).setAddress("database-service-address");
+
+    SomeDatabaseService service = factory.createProxy(SomeDatabaseService.class);
     // or with delivery options:
-    SomeDatabaseService service2 = ProxyHelper.createProxy(SomeDatabaseService.class,
-        vertx,
-        "database-service-address", options);
+    SomeDatabaseService service2 = factory.setOptions(options).createProxy(SomeDatabaseService.class);
   }
 }
