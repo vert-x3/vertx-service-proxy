@@ -41,10 +41,7 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-auth-jwt</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-lang-js</artifactId>
+      <optional>true</optional>
     </dependency>
 
     <dependency>

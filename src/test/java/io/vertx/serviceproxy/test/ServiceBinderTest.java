@@ -18,29 +18,30 @@ package io.vertx.serviceproxy.test;
 
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.serviceproxy.ServiceProxyFactory;
+import io.vertx.serviceproxy.ServiceBinder;
+import io.vertx.serviceproxy.ServiceProxyBuilder;
 import io.vertx.serviceproxy.testmodel.OKService;
 import io.vertx.serviceproxy.testmodel.OKServiceImpl;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
-public class ServiceProxyFactoryTest extends VertxTestBase {
+public class ServiceBinderTest extends VertxTestBase {
 
   private final static String SERVICE_ADDRESS = "someaddress";
 
   private MessageConsumer<JsonObject> consumer;
-  private OKService service;
   private OKService proxy;
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    service = new OKServiceImpl();
+    OKService service = new OKServiceImpl();
 
-    final ServiceProxyFactory factory = new ServiceProxyFactory(vertx).setAddress(SERVICE_ADDRESS);
+    final ServiceBinder serviceBinder = new ServiceBinder(vertx).setAddress(SERVICE_ADDRESS);
+    final ServiceProxyBuilder serviceProxyBuilder = new ServiceProxyBuilder(vertx).setAddress(SERVICE_ADDRESS);
 
-    consumer = factory.register(OKService.class, service);
-    proxy = factory.createProxy(OKService.class);
+    consumer = serviceBinder.register(OKService.class, service);
+    proxy = serviceProxyBuilder.build(OKService.class);
   }
 
   @Override

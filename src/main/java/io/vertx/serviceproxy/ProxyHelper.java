@@ -26,22 +26,22 @@ import java.util.Objects;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  *
- * @deprecated for a more robust proxy creation see: {@link ServiceProxyFactory}
+ * @deprecated for a more robust proxy creation see: {@link ServiceBinder}
  */
 @Deprecated
 public class ProxyHelper {
 
   public static <T> T createProxy(Class<T> clazz, Vertx vertx, String address) {
-    return new ServiceProxyFactory(vertx)
+    return new ServiceProxyBuilder(vertx)
       .setAddress(address)
-      .createProxy(clazz);
+      .build(clazz);
   }
 
   public static <T> T createProxy(Class<T> clazz, Vertx vertx, String address, DeliveryOptions options) {
-    return new ServiceProxyFactory(vertx)
+    return new ServiceProxyBuilder(vertx)
       .setAddress(address)
       .setOptions(options)
-      .createProxy(clazz);
+      .build(clazz);
   }
 
   public static final long DEFAULT_CONNECTION_TIMEOUT = 5 * 60; // 5 minutes
@@ -57,14 +57,14 @@ public class ProxyHelper {
    * @return the consumer used to unregister the service
    */
   public static <T> MessageConsumer<JsonObject> registerService(Class<T> clazz, Vertx vertx, T service, String address) {
-    return new ServiceProxyFactory(vertx)
+    return new ServiceBinder(vertx)
       .setAddress(address)
       .register(clazz, service);
   }
 
   public static <T> MessageConsumer<JsonObject> registerService(Class<T> clazz, Vertx vertx, T service, String address,
                                                                 long timeoutSeconds) {
-    return new ServiceProxyFactory(vertx)
+    return new ServiceBinder(vertx)
       .setAddress(address)
       .setTimeoutSeconds(timeoutSeconds)
       .register(clazz, service);
@@ -73,7 +73,7 @@ public class ProxyHelper {
   public static <T> MessageConsumer<JsonObject> registerService(Class<T> clazz, Vertx vertx, T service, String address,
                                                                 boolean topLevel,
                                                                 long timeoutSeconds) {
-    return new ServiceProxyFactory(vertx)
+    return new ServiceBinder(vertx)
       .setAddress(address)
       .setTopLevel(topLevel)
       .setTimeoutSeconds(timeoutSeconds)

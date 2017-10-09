@@ -22,16 +22,17 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.SecretOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
-import io.vertx.serviceproxy.ServiceProxyFactory;
+import io.vertx.serviceproxy.ServiceBinder;
+import io.vertx.serviceproxy.ServiceProxyBuilder;
 import io.vertx.serviceproxy.testmodel.*;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
-public class SecureServiceProxyFactoryTest extends VertxTestBase {
+public class SecureServiceBinderTest extends VertxTestBase {
 
   private final static String SERVICE_ADDRESS = "someaddress";
 
-  private ServiceProxyFactory factory;
+  private ServiceProxyBuilder serviceProxyBuilder;
   private MessageConsumer<JsonObject> consumer;
   private OKService proxy;
 
@@ -40,14 +41,17 @@ public class SecureServiceProxyFactoryTest extends VertxTestBase {
     super.setUp();
     OKService service = new OKServiceImpl();
 
-    factory = new ServiceProxyFactory(vertx)
+    ServiceBinder serviceBinder = new ServiceBinder(vertx)
       .setAddress(SERVICE_ADDRESS)
       .setJwtAuth(JWTAuth.create(vertx, new JWTAuthOptions()
-          .addSecret(new SecretOptions()
-            .setType("HS256")
-            .setSecret("notasecret"))));
+        .addSecret(new SecretOptions()
+          .setType("HS256")
+          .setSecret("notasecret"))));
 
-    consumer = factory.register(OKService.class, service);
+    consumer = serviceBinder.register(OKService.class, service);
+
+    serviceProxyBuilder = new ServiceProxyBuilder(vertx)
+      .setAddress(SERVICE_ADDRESS);
   }
 
   @Override
@@ -59,10 +63,10 @@ public class SecureServiceProxyFactoryTest extends VertxTestBase {
   @Test
   public void testWithToken() {
 
-    factory
+    serviceProxyBuilder
       .setToken("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MDE3ODUyMDZ9.08K_rROcCmKTF1cKfPCli2GQFYIOP8dePxeS1SE4dc8");
 
-    proxy = factory.createProxy(OKService.class);
+    proxy = serviceProxyBuilder.build(OKService.class);
 
     proxy.ok(res -> {
       assertFalse(res.failed());
@@ -74,10 +78,10 @@ public class SecureServiceProxyFactoryTest extends VertxTestBase {
   @Test
   public void testWithoutToken() {
 
-    factory
+    serviceProxyBuilder
       .setToken(null);
 
-    proxy = factory.createProxy(OKService.class);
+    proxy = serviceProxyBuilder.build(OKService.class);
 
     proxy.ok(res -> {
       assertTrue(res.failed());

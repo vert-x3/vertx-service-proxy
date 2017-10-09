@@ -27,11 +27,11 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * A factory for Service Proxies which state can be reused during the factory lifecycle.
+ * A binder for Service Proxies which state can be reused during the binder lifecycle.
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
-public class ServiceProxyFactory {
+public class ServiceBinder {
 
   public static final long DEFAULT_CONNECTION_TIMEOUT = 5 * 60; // 5 minutes
 
@@ -42,15 +42,13 @@ public class ServiceProxyFactory {
   private long timeoutSeconds = DEFAULT_CONNECTION_TIMEOUT;
   private JWTAuth jwtAuth;
   private Set<String> authorities;
-  private DeliveryOptions options;
-  private String token;
 
   /**
    * Creates a factory.
    *
    * @param vertx a non null instance of vertx.
    */
-  public ServiceProxyFactory(Vertx vertx) {
+  public ServiceBinder(Vertx vertx) {
     Objects.requireNonNull(vertx);
 
     this.vertx = vertx;
@@ -62,7 +60,7 @@ public class ServiceProxyFactory {
    * @param address an eventbus address
    * @return self
    */
-  public ServiceProxyFactory setAddress(String address) {
+  public ServiceBinder setAddress(String address) {
     this.address = address;
     return this;
   }
@@ -73,7 +71,7 @@ public class ServiceProxyFactory {
    * @param topLevel true for top level (default: true)
    * @return self
    */
-  public ServiceProxyFactory setTopLevel(boolean topLevel) {
+  public ServiceBinder setTopLevel(boolean topLevel) {
     this.topLevel = topLevel;
     return this;
   }
@@ -84,7 +82,7 @@ public class ServiceProxyFactory {
    * @param timeoutSeconds the default timeout (default: 5 minutes)
    * @return self
    */
-  public ServiceProxyFactory setTimeoutSeconds(long timeoutSeconds) {
+  public ServiceBinder setTimeoutSeconds(long timeoutSeconds) {
     this.timeoutSeconds = timeoutSeconds;
     return this;
   }
@@ -95,7 +93,7 @@ public class ServiceProxyFactory {
    * @param jwtAuth a JWT auth
    * @return self
    */
-  public ServiceProxyFactory setJwtAuth(JWTAuth jwtAuth) {
+  public ServiceBinder setJwtAuth(JWTAuth jwtAuth) {
     this.jwtAuth = jwtAuth;
     return this;
   }
@@ -107,7 +105,7 @@ public class ServiceProxyFactory {
    * @param authorities set of authorities
    * @return self
    */
-  public ServiceProxyFactory setAuthorities(Set<String> authorities) {
+  public ServiceBinder setAuthorities(Set<String> authorities) {
     this.authorities = authorities;
     return this;
   }
@@ -118,7 +116,7 @@ public class ServiceProxyFactory {
    * @param authority authority
    * @return self
    */
-  public ServiceProxyFactory addAuthority(String authority) {
+  public ServiceBinder addAuthority(String authority) {
     if (authorities == null) {
       authorities = new HashSet<>();
     }
@@ -130,32 +128,10 @@ public class ServiceProxyFactory {
    * Clear the current set of authorities.
    * @return self
    */
-  public ServiceProxyFactory clearAuthorities() {
+  public ServiceBinder clearAuthorities() {
     if (authorities != null) {
       authorities.clear();
     }
-    return this;
-  }
-
-  /**
-   * Set a JWT token to be used on proxy calls.
-   *
-   * @param token a JWT token
-   * @return self
-   */
-  public ServiceProxyFactory setToken(String token) {
-    this.token = token;
-    return this;
-  }
-
-  /**
-   * Set delivery options to be used during a proxy call.
-   *
-   * @param options delivery options
-   * @return self
-   */
-  public ServiceProxyFactory setOptions(DeliveryOptions options) {
-    this.options = options;
     return this;
   }
 
@@ -196,38 +172,6 @@ public class ServiceProxyFactory {
       // Fall back to plain unregister.
       consumer.unregister();
     }
-  }
-
-  /**
-   * Creates a proxy to a service on the event bus.
-   *
-   * @param clazz   the service class (interface)
-   * @param <T>     the type of the service interface
-   * @return a proxy to the service
-   */
-  public <T> T createProxy(Class<T> clazz) {
-    Objects.requireNonNull(address);
-
-    String proxyClassName = clazz.getName() + "VertxEBProxy";
-    Class<?> proxyClass = loadClass(proxyClassName, clazz);
-    Constructor constructor;
-    Object instance;
-
-    if (token != null) {
-      if (options == null) {
-        options = new DeliveryOptions();
-      }
-      options.addHeader("auth-token", token);
-    }
-
-    if (options == null) {
-      constructor = getConstructor(proxyClass, Vertx.class, String.class);
-      instance = createInstance(constructor, vertx, address);
-    } else {
-      constructor = getConstructor(proxyClass, Vertx.class, String.class, DeliveryOptions.class);
-      instance = createInstance(constructor, vertx, address, options);
-    }
-    return (T) instance;
   }
 
   private static Class<?> loadClass(String name, Class origin) {
