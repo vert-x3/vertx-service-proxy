@@ -16,10 +16,19 @@
 
 package io.vertx.serviceproxy;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.jwt.JWTAuth;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -27,10 +36,19 @@ import io.vertx.core.json.JsonObject;
 public abstract class ProxyHandler implements Handler<Message<JsonObject>> {
 
   protected boolean closed;
-  protected MessageConsumer<JsonObject> consumer;
 
-  public void setConsumer(MessageConsumer<JsonObject> consumer) {
-    this.consumer = consumer;
+  protected MessageConsumer<JsonObject> consumer;
+  private JWTAuth authProvider;
+  private Set<String> authorities;
+
+  public ProxyHandler setJWTAuth(JWTAuth authProvider) {
+    this.authProvider = authProvider;
+    return this;
+  }
+
+  public ProxyHandler setAuthorities(Set<String> authorities) {
+    this.authorities = authorities;
+    return this;
   }
 
   public void close() {
@@ -41,9 +59,71 @@ public abstract class ProxyHandler implements Handler<Message<JsonObject>> {
   /**
    * Register the proxy handle on the event bus.
    *
+   * @param eventBus the event bus
    * @param address the proxy address
-   * @return the registered message consumer
    */
-  public abstract MessageConsumer<JsonObject> registerHandler(String address);
+  public MessageConsumer<JsonObject> register(EventBus eventBus, String address) {
+    consumer = eventBus.consumer(address, msg -> {
+      if (authProvider == null) {
+        handle(msg);
+        return;
+      }
 
+      final String authorization = msg.headers().get("auth-token");
+
+      if (authorization == null) {
+        msg.fail(401, "Unauthorized");
+        return;
+      }
+
+      authProvider.authenticate(new JsonObject().put("jwt", authorization), authenticate -> {
+        if (authenticate.failed()) {
+          msg.fail(500, authenticate.cause().getMessage());
+          return;
+        }
+
+        final User user = authenticate.result();
+
+        if (user == null) {
+          msg.fail(403, "Forbidden");
+          return;
+        }
+
+        final int requiredcount = authorities == null ? 0 : authorities.size();
+
+        if (requiredcount > 0) {
+
+          AtomicInteger count = new AtomicInteger();
+          AtomicBoolean sentFailure = new AtomicBoolean();
+
+          Handler<AsyncResult<Boolean>> authHandler = res -> {
+            if (res.succeeded()) {
+              if (res.result()) {
+                if (count.incrementAndGet() == requiredcount) {
+                  // Has all required authorities
+                  handle(msg);
+                }
+              } else {
+                if (sentFailure.compareAndSet(false, true)) {
+                  msg.fail(403, "Forbidden");
+                }
+              }
+            } else {
+              msg.fail(500, res.cause().getMessage());
+            }
+          };
+          for (String authority : authorities) {
+            if (!sentFailure.get()) {
+              user.isAuthorised(authority, authHandler);
+            }
+          }
+        } else {
+          // No auth required
+          handle(msg);
+        }
+      });
+    });
+
+    return consumer;
+  }
 }

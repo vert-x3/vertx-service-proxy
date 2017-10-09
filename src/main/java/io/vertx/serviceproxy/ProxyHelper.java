@@ -21,31 +21,27 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 
-import java.lang.reflect.Constructor;
 import java.util.Objects;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
+ *
+ * @deprecated for a more robust proxy creation see: {@link ServiceBinder}
  */
+@Deprecated
 public class ProxyHelper {
 
   public static <T> T createProxy(Class<T> clazz, Vertx vertx, String address) {
-    return createProxy(clazz, vertx, address, null);
+    return new ServiceProxyBuilder(vertx)
+      .setAddress(address)
+      .build(clazz);
   }
 
   public static <T> T createProxy(Class<T> clazz, Vertx vertx, String address, DeliveryOptions options) {
-    String proxyClassName = clazz.getName() + "VertxEBProxy";
-    Class<?> proxyClass = loadClass(proxyClassName, clazz);
-    Constructor constructor;
-    Object instance;
-    if (options == null) {
-      constructor = getConstructor(proxyClass, Vertx.class, String.class);
-      instance = createInstance(constructor, vertx, address);
-    } else {
-      constructor = getConstructor(proxyClass, Vertx.class, String.class, DeliveryOptions.class);
-      instance = createInstance(constructor, vertx, address, options);
-    }
-    return (T) instance;
+    return new ServiceProxyBuilder(vertx)
+      .setAddress(address)
+      .setOptions(options)
+      .build(clazz);
   }
 
   public static final long DEFAULT_CONNECTION_TIMEOUT = 5 * 60; // 5 minutes
@@ -61,25 +57,27 @@ public class ProxyHelper {
    * @return the consumer used to unregister the service
    */
   public static <T> MessageConsumer<JsonObject> registerService(Class<T> clazz, Vertx vertx, T service, String address) {
-    // No timeout - used for top level services
-    return registerService(clazz, vertx, service, address, DEFAULT_CONNECTION_TIMEOUT);
+    return new ServiceBinder(vertx)
+      .setAddress(address)
+      .register(clazz, service);
   }
 
   public static <T> MessageConsumer<JsonObject> registerService(Class<T> clazz, Vertx vertx, T service, String address,
                                                                 long timeoutSeconds) {
-    // No timeout - used for top level services
-    return registerService(clazz, vertx, service, address, true, timeoutSeconds);
+    return new ServiceBinder(vertx)
+      .setAddress(address)
+      .setTimeoutSeconds(timeoutSeconds)
+      .register(clazz, service);
   }
 
   public static <T> MessageConsumer<JsonObject> registerService(Class<T> clazz, Vertx vertx, T service, String address,
                                                                 boolean topLevel,
                                                                 long timeoutSeconds) {
-    String handlerClassName = clazz.getName() + "VertxProxyHandler";
-    Class<?> handlerClass = loadClass(handlerClassName, clazz);
-    Constructor constructor = getConstructor(handlerClass, Vertx.class, clazz, boolean.class, long.class);
-    Object instance = createInstance(constructor, vertx, service, topLevel, timeoutSeconds);
-    ProxyHandler handler = (ProxyHandler) instance;
-    return handler.registerHandler(address);
+    return new ServiceBinder(vertx)
+      .setAddress(address)
+      .setTopLevel(topLevel)
+      .setTimeoutSeconds(timeoutSeconds)
+      .register(clazz, service);
   }
 
   /**
@@ -94,30 +92,6 @@ public class ProxyHelper {
     } else {
       // Fall back to plain unregister.
       consumer.unregister();
-    }
-  }
-
-  private static Class<?> loadClass(String name, Class origin) {
-    try {
-      return origin.getClassLoader().loadClass(name);
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException("Cannot find proxyClass: " + name, e);
-    }
-  }
-
-  private static Constructor getConstructor(Class<?> clazz, Class<?>... types) {
-    try {
-      return clazz.getDeclaredConstructor(types);
-    } catch (NoSuchMethodException e) {
-      throw new IllegalStateException("Cannot find constructor on: " + clazz.getName(), e);
-    }
-  }
-
-  private static Object createInstance(Constructor constructor, Object... args) {
-    try {
-      return constructor.newInstance(args);
-    } catch (Exception e) {
-      throw new IllegalStateException("Failed to call constructor on", e);
     }
   }
 }
