@@ -22,6 +22,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.SecretOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
+import io.vertx.serviceproxy.ServiceJWTInterceptor;
 import io.vertx.serviceproxy.ServiceBinder;
 import io.vertx.serviceproxy.ServiceProxyBuilder;
 import io.vertx.serviceproxy.testmodel.*;
@@ -43,10 +44,10 @@ public class SecureServiceBinderTest extends VertxTestBase {
 
     ServiceBinder serviceBinder = new ServiceBinder(vertx)
       .setAddress(SERVICE_ADDRESS)
-      .setJwtAuth(JWTAuth.create(vertx, new JWTAuthOptions()
+      .addInterceptor(new ServiceJWTInterceptor().setJwtAuth(JWTAuth.create(vertx, new JWTAuthOptions()
         .addSecret(new SecretOptions()
           .setType("HS256")
-          .setSecret("notasecret"))));
+          .setSecret("notasecret")))));
 
     consumer = serviceBinder.register(OKService.class, service);
 

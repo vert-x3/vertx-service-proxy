@@ -16,19 +16,16 @@
 
 package io.vertx.serviceproxy;
 
-import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.jwt.JWTAuth;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -36,20 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class ProxyHandler implements Handler<Message<JsonObject>> {
 
   protected boolean closed;
-
   protected MessageConsumer<JsonObject> consumer;
-  private JWTAuth authProvider;
-  private Set<String> authorities;
-
-  public ProxyHandler setJWTAuth(JWTAuth authProvider) {
-    this.authProvider = authProvider;
-    return this;
-  }
-
-  public ProxyHandler setAuthorities(Set<String> authorities) {
-    this.authorities = authorities;
-    return this;
-  }
 
   public void close() {
     consumer.unregister();
@@ -63,67 +47,34 @@ public abstract class ProxyHandler implements Handler<Message<JsonObject>> {
    * @param address the proxy address
    */
   public MessageConsumer<JsonObject> register(EventBus eventBus, String address) {
-    consumer = eventBus.consumer(address, msg -> {
-      if (authProvider == null) {
-        handle(msg);
-        return;
-      }
+    return register(eventBus, address, null);
+  }
 
-      final String authorization = msg.headers().get("auth-token");
-
-      if (authorization == null) {
-        msg.fail(401, "Unauthorized");
-        return;
-      }
-
-      authProvider.authenticate(new JsonObject().put("jwt", authorization), authenticate -> {
-        if (authenticate.failed()) {
-          msg.fail(500, authenticate.cause().getMessage());
-          return;
-        }
-
-        final User user = authenticate.result();
-
-        if (user == null) {
-          msg.fail(403, "Forbidden");
-          return;
-        }
-
-        final int requiredcount = authorities == null ? 0 : authorities.size();
-
-        if (requiredcount > 0) {
-
-          AtomicInteger count = new AtomicInteger();
-          AtomicBoolean sentFailure = new AtomicBoolean();
-
-          Handler<AsyncResult<Boolean>> authHandler = res -> {
-            if (res.succeeded()) {
-              if (res.result()) {
-                if (count.incrementAndGet() == requiredcount) {
-                  // Has all required authorities
-                  handle(msg);
-                }
-              } else {
-                if (sentFailure.compareAndSet(false, true)) {
-                  msg.fail(403, "Forbidden");
-                }
-              }
+  /**
+   * Register the proxy handle on the event bus.
+   *
+   * @param eventBus the event bus
+   * @param address the proxy address
+   */
+  public MessageConsumer<JsonObject> register(EventBus eventBus, String address, List<Function<Message<JsonObject>, Future<Message<JsonObject>>>> interceptors) {
+    Handler<Message<JsonObject>> handler = this::handle;
+    if (interceptors != null) {
+      for (Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor : interceptors) {
+        Handler<Message<JsonObject>> prev = handler;
+        handler = msg -> {
+          Future<Message<JsonObject>> fut = interceptor.apply(msg);
+          fut.setHandler(ar -> {
+            if (ar.succeeded()) {
+              prev.handle(msg);
             } else {
-              msg.fail(500, res.cause().getMessage());
+              ReplyException exception = (ReplyException) ar.cause();
+              msg.fail(exception.failureCode(), exception.getMessage());
             }
-          };
-          for (String authority : authorities) {
-            if (!sentFailure.get()) {
-              user.isAuthorised(authority, authHandler);
-            }
-          }
-        } else {
-          // No auth required
-          handle(msg);
-        }
-      });
-    });
-
+          });
+        };
+      }
+    }
+    consumer = eventBus.consumer(address, handler);
     return consumer;
   }
 }

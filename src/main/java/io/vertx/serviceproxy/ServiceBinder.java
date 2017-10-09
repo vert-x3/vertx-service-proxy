@@ -15,16 +15,17 @@
  */
 package io.vertx.serviceproxy;
 
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.DeliveryOptions;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.jwt.JWTAuth;
 
 import java.lang.reflect.Constructor;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 
 /**
  * A binder for Service Proxies which state can be reused during the binder lifecycle.
@@ -40,8 +41,7 @@ public class ServiceBinder {
   private String address;
   private boolean topLevel = true;
   private long timeoutSeconds = DEFAULT_CONNECTION_TIMEOUT;
-  private JWTAuth jwtAuth;
-  private Set<String> authorities;
+  private List<Function<Message<JsonObject>, Future<Message<JsonObject>>>> interceptors;
 
   /**
    * Creates a factory.
@@ -87,51 +87,11 @@ public class ServiceBinder {
     return this;
   }
 
-  /**
-   * Set a JWT auth that will verify all requests before the service is invoked.
-   *
-   * @param jwtAuth a JWT auth
-   * @return self
-   */
-  public ServiceBinder setJwtAuth(JWTAuth jwtAuth) {
-    this.jwtAuth = jwtAuth;
-    return this;
-  }
-
-  /**
-   * Set the required authorities for the service, once a JWT is validated it will be
-   * queried for these authorities. If authorities are missing a error 403 is returned.
-   *
-   * @param authorities set of authorities
-   * @return self
-   */
-  public ServiceBinder setAuthorities(Set<String> authorities) {
-    this.authorities = authorities;
-    return this;
-  }
-
-  /**
-   * Add a single authority to the authorities set.
-   *
-   * @param authority authority
-   * @return self
-   */
-  public ServiceBinder addAuthority(String authority) {
-    if (authorities == null) {
-      authorities = new HashSet<>();
+  public ServiceBinder addInterceptor(Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
+    if (interceptors == null) {
+      interceptors = new ArrayList<>();
     }
-    authorities.add(authority);
-    return this;
-  }
-
-  /**
-   * Clear the current set of authorities.
-   * @return self
-   */
-  public ServiceBinder clearAuthorities() {
-    if (authorities != null) {
-      authorities.clear();
-    }
+    interceptors.add(interceptor);
     return this;
   }
 
@@ -151,11 +111,8 @@ public class ServiceBinder {
     Constructor constructor = getConstructor(handlerClass, Vertx.class, clazz, boolean.class, long.class);
     Object instance = createInstance(constructor, vertx, service, topLevel, timeoutSeconds);
     ProxyHandler handler = (ProxyHandler) instance;
-    // security
-    handler.setJWTAuth(jwtAuth);
-    handler.setAuthorities(authorities);
     // register
-    return handler.register(vertx.eventBus(), address);
+    return handler.register(vertx.eventBus(), address, interceptors);
   }
 
   /**
