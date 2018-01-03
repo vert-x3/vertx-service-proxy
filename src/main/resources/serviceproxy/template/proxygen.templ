@@ -189,6 +189,7 @@ public class @{ifaceSimpleName}VertxEBProxy implements @{ifaceSimpleName} {\n
 \n
 @foreach{method:methods}
 	@if{!method.staticMethod}
+  @Override\n
   @includeNamed{'startMethodTemplate';method:method}\n
 		@if{!method.proxyIgnore}@includeNamed{'methodBody';method:method}@end{}
 		@if{method.fluent}

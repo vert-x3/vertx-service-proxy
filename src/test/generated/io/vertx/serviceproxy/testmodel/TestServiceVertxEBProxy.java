@@ -72,6 +72,7 @@ public class TestServiceVertxEBProxy implements TestService {
     } catch (IllegalStateException ex) {}
   }
 
+  @Override
   public void longDeliverySuccess(Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -89,6 +90,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void longDeliveryFailed(Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -106,6 +108,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void createConnection(String str, Handler<AsyncResult<TestConnection>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -125,6 +128,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void createConnectionWithCloseFuture(Handler<AsyncResult<TestConnectionWithCloseFuture>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -143,6 +147,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void noParams() {
     if (closed) {
     throw new IllegalStateException("Proxy is closed");
@@ -153,6 +158,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
 
+  @Override
   public void basicTypes(String str, byte b, short s, int i, long l, float f, double d, char c, boolean bool) {
     if (closed) {
     throw new IllegalStateException("Proxy is closed");
@@ -172,6 +178,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
 
+  @Override
   public void basicBoxedTypes(String str, Byte b, Short s, Integer i, Long l, Float f, Double d, Character c, Boolean bool) {
     if (closed) {
     throw new IllegalStateException("Proxy is closed");
@@ -191,6 +198,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
 
+  @Override
   public void basicBoxedTypesNull(String str, Byte b, Short s, Integer i, Long l, Float f, Double d, Character c, Boolean bool) {
     if (closed) {
     throw new IllegalStateException("Proxy is closed");
@@ -210,6 +218,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
 
+  @Override
   public void jsonTypes(JsonObject jsonObject, JsonArray jsonArray) {
     if (closed) {
     throw new IllegalStateException("Proxy is closed");
@@ -222,6 +231,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
 
+  @Override
   public void jsonTypesNull(JsonObject jsonObject, JsonArray jsonArray) {
     if (closed) {
     throw new IllegalStateException("Proxy is closed");
@@ -234,6 +244,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
 
+  @Override
   public void enumType(SomeEnum someEnum) {
     if (closed) {
     throw new IllegalStateException("Proxy is closed");
@@ -245,6 +256,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
 
+  @Override
   public void enumTypeNull(SomeEnum someEnum) {
     if (closed) {
     throw new IllegalStateException("Proxy is closed");
@@ -256,6 +268,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
 
+  @Override
   public void enumTypeAsResult(Handler<AsyncResult<SomeEnum>> someEnum) {
     if (closed) {
     someEnum.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -273,6 +286,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void enumTypeAsResultNull(Handler<AsyncResult<SomeEnum>> someEnum) {
     if (closed) {
     someEnum.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -290,6 +304,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void dataObjectType(TestDataObject options) {
     if (closed) {
     throw new IllegalStateException("Proxy is closed");
@@ -301,6 +316,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
 
+  @Override
   public void dataObjectTypeNull(TestDataObject options) {
     if (closed) {
     throw new IllegalStateException("Proxy is closed");
@@ -312,6 +328,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
 
+  @Override
   public void listParams(List<String> listString, List<Byte> listByte, List<Short> listShort, List<Integer> listInt, List<Long> listLong, List<JsonObject> listJsonObject, List<JsonArray> listJsonArray, List<TestDataObject> listDataObject) {
     if (closed) {
     throw new IllegalStateException("Proxy is closed");
@@ -330,6 +347,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
 
+  @Override
   public void setParams(Set<String> setString, Set<Byte> setByte, Set<Short> setShort, Set<Integer> setInt, Set<Long> setLong, Set<JsonObject> setJsonObject, Set<JsonArray> setJsonArray, Set<TestDataObject> setDataObject) {
     if (closed) {
     throw new IllegalStateException("Proxy is closed");
@@ -348,6 +366,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
 
+  @Override
   public void mapParams(Map<String,String> mapString, Map<String,Byte> mapByte, Map<String,Short> mapShort, Map<String,Integer> mapInt, Map<String,Long> mapLong, Map<String,JsonObject> mapJsonObject, Map<String,JsonArray> mapJsonArray) {
     if (closed) {
     throw new IllegalStateException("Proxy is closed");
@@ -365,6 +384,7 @@ public class TestServiceVertxEBProxy implements TestService {
     _vertx.eventBus().send(_address, _json, _deliveryOptions);
   }
 
+  @Override
   public void stringHandler(Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -382,6 +402,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void stringNullHandler(Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -399,6 +420,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void byteHandler(Handler<AsyncResult<Byte>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -416,6 +438,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void byteNullHandler(Handler<AsyncResult<Byte>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -433,6 +456,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void shortHandler(Handler<AsyncResult<Short>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -450,6 +474,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void shortNullHandler(Handler<AsyncResult<Short>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -467,6 +492,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void intHandler(Handler<AsyncResult<Integer>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -484,6 +510,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void intNullHandler(Handler<AsyncResult<Integer>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -501,6 +528,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void longHandler(Handler<AsyncResult<Long>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -518,6 +546,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void longNullHandler(Handler<AsyncResult<Long>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -535,6 +564,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void floatHandler(Handler<AsyncResult<Float>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -552,6 +582,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void floatNullHandler(Handler<AsyncResult<Float>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -569,6 +600,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void doubleHandler(Handler<AsyncResult<Double>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -586,6 +618,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void doubleNullHandler(Handler<AsyncResult<Double>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -603,6 +636,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void charHandler(Handler<AsyncResult<Character>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -620,6 +654,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void charNullHandler(Handler<AsyncResult<Character>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -637,6 +672,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void booleanHandler(Handler<AsyncResult<Boolean>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -654,6 +690,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void booleanNullHandler(Handler<AsyncResult<Boolean>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -671,6 +708,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void jsonObjectHandler(Handler<AsyncResult<JsonObject>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -688,6 +726,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void jsonObjectNullHandler(Handler<AsyncResult<JsonObject>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -705,6 +744,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void jsonArrayHandler(Handler<AsyncResult<JsonArray>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -722,6 +762,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void jsonArrayNullHandler(Handler<AsyncResult<JsonArray>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -739,6 +780,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void dataObjectHandler(Handler<AsyncResult<TestDataObject>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -756,6 +798,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void dataObjectNullHandler(Handler<AsyncResult<TestDataObject>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -773,6 +816,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void voidHandler(Handler<AsyncResult<Void>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -790,6 +834,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public TestService fluentMethod(String str, Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -809,6 +854,7 @@ public class TestServiceVertxEBProxy implements TestService {
     return this;
   }
 
+  @Override
   public TestService fluentNoParams() {
     if (closed) {
     throw new IllegalStateException("Proxy is closed");
@@ -820,6 +866,7 @@ public class TestServiceVertxEBProxy implements TestService {
     return this;
   }
 
+  @Override
   public void failingMethod(Handler<AsyncResult<JsonObject>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -837,6 +884,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void invokeWithMessage(JsonObject object, String str, int i, char chr, SomeEnum senum, Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -859,6 +907,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void listStringHandler(Handler<AsyncResult<List<String>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -876,6 +925,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void listByteHandler(Handler<AsyncResult<List<Byte>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -893,6 +943,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void listShortHandler(Handler<AsyncResult<List<Short>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -910,6 +961,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void listIntHandler(Handler<AsyncResult<List<Integer>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -927,6 +979,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void listLongHandler(Handler<AsyncResult<List<Long>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -944,6 +997,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void listFloatHandler(Handler<AsyncResult<List<Float>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -961,6 +1015,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void listDoubleHandler(Handler<AsyncResult<List<Double>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -978,6 +1033,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void listCharHandler(Handler<AsyncResult<List<Character>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -995,6 +1051,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void listBoolHandler(Handler<AsyncResult<List<Boolean>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -1012,6 +1069,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void listJsonObjectHandler(Handler<AsyncResult<List<JsonObject>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -1029,6 +1087,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void listJsonArrayHandler(Handler<AsyncResult<List<JsonArray>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -1046,6 +1105,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void listDataObjectHandler(Handler<AsyncResult<List<TestDataObject>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -1067,6 +1127,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void setStringHandler(Handler<AsyncResult<Set<String>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -1084,6 +1145,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void setByteHandler(Handler<AsyncResult<Set<Byte>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -1101,6 +1163,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void setShortHandler(Handler<AsyncResult<Set<Short>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -1118,6 +1181,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void setIntHandler(Handler<AsyncResult<Set<Integer>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -1135,6 +1199,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void setLongHandler(Handler<AsyncResult<Set<Long>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -1152,6 +1217,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void setFloatHandler(Handler<AsyncResult<Set<Float>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -1169,6 +1235,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void setDoubleHandler(Handler<AsyncResult<Set<Double>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -1186,6 +1253,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void setCharHandler(Handler<AsyncResult<Set<Character>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -1203,6 +1271,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void setBoolHandler(Handler<AsyncResult<Set<Boolean>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -1220,6 +1289,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void setJsonObjectHandler(Handler<AsyncResult<Set<JsonObject>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -1237,6 +1307,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void setJsonArrayHandler(Handler<AsyncResult<Set<JsonArray>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -1254,6 +1325,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void setDataObjectHandler(Handler<AsyncResult<Set<TestDataObject>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -1275,6 +1347,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void failingCall(String value, Handler<AsyncResult<JsonObject>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -1293,6 +1366,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void listDataObjectContainingNullHandler(Handler<AsyncResult<List<TestDataObject>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -1314,6 +1388,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void setDataObjectContainingNullHandler(Handler<AsyncResult<Set<TestDataObject>>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -1335,6 +1410,7 @@ public class TestServiceVertxEBProxy implements TestService {
     });
   }
 
+  @Override
   public void ignoredMethod() {
   }
 

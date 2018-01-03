@@ -61,6 +61,7 @@ public class OKServiceVertxEBProxy implements OKService {
     } catch (IllegalStateException ex) {}
   }
 
+  @Override
   public void ok(Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));

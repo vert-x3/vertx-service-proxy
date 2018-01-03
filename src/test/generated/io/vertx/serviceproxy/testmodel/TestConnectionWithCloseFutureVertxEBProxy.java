@@ -61,6 +61,7 @@ public class TestConnectionWithCloseFutureVertxEBProxy implements TestConnection
     } catch (IllegalStateException ex) {}
   }
 
+  @Override
   public void close(Handler<AsyncResult<Void>> handler) {
     if (closed) {
     handler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -79,6 +80,7 @@ public class TestConnectionWithCloseFutureVertxEBProxy implements TestConnection
     });
   }
 
+  @Override
   public void someMethod(Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
