@@ -59,6 +59,7 @@ public class TestBaseImportsServiceVertxEBProxy implements TestBaseImportsServic
     } catch (IllegalStateException ex) {}
   }
 
+  @Override
   public void m() {
     if (closed) {
     throw new IllegalStateException("Proxy is closed");

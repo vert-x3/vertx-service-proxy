@@ -63,6 +63,7 @@ public class TestConnectionVertxEBProxy implements TestConnection {
     } catch (IllegalStateException ex) {}
   }
 
+  @Override
   public TestConnection startTransaction(Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -81,6 +82,7 @@ public class TestConnectionVertxEBProxy implements TestConnection {
     return this;
   }
 
+  @Override
   public TestConnection insert(String name, JsonObject data, Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -101,6 +103,7 @@ public class TestConnectionVertxEBProxy implements TestConnection {
     return this;
   }
 
+  @Override
   public TestConnection commit(Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -119,6 +122,7 @@ public class TestConnectionVertxEBProxy implements TestConnection {
     return this;
   }
 
+  @Override
   public TestConnection rollback(Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -137,6 +141,7 @@ public class TestConnectionVertxEBProxy implements TestConnection {
     return this;
   }
 
+  @Override
   public void close() {
     if (closed) {
     throw new IllegalStateException("Proxy is closed");
