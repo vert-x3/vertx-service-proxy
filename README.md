@@ -4,7 +4,7 @@
 
 Please see the main documentation on the web-site for a full description:
 
-* [Web-site documentation](https://github.com/vert-x3/vertx-service-proxy/blob/master/src/main/asciidoc/java/index.adoc)
+* [Web-site documentation](https://vertx.io/docs/vertx-service-proxy/java/)
 
 Many Vert.x applications include various services which do useful things and often can be reused from one application
 to another. An example would be a database service.
