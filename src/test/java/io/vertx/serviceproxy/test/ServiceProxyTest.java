@@ -46,19 +46,23 @@ import static java.util.concurrent.TimeUnit.*;
 public class ServiceProxyTest extends VertxTestBase {
 
   public final static String SERVICE_ADDRESS = "someaddress";
+  public final static String SERVICE_LOCAL_ADDRESS = "someaddress.local";
   public final static String TEST_ADDRESS = "testaddress";
 
-  MessageConsumer<JsonObject> consumer;
-  TestService service;
-  TestService proxy;
+  MessageConsumer<JsonObject> consumer, localConsumer;
+  TestService service, localService;
+  TestService proxy, localProxy;
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
     service = TestService.create(vertx);
+    localService = TestService.create(vertx);
     consumer = ProxyHelper.registerService(TestService.class, vertx, service, SERVICE_ADDRESS);
+    localConsumer = ProxyHelper.registerLocalService(TestService.class, vertx, localService, SERVICE_LOCAL_ADDRESS);
 
     proxy = TestService.createProxy(vertx, SERVICE_ADDRESS);
+    localProxy = TestService.createProxy(vertx, SERVICE_LOCAL_ADDRESS);
     vertx.eventBus().<String>consumer(TEST_ADDRESS).handler(msg -> {
       assertEquals("ok", msg.body());
       testComplete();
@@ -68,6 +72,7 @@ public class ServiceProxyTest extends VertxTestBase {
   @Override
   public void tearDown() throws Exception {
     consumer.unregister();
+    localConsumer.unregister();
     super.tearDown();
   }
 
@@ -845,36 +850,9 @@ public class ServiceProxyTest extends VertxTestBase {
   public void testConnectionTimeout() {
 
     consumer.unregister();
-    long timeoutSeconds = 2;
-    consumer = ProxyHelper.registerService(TestService.class, vertx, service, SERVICE_ADDRESS, timeoutSeconds);
+    consumer = ProxyHelper.registerService(TestService.class, vertx, service, SERVICE_ADDRESS, (long) 2);
 
-    proxy.createConnection("foo", onSuccess(conn -> {
-      long start = System.nanoTime();
-
-      conn.startTransaction(onSuccess(res -> {
-        assertEquals("foo", res);
-
-        vertx.eventBus().consumer("closeCalled").handler(msg -> {
-          assertEquals("blah", msg.body());
-
-          long duration = System.nanoTime() - start;
-          assertTrue(String.valueOf(duration), duration >= SECONDS.toNanos(timeoutSeconds));
-
-          // Should be closed now
-          conn.startTransaction(onFailure(cause -> {
-            assertNotNull(cause);
-            assertTrue(cause instanceof ReplyException);
-            assertFalse(cause instanceof ServiceException);
-            ReplyException re = (ReplyException) cause;
-            assertEquals(ReplyFailure.NO_HANDLERS, re.failureType());
-            testComplete();
-          }));
-
-
-        });
-
-      }));
-    }));
+    checkConnection(proxy, 2L);
 
     await();
   }
@@ -883,29 +861,31 @@ public class ServiceProxyTest extends VertxTestBase {
   public void testConnectionWithCloseFutureTimeout() {
 
     consumer.unregister();
-    long timeoutSeconds = 2;
-    consumer = ProxyHelper.registerService(TestService.class, vertx, service, SERVICE_ADDRESS, timeoutSeconds);
+    consumer = ProxyHelper.registerService(TestService.class, vertx, service, SERVICE_ADDRESS, (long) 2);
 
-    long start = System.currentTimeMillis();
-    proxy.createConnectionWithCloseFuture(onSuccess(conn -> {
+    checkConnectionWithCloseFuture(proxy, System.currentTimeMillis(), 2L);
 
-      vertx.eventBus().consumer("closeCalled").handler(msg -> {
-        assertEquals("blah", msg.body());
+    await();
+  }
 
-        long now = System.currentTimeMillis();
-        assertTrue(now - start > timeoutSeconds * 1000);
+  @Test
+  public void testLocalServiceConnectionTimeout() {
 
-        // Should be closed now
-        conn.someMethod(onFailure(cause -> {
-          assertNotNull(cause);
-          assertTrue(cause instanceof ReplyException);
-          assertFalse(cause instanceof ServiceException);
-          ReplyException re = (ReplyException) cause;
-          assertEquals(ReplyFailure.NO_HANDLERS, re.failureType());
-          testComplete();
-        }));
-      });
-    }));
+    localConsumer.unregister();
+    localConsumer = ProxyHelper.registerLocalService(TestService.class, vertx, localService, SERVICE_LOCAL_ADDRESS, 2L);
+
+    checkConnection(localProxy, 2L);
+
+    await();
+  }
+
+  @Test
+  public void testLocalServiceConnectionWithCloseFutureTimeout() {
+
+    localConsumer.unregister();
+    localConsumer = ProxyHelper.registerLocalService(TestService.class, vertx, localService, SERVICE_LOCAL_ADDRESS, 2L);
+
+    checkConnectionWithCloseFuture(localProxy, System.currentTimeMillis(), 2L);
 
     await();
   }
@@ -989,5 +969,56 @@ public class ServiceProxyTest extends VertxTestBase {
       testComplete();
     }));
     await();
+  }
+
+  @Test
+  public void testLocalServiceFromLocalSender() {
+    localProxy.noParams();
+    await();
+  }
+
+  private void checkConnection(TestService proxy, long timeoutSeconds) {
+    proxy.createConnection("foo", onSuccess(conn -> {
+      long start = System.nanoTime();
+
+      conn.startTransaction(onSuccess(res -> {
+        assertEquals("foo", res);
+
+        vertx.eventBus().consumer("closeCalled").handler(msg -> {
+          assertEquals("blah", msg.body());
+
+          long duration = System.nanoTime() - start;
+          assertTrue(String.valueOf(duration), duration >= SECONDS.toNanos(timeoutSeconds));
+
+          // Should be closed now
+          conn.startTransaction(onFailure(this::checkCause));
+        });
+
+      }));
+    }));
+  }
+
+  private void checkConnectionWithCloseFuture(TestService proxy, long start, long timeoutSeconds) {
+    proxy.createConnectionWithCloseFuture(onSuccess(conn -> {
+
+      vertx.eventBus().consumer("closeCalled").handler(msg -> {
+        assertEquals("blah", msg.body());
+
+        long now = System.currentTimeMillis();
+        assertTrue(now - start > timeoutSeconds * 1000);
+
+        // Should be closed now
+        conn.someMethod(onFailure(this::checkCause));
+      });
+    }));
+  }
+
+  private void checkCause(Throwable cause) {
+    assertNotNull(cause);
+    assertTrue(cause instanceof ReplyException);
+    assertFalse(cause instanceof ServiceException);
+    ReplyException re = (ReplyException) cause;
+    assertEquals(ReplyFailure.NO_HANDLERS, re.failureType());
+    testComplete();
   }
 }

@@ -3,8 +3,6 @@ package io.vertx.serviceproxy.clustered;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.eventbus.ReplyException;
-import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ServiceException;
@@ -14,7 +12,6 @@ import io.vertx.serviceproxy.testmodel.SomeVertxEnum;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>

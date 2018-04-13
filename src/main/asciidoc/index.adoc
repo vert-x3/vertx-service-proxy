@@ -256,7 +256,17 @@ code to "register" your service on the event bus:
 This can be done in a verticle, or anywhere in your code.
 
 Once registered, the service becomes accessible. If you are running your application on a cluster, the service is
-available from any host.
+available from any host. If you do not want your service to be accessible to other nodes in the cluster, use the
+`link:../../apidocs/io/vertx/serviceproxy/ServiceBinder.html#registerLocal-java.lang.Class-T-[registerLocal]` method:
+
+[source, java]
+----
+SomeDatabaseService service = new SomeDatabaseServiceImpl();
+// Register the handler locally (will not be propagated to other nodes in the cluster)
+new ServiceBinder(vertx)
+  .setAddress("database-service-address")
+  .registerLocal(SomeDatabaseService.class, service);
+----
 
 To withdraw your service, use the {@link io.vertx.serviceproxy.ServiceBinder#unregister(io.vertx.core.eventbus.MessageConsumer)}
 method:

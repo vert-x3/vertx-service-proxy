@@ -4,22 +4,16 @@ import com.jayway.awaitility.Awaitility;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.eventbus.ReplyException;
+import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ServiceException;
-import io.vertx.serviceproxy.ServiceExceptionMessageCodec;
-import io.vertx.serviceproxy.testmodel.MyServiceException;
-import io.vertx.serviceproxy.testmodel.MyServiceExceptionMessageCodec;
-import io.vertx.serviceproxy.testmodel.SomeEnum;
-import io.vertx.serviceproxy.testmodel.SomeVertxEnum;
-import io.vertx.serviceproxy.testmodel.TestDataObject;
+import io.vertx.serviceproxy.testmodel.*;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -41,6 +35,7 @@ public class ClusteredTest {
           new MyServiceExceptionMessageCodec());
       providerNode.set(vertx);
       vertx.deployVerticle(ServiceProviderVerticle.class.getName());
+      vertx.deployVerticle(LocalServiceProviderVerticle.class.getName());
     });
 
     Vertx.clusteredVertx(new VertxOptions().setClustered(true).setClusterHost("127.0.0.1"), ar -> {
@@ -223,6 +218,21 @@ public class ClusteredTest {
       assertThat(ar.cause() instanceof MyServiceException).isTrue();
       assertThat(((MyServiceException)ar.cause()).failureCode()).isEqualTo(30);
       assertThat(((MyServiceException)ar.cause()).getExtra()).isEqualTo("some extra");
+      result.set(ar.cause());
+    });
+    Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> result.get() != null);
+  }
+
+  @Test
+  public void testLocalServiceShouldBeUnreachable() {
+    AtomicReference<Throwable> result = new AtomicReference<>();
+    Service service = Service.createProxy(consumerNode.get(), "my.local.service");
+    service.hello("vert.x", (ar) -> {
+      assertThat(ar.succeeded()).isFalse().withFailMessage("Local service should not be accessible from a different node in the cluster");
+      assertThat(ar.cause()).isNotNull();
+      assertThat(ar.cause()).isInstanceOf(ReplyException.class);
+      ReplyException exception = (ReplyException) ar.cause();
+      assertThat(exception.failureType()).isEqualTo(ReplyFailure.NO_HANDLERS);
       result.set(ar.cause());
     });
     Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> result.get() != null);
