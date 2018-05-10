@@ -29,7 +29,6 @@ import io.vertx.serviceproxy.testmodel.MyServiceExceptionMessageCodec;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 import io.vertx.serviceproxy.testmodel.TestService;
-import io.vertx.test.codegen.DataObjectTest;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
