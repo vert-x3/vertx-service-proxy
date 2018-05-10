@@ -16,7 +16,7 @@
 package io.vertx.serviceproxy;
 
 import io.vertx.codegen.CodeGenProcessor;
-import io.vertx.codegen.CodeGenerator;
+import io.vertx.codegen.Generator;
 
 import java.util.function.Predicate;
 
@@ -26,11 +26,11 @@ import java.util.function.Predicate;
 @javax.annotation.processing.SupportedOptions({})
 public class ServiceProxyProcessor extends CodeGenProcessor {
 
-  private static final Predicate<CodeGenerator> FILTER = generator ->
+  private static final Predicate<Generator> FILTER = generator ->
     generator.name.contains("service_proxies") || generator.name.equals("data_object_converters");
 
   @Override
-  protected Predicate<CodeGenerator> filterGenerators() {
-    return FILTER;
+  protected Predicate<Generator> filterGenerators() {
+    return super.filterGenerators();
   }
 }
