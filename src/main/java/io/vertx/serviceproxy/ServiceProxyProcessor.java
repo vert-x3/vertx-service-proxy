@@ -32,6 +32,6 @@ public class ServiceProxyProcessor extends CodeGenProcessor {
 
   @Override
   protected Predicate<Generator> filterGenerators() {
-    return super.filterGenerators();
+    return FILTER;
   }
 }
