@@ -24,6 +24,7 @@ import java.util.function.Predicate;
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
 @javax.annotation.processing.SupportedOptions({})
+@javax.annotation.processing.SupportedSourceVersion(javax.lang.model.SourceVersion.RELEASE_8)
 public class ServiceProxyProcessor extends CodeGenProcessor {
 
   private static final Predicate<Generator> FILTER = generator ->
