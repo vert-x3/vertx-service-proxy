@@ -67,6 +67,13 @@
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-codegen</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+      <version>3.6.0-SNAPSHOT</version>
+    </dependency>
 
     <dependency>
       <groupId>com.jayway.awaitility</groupId>
@@ -92,7 +99,7 @@
               <id>default-jar</id>
               <configuration>
                 <excludes>
-                  <exclude>META-INF/**</exclude>
+                  <exclude>META-INF/javax.annotation.processing.Processor</exclude>
                   <exclude>examples/**</exclude>
                 </excludes>
               </configuration>
@@ -124,18 +131,8 @@
             <execution>
               <id>default-compile</id>
               <configuration>
-                <annotationProcessors>
-                  <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
-                  <annotationProcessor>io.vertx.docgen.JavaDocGenProcessor</annotationProcessor>
-                  <annotationProcessor>io.vertx.docgen.DocGenProcessor</annotationProcessor>
-                </annotationProcessors>
-                <generatedSourcesDirectory>${project.basedir}/target/generated-for-docs</generatedSourcesDirectory>
                 <compilerArgs>
-                  <arg>-Acodegen.output=${project.basedir}/target/generated-for-docs</arg>
-                  <arg>-Adocgen.output=${asciidoc.dir}/$lang</arg>
-                  <arg>-Amaven.groupId=${project.groupId}</arg>
-                  <arg>-Amaven.artifactId=${project.artifactId}</arg>
-                  <arg>-Amaven.version=${project.version}</arg>
+                  <arg>-proc:none</arg>
                 </compilerArgs>
               </configuration>
             </execution>
@@ -148,6 +145,15 @@
               </configuration>
             </execution>
           </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <additionalClasspathElements>
+              <additionalClasspathElement>${project.build.testSourceDirectory}</additionalClasspathElement>
+            </additionalClasspathElements>
+          </configuration>
         </plugin>
 
       </plugins>
@@ -217,6 +223,47 @@
         </configuration>
         <executions>
           <execution>
+            <!--
+            <execution>
+              <id>default-compile</id>
+              <configuration>
+                <annotationProcessors>
+                  <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
+                  <annotationProcessor>io.vertx.docgen.JavaDocGenProcessor</annotationProcessor>
+                  <annotationProcessor>io.vertx.docgen.DocGenProcessor</annotationProcessor>
+                </annotationProcessors>
+                <generatedSourcesDirectory>${project.basedir}/target/generated-for-docs</generatedSourcesDirectory>
+                <compilerArgs>
+                  <arg>-Acodegen.output=${project.basedir}/target/generated-for-docs</arg>
+                  <arg>-Adocgen.output=${asciidoc.dir}/$lang</arg>
+                  <arg>-Amaven.groupId=${project.groupId}</arg>
+                  <arg>-Amaven.artifactId=${project.artifactId}</arg>
+                  <arg>-Amaven.version=${project.version}</arg>
+                </compilerArgs>
+              </configuration>
+            </execution>
+            -->
+            <id>generate-sources</id>
+            <goals>
+              <goal>process</goal>
+            </goals>
+            <phase>process-classes</phase>
+            <configuration>
+              <processors>
+                <processor>io.vertx.codegen.CodeGenProcessor</processor>
+                <processor>io.vertx.docgen.JavaDocGenProcessor</processor>
+                <processor>io.vertx.docgen.DocGenProcessor</processor>
+              </processors>
+              <optionMap>
+                <codegen.output>${project.basedir}/target/generated-for-docs</codegen.output>
+                <docgen.output>${asciidoc.dir}/$lang</docgen.output>
+                <maven.groupId>${project.groupId}</maven.groupId>
+                <maven.artifactId>${project.artifactId}</maven.artifactId>
+                <maven.version>${project.version}</maven.version>
+              </optionMap>
+            </configuration>
+          </execution>
+          <execution>
             <id>generate-test-sources</id>
             <goals>
               <goal>process-test</goal>
@@ -226,6 +273,9 @@
               <processors>
                 <processor>io.vertx.codegen.CodeGenProcessor</processor>
               </processors>
+              <excludes>
+                <exclude>io/vertx/serviceproxy/codegen/**</exclude>
+              </excludes>
             </configuration>
           </execution>
         </executions>
