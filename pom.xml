@@ -142,17 +142,14 @@
             <execution>
               <id>default-testCompile</id>
               <configuration>
-                <annotationProcessors>
-                  <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
-                </annotationProcessors>
-                <generatedTestSourcesDirectory>${project.basedir}/src/test/generated</generatedTestSourcesDirectory>
                 <compilerArgs>
-                  <arg>-AoutputDirectory=${project.basedir}/src/test</arg>
+                  <arg>-proc:none</arg>
                 </compilerArgs>
               </configuration>
             </execution>
           </executions>
         </plugin>
+
       </plugins>
 
     </pluginManagement>
@@ -205,6 +202,30 @@
               <descriptors>
                 <descriptor>${basedir}/src/main/assembly/docs.xml</descriptor>
               </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.bsc.maven</groupId>
+        <artifactId>maven-processor-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <systemProperties>
+            <java.util.logging.SimpleFormatter.format>%4$s: %3$s - %5$s %6$s%n</java.util.logging.SimpleFormatter.format>
+          </systemProperties>
+        </configuration>
+        <executions>
+          <execution>
+            <id>generate-test-sources</id>
+            <goals>
+              <goal>process-test</goal>
+            </goals>
+            <phase>generate-test-sources</phase>
+            <configuration>
+              <processors>
+                <processor>io.vertx.codegen.CodeGenProcessor</processor>
+              </processors>
             </configuration>
           </execution>
         </executions>
