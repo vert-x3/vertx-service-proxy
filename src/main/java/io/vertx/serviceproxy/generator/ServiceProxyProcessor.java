@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.serviceproxy;
+package io.vertx.serviceproxy.generator;
 
 import io.vertx.codegen.CodeGenProcessor;
 import io.vertx.codegen.Generator;

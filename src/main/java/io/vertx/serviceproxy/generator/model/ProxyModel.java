@@ -14,7 +14,7 @@
  * You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.serviceproxy.model;
+package io.vertx.serviceproxy.generator.model;
 
 import io.vertx.codegen.*;
 import io.vertx.codegen.annotations.ProxyClose;

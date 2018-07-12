@@ -1,4 +1,4 @@
-package io.vertx.serviceproxy.model;
+package io.vertx.serviceproxy.generator.model;
 
 /*
  * Copyright 2014 Red Hat, Inc.

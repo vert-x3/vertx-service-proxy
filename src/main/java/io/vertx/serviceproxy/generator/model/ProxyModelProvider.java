@@ -1,4 +1,4 @@
-package io.vertx.serviceproxy.model;
+package io.vertx.serviceproxy.generator.model;
 
 import io.vertx.codegen.Model;
 import io.vertx.codegen.ModelProvider;
