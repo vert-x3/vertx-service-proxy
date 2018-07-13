@@ -17,12 +17,18 @@ public class GeneratorUtils {
 
   final String classHeader;
   final String proxyGenImports;
+  final String handlerGenImports;
   final String roger;
+  final String handlerConstructorBody;
+  final String handlerCloseAccessed;
 
   public GeneratorUtils() {
-    classHeader = loadResource("class_header");
-    proxyGenImports = loadResource("proxy_gen_import");
-    roger = loadResource("roger");
+    classHeader = loadResource("class_header") + "\n";
+    proxyGenImports = loadResource("proxy_gen_import") + "\n";
+    handlerGenImports = loadResource("handler_gen_import") + "\n";
+    handlerConstructorBody = loadResource("handler_constructor_body") + "\n";
+    handlerCloseAccessed = loadResource("handler_close_accessed") + "\n";
+    roger = loadResource("roger") + "\n";
   }
 
   public void classHeader(PrintWriter w) {
@@ -33,7 +39,13 @@ public class GeneratorUtils {
     w.print(proxyGenImports);
   }
 
+  public void handlerGenImports(PrintWriter w) { w.print(handlerGenImports); }
+
   public void roger(PrintWriter w) { w.print(roger); }
+
+  public void handlerConstructorBody(PrintWriter w) { w.print(handlerConstructorBody); }
+
+  public void handleCloseAccessed(PrintWriter w) { w.print(handlerCloseAccessed); }
 
   public void writeImport(PrintWriter w, String i) {
     w.print("import " + i + ";\n");
@@ -41,7 +53,7 @@ public class GeneratorUtils {
 
   private String loadResource(String resource) {
     try {
-      Path p = Paths.get(GeneratorUtils.class.getResource(resource + ".txt").toURI());
+      Path p = Paths.get(GeneratorUtils.class.getResource("/" + resource + ".txt").toURI());
       return String.join("\n", Files.readAllLines(p, StandardCharsets.UTF_8));
     } catch (Exception e) { // Should never happen
       e.printStackTrace();

@@ -23,13 +23,17 @@ public class CodeWriter extends PrintWriter {
     super(out);
   }
 
+  public String indentation() {
+    return indent;
+  }
+
   public CodeWriter indent() {
     indent += "  ";
     return this;
   }
 
   public CodeWriter unindent() {
-    if (indent.length() > 2) indent.substring(0, indent.length() - 2);
+    if (indent.length() >= 2) indent = indent.substring(0, indent.length() - 2);
     return this;
   }
 

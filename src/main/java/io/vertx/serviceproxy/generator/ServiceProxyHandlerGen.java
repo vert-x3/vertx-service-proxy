@@ -2,20 +2,41 @@ package io.vertx.serviceproxy.generator;
 
 import io.vertx.codegen.DataObjectModel;
 import io.vertx.codegen.Generator;
+import io.vertx.codegen.ParamInfo;
 import io.vertx.codegen.PropertyInfo;
-import io.vertx.codegen.type.ClassKind;
+import io.vertx.codegen.type.*;
+import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
+import io.vertx.serviceproxy.generator.model.ProxyModel;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author <a href="http://slinkydeveloper.github.io">Francesco Guardiani @slinkydeveloper</a>
  */
-public class ServiceProxyHandlerGen extends Generator<DataObjectModel> {
+public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
 
   final GeneratorUtils utils;
+  final Map<String, String> numericMapping = Stream.of(
+    new SimpleEntry<>("byte", "byte"),
+    new SimpleEntry<>("java.lang.Byte", "byte"),
+    new SimpleEntry<>("short", "short"),
+    new SimpleEntry<>("java.lang.Short", "short"),
+    new SimpleEntry<>("int", "int"),
+    new SimpleEntry<>("java.lang.Integer", "int"),
+    new SimpleEntry<>("long", "long"),
+    new SimpleEntry<>("java.lang.Long", "long"),
+    new SimpleEntry<>("float", "float"),
+    new SimpleEntry<>("java.lang.Float", "float"),
+    new SimpleEntry<>("double", "double"),
+    new SimpleEntry<>("java.lang.Double", "double")
+  ).collect(Collectors.toMap((e) -> e.getKey(), (e) -> e.getValue()));
 
   public ServiceProxyHandlerGen(GeneratorUtils utils) {
     kinds = Collections.singleton("proxy");
@@ -24,235 +45,223 @@ public class ServiceProxyHandlerGen extends Generator<DataObjectModel> {
   }
 
   @Override
-  public String relativeFilename(DataObjectModel model) {
-    if (model.isClass() && model.getGenerateConverter()) {
-      return model.getFqn() + "Converter.java";
-    }
-    return null;
+  public String relativeFilename(ProxyModel model) {
+    return model.getIfacePackageName() + "." + className(model) + ".java";
+  }
+
+  public String className(ProxyModel model) {
+    return model.getIfaceSimpleName() + "VertxProxyHandler";
+  }
+
+  public Stream<String> additionalImports(ProxyModel model) {
+    return model.getImportedTypes().stream().filter(c -> !c.getPackageName().equals("java.lang")).map(ClassTypeInfo::toString);
   }
 
   @Override
-  public String render(DataObjectModel model, int index, int size, Map<String, Object> session) {
+  public String render(ProxyModel model, int index, int size, Map<String, Object> session) {
     StringWriter buffer = new StringWriter();
-    PrintWriter writer = new PrintWriter(buffer);
-    String visibility= model.isPublicConverter() ? "public" : "";
-    String simpleName = model.getType().getSimpleName();
-    boolean inheritConverter = model.getInheritConverter();
-    writer.print("package " + model.getType().getPackageName() + ";\n");
-    writer.print("\n");
-    writer.print("import io.vertx.core.json.JsonObject;\n");
-    writer.print("import io.vertx.core.json.JsonArray;\n");
-    writer.print("\n");
-    writer.print("/**\n");
-    writer.print(" * Converter for {@link " + model.getType() + "}.\n");
-    writer.print(" * NOTE: This class has been automatically generated from the {@link " + model.getType() + "} original class using Vert.x codegen.\n");
-    writer.print(" */\n");
-    writer.print(visibility + " class " + simpleName + "Converter {\n");
-    writer.print("\n");
-    generateFromson(visibility, inheritConverter, model, writer);
-    writer.print("\n");
-    generateToJson(visibility, inheritConverter, model, writer);
-    writer.print("}\n");
+    CodeWriter writer = new CodeWriter(buffer);
+    String className = className(model);
+    utils.classHeader(writer);
+    writer.stmt("package " + model.getIfacePackageName());
+    writer.newLine();
+    utils.writeImport(writer, model.getIfaceFQCN());
+    utils.handlerGenImports(writer);
+    additionalImports(model).forEach(i -> utils.writeImport(writer, i));
+    utils.roger(writer);
+    writer
+      .code("@SuppressWarnings({\"unchecked\", \"rawtypes\"})\n")
+      .code("public class " + className + " extends ProxyHandler {\n")
+      .newLine()
+      .indent()
+      .code("public static final long DEFAULT_CONNECTION_TIMEOUT = 5 * 60; // 5 minutes \n")
+      .stmt("private final Vertx vertx")
+      .stmt("private final " + model.getIfaceSimpleName() + " service")
+      .stmt("private final long timerID")
+      .stmt("private long lastAccessed")
+      .stmt("private final long timeoutSeconds")
+      .newLine()
+      .code("public " + className + "(Vertx vertx, " + model.getIfaceSimpleName() + " service){\n")
+      .indent()
+      .stmt("this(vertx, service, DEFAULT_CONNECTION_TIMEOUT)")
+      .unindent()
+      .code("}\n")
+      .newLine()
+      .code("public "+ className + "(Vertx vertx, " + model.getIfaceSimpleName() + " service, long timeoutInSecond){\n")
+      .indent()
+      .stmt("this(vertx, service, true, timeoutInSecond)")
+      .unindent()
+      .code("}\n")
+      .newLine()
+      .code("public " + className + "(Vertx vertx, " + model.getIfaceSimpleName() + " service, boolean topLevel, long timeoutSeconds) {\n");
+    utils.handlerConstructorBody(writer);
+    writer.code("private void checkTimedOut(long id) {\n")
+      .indent()
+      .stmt("long now = System.nanoTime()")
+      .code("if (now - lastAccessed > timeoutSeconds * 1000000000) {\n")
+      .indent();
+    model.getMethods().stream()
+      .filter(m -> ((ProxyMethodInfo)m).isProxyClose())
+      .forEach(m -> {
+        if (m.getParams().isEmpty()) writer.stmt("service." + m.getName() + "()");
+        else writer.stmt("service." + m.getName() + "(done -> {})");
+      });
+    writer
+      .stmt("close()")
+      .unindent()
+      .code("}\n")
+      .unindent()
+      .code("}\n")
+      .newLine();
+    utils.handleCloseAccessed(writer);
+    writer.code("public void handle(Message<JsonObject> msg) {\n")
+      .indent()
+      .code("try{\n")
+      .indent()
+      .stmt("JsonObject json = msg.body()")
+      .stmt("String action = msg.headers().get(\"action\")")
+      .stmt("if (action == null) throw new IllegalStateException(\"action not specified\")")
+      .stmt("accessed()")
+      .code("switch (action) {\n")
+      .indent();
+    model.getMethods().stream().filter(m -> !m.isStaticMethod()).forEach(m -> generateActionSwitchEntry((ProxyMethodInfo) m, writer));
+    writer
+      .code("default: throw new IllegalStateException(\"Invalid action: \" + action);\n")
+      .unindent()
+      .code("}\n")
+      .unindent()
+      .code("} catch (Throwable t) {\n")
+      .indent()
+      .stmt("msg.reply(new ServiceException(500, t.getMessage()))")
+      .stmt("throw t")
+      .unindent()
+      .code("}\n")
+      .unindent()
+      .code("}\n")
+      .unindent()
+      .code("}");
     return buffer.toString();
   }
 
-  private void generateToJson(String visibility, boolean inheritConverter, DataObjectModel model, PrintWriter writer) {
-    String simpleName = model.getType().getSimpleName();
-    writer.print("  " + visibility + " static void toJson(" + simpleName + " obj, JsonObject json) {\n");
-    writer.print("    toJson(obj, json.getMap());\n");
-    writer.print("  }\n");
-    writer.print("\n");
-    writer.print("  " + visibility + " static void toJson(" + simpleName + " obj, java.util.Map<String, Object> json) {\n");
-    model.getPropertyMap().values().forEach(prop -> {
-      if ((prop.isDeclared() || inheritConverter) && prop.getGetterMethod() != null && prop.isJsonifiable()) {
-        ClassKind propKind = prop.getType().getKind();
-        if (propKind.basic) {
-          if (propKind == ClassKind.STRING) {
-            genPropToJson("", "", prop, writer);
-          } else {
-            switch (prop.getType().getSimpleName()) {
-              case "char":
-              case "Character":
-                genPropToJson("Character.toString(", ")", prop, writer);
-                break;
-              default:
-                genPropToJson("", "", prop, writer);
-            }
-          }
-        } else {
-          switch (propKind) {
-            case API:
-              if (prop.getType().getName().equals("io.vertx.core.buffer.Buffer")) {
-                genPropToJson("java.util.Base64.getEncoder().encodeToString(", ".getBytes())", prop, writer);
-              }
-              break;
-            case ENUM:
-              genPropToJson("", ".name()", prop, writer);
-              break;
-            case JSON_OBJECT:
-            case JSON_ARRAY:
-            case OBJECT:
-              genPropToJson("", "", prop, writer);
-              break;
-            case DATA_OBJECT:
-              genPropToJson("", ".toJson()", prop, writer);
-              break;
-          }
-        }
-      }
-    });
-
-    writer.print("  }\n");
-  }
-
-  private void genPropToJson(String before, String after, PropertyInfo prop, PrintWriter writer) {
-    String indent = "    ";
-    if (prop.isList() || prop.isSet()) {
-      writer.print(indent + "if (obj." + prop.getGetterMethod() + "() != null) {\n");
-      writer.print(indent + "  JsonArray array = new JsonArray();\n");
-      writer.print(indent + "  obj." + prop.getGetterMethod() + "().forEach(item -> array.add(" + before + "item" + after + "));\n");
-      writer.print(indent + "  json.put(\"" + prop.getName() + "\", array);\n");
-      writer.print(indent + "}\n");
-    } else if (prop.isMap()) {
-      writer.print(indent + "if (obj." + prop.getGetterMethod() + "() != null) {\n");
-      writer.print(indent + "  JsonObject map = new JsonObject();\n");
-      writer.print(indent + "  obj." + prop.getGetterMethod() + "().forEach((key, value) -> map.put(key, " + before + "value" + after + "));\n");
-      writer.print(indent + "  json.put(\"" + prop.getName() + "\", map);\n");
-      writer.print(indent + "}\n");
+  public void generateActionSwitchEntry(ProxyMethodInfo m, CodeWriter writer) {
+    ParamInfo lastParam = !m.getParams().isEmpty() ? m.getParam(m.getParams().size() - 1) : null;
+    boolean hasResultHandler = utils.isResultHandler(lastParam);
+    writer
+      .code("case \"" + m.getName() + "\": {\n")
+      .indent()
+      .code("service." + m.getName() + "(")
+      .indent();
+    if (hasResultHandler) {
+      writer.writeArray(
+        ",\n" + writer.indentation(),
+        Stream.concat(
+          m.getParams().subList(0, m.getParams().size() - 1).stream().map(this::generateJsonParamExtract),
+          Stream.of(generateHandler(lastParam))
+        ).collect(Collectors.toList()),
+        String::toString
+      );
     } else {
-      String sp = "";
-      if (prop.getType().getKind() != ClassKind.PRIMITIVE) {
-        sp = "  ";
-        writer.print(indent + "if (obj." + prop.getGetterMethod() + "() != null) {\n");
-      }
-      writer.print(indent + sp + "json.put(\"" + prop.getName() + "\", " + before + "obj." + prop.getGetterMethod() + "()" + after + ");\n");
-      if (prop.getType().getKind() != ClassKind.PRIMITIVE) {
-        writer.print(indent + "}\n");
-      }
+      writer.writeArray(
+        ",\n" + writer.indentation(),
+        m.getParams().stream().map(this::generateJsonParamExtract).collect(Collectors.toList()),
+        String::toString
+      );
     }
+    writer.unindent();
+    writer.write(");\n");
+    if (m.isProxyClose()) writer.stmt("close()");
+    writer.stmt("break");
+    writer.unindent();
+    writer.code("}\n");
   }
 
-  private void generateFromson(String visibility, boolean inheritConverter, DataObjectModel model, PrintWriter writer) {
-    writer.print("  " + visibility + " static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, " + model.getType().getSimpleName() + " obj) {\n");
-    writer.print("    for (java.util.Map.Entry<String, Object> member : json) {\n");
-    writer.print("      switch (member.getKey()) {\n");
-    model.getPropertyMap().values().forEach(prop -> {
-      if (prop.isDeclared() || inheritConverter) {
-        ClassKind propKind = prop.getType().getKind();
-        if (propKind.basic) {
-          if (propKind == ClassKind.STRING) {
-            genPropFromJson("String", "(String)", "", prop, writer);
-          } else {
-            switch (prop.getType().getSimpleName()) {
-              case "boolean":
-              case "Boolean":
-                genPropFromJson("Boolean", "(Boolean)", "", prop, writer);
-                break;
-              case "byte":
-              case "Byte":
-                genPropFromJson("Number", "((Number)", ").byteValue()", prop, writer);
-                break;
-              case "short":
-              case "Short":
-                genPropFromJson("Number", "((Number)", ").shortValue()", prop, writer);
-                break;
-              case "int":
-              case "Integer":
-                genPropFromJson("Number", "((Number)", ").intValue()", prop, writer);
-                break;
-              case "long":
-              case "Long":
-                genPropFromJson("Number", "((Number)", ").longValue()", prop, writer);
-                break;
-              case "float":
-              case "Float":
-                genPropFromJson("Number", "((Number)", ").floatValue()", prop, writer);
-                break;
-              case "double":
-              case "Double":
-                genPropFromJson("Number", "((Number)", ").doubleValue()", prop, writer);
-                break;
-              case "char":
-              case "Character":
-                genPropFromJson("String", "((String)", ").charAt(0)", prop, writer);
-                break;
-            }
-          }
-        } else {
-          switch (propKind) {
-            case API:
-              if (prop.getType().getName().equals("io.vertx.core.buffer.Buffer")) {
-                genPropFromJson("String", "io.vertx.core.buffer.Buffer.buffer(java.util.Base64.getDecoder().decode((String)", "))", prop, writer);
-              }
-              break;
-            case JSON_OBJECT:
-              genPropFromJson("JsonObject", "((JsonObject)", ").copy()", prop, writer);
-              break;
-            case JSON_ARRAY:
-              genPropFromJson("JsonArray", "((JsonArray)", ").copy()", prop, writer);
-              break;
-            case DATA_OBJECT:
-              genPropFromJson("JsonObject", "new " + prop.getType().getName() + "((JsonObject)", ")", prop, writer);
-              break;
-            case ENUM:
-              genPropFromJson("String", prop.getType().getName() + ".valueOf((String)", ")", prop, writer);
-              break;
-            case OBJECT:
-              genPropFromJson("Object", "", "", prop, writer);
-              break;
-            default:
-          }
-        }
-      }
-    });
-    writer.print("      }\n");
-    writer.print("    }\n");
-    writer.print("  }\n");
+  public String generateJsonParamExtract(ParamInfo param) {
+    String name = param.getName();
+    TypeInfo type = param.getType();
+    String typeName = type.getName();
+    if (typeName.equals("char") || typeName.equals("java.lang.Character"))
+      return "json.getInteger(\"" + name + "\") == null ? null : (char)(int)(json.getInteger(\"" + name + "\"))";
+    if (typeName.equals("byte") || typeName.equals("java.lang.Byte") ||
+      typeName.equals("short") || typeName.equals("java.lang.Short") ||
+      typeName.equals("int") || typeName.equals("java.lang.Integer") ||
+      typeName.equals("long") || typeName.equals("java.lang.Long"))
+      return "json.getValue(\"" + name + "\") == null ? null : (json.getLong(\"" + name + "\")." + numericMapping.get(typeName) + "Value())";
+    if (typeName.equals("float") || typeName.equals("java.lang.Float") ||
+      typeName.equals("double") || typeName.equals("java.lang.Double"))
+      return "json.getValue(\"" + name + "\") == null ? null : (json.getDouble(\"" + name + "\")." + numericMapping.get(typeName) + "Value())";
+    if (type.getKind() == ClassKind.ENUM)
+      return "json.getString(\"" + name + "\") == null ? null : " + param.getType().getName() + ".valueOf(json.getString(\"" + name + "\"))";
+    if (type.getKind() == ClassKind.LIST || type.getKind() == ClassKind.SET) {
+      String coll = type.getKind() == ClassKind.LIST ? "List" : "Set";
+      TypeInfo typeArg = ((ParameterizedTypeInfo)type).getArg(0);
+      if (typeArg.getKind() == ClassKind.DATA_OBJECT)
+        return "json.getJsonArray(\"" + name + "\").stream().map(o -> new " + typeArg.getName() + "((JsonObject)o)).collect(Collectors.to" + coll + "())";
+      if (typeArg.getName().equals("java.lang.Byte") || typeArg.getName().equals("java.lang.Short") ||
+        typeArg.getName().equals("java.lang.Integer") || typeArg.getName().equals("java.lang.Long"))
+        return "json.getJsonArray(\"" + name + "\").stream().map(o -> ((Number)o)." + numericMapping.get(typeArg.getName()) + "Value()).collect(Collectors.to" + coll + "())";
+      return "HelperUtils.convert" + coll + "(json.getJsonArray(\"" + name + "\").getList())";
+    }
+    if (type.getKind() == ClassKind.MAP) {
+      TypeInfo typeArg = ((ParameterizedTypeInfo)type).getArg(1);
+      if (typeArg.getName().equals("java.lang.Byte") || typeArg.getName().equals("java.lang.Short") ||
+        typeArg.getName().equals("java.lang.Integer") || typeArg.getName().equals("java.lang.Long") ||
+        typeArg.getName().equals("java.lang.Float") || typeArg.getName().equals("java.lang.Double"))
+        return "json.getJsonObject(\"" + name + "\").getMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> ((java.lang.Number)entry.getValue())." + numericMapping.get(typeArg.getName()) + "Value()))";
+      return "HelperUtils.convertMap(json.getJsonObject(\"" + name + "\").getMap())";
+    }
+    if (type.getKind() == ClassKind.DATA_OBJECT)
+      return "json.getJsonObject(\"" + name + "\") == null ? null : new " + type.getName() + "(json.getJsonObject(\"" + name + "\"))";
+    return "(" + type.getName() + ")json.getValue(\"" + name + "\")";
   }
 
-  private void genPropFromJson(String cast, String before, String after, PropertyInfo prop, PrintWriter writer) {
-    String indent = "        ";
-    writer.print(indent + "case \"" + prop.getName() + "\":\n");
-    if (prop.isList() || prop.isSet()) {
-      writer.print(indent + "  if (member.getValue() instanceof JsonArray) {\n");
-      if (prop.isSetter()) {
-        String coll = prop.isList() ? "java.util.ArrayList" : "java.util.LinkedHashSet";
-        writer.print(indent + "    " + coll + "<" + prop.getType().getName() + "> list =  new " + coll + "<>();\n");
-        writer.print(indent + "    ((Iterable<Object>)member.getValue()).forEach( item -> {\n");
-        writer.print(indent + "      if (item instanceof " + cast + ")\n");
-        writer.print(indent + "        list.add(" + before + "item" + after + ");\n");
-        writer.print(indent + "    });\n");
-        writer.print(indent + "    obj." + prop.getSetterMethod() + "(list);\n");
-      } else if (prop.isAdder()) {
-        writer.print(indent + "    ((Iterable<Object>)member.getValue()).forEach( item -> {\n");
-        writer.print(indent + "      if (item instanceof " + cast + ")\n");
-        writer.print(indent + "        obj." + prop.getAdderMethod() + "(" + before + "item" + after + ");\n");
-        writer.print(indent + "    });\n");
-      }
-      writer.print(indent + "  }\n");
-    } else if (prop.isMap()) {
-      writer.print(indent + "  if (member.getValue() instanceof JsonObject) {\n");
-      if (prop.isAdder()) {
-        writer.print(indent + "    ((Iterable<java.util.Map.Entry<String, Object>>)member.getValue()).forEach(entry -> {\n");
-        writer.print(indent + "      if (entry.getValue() instanceof " + cast + ")\n");
-        writer.print(indent + "        obj." + prop.getAdderMethod() + "(entry.getKey(), " + before + "entry.getValue()" + after + ");\n");
-        writer.print(indent + "    });\n");
-      } else if (prop.isSetter()) {
-        writer.print(indent + "    java.util.Map<String, " + prop.getType().getName() + "> map = new java.util.LinkedHashMap<>();\n");
-        writer.print(indent + "    ((Iterable<java.util.Map.Entry<String, Object>>)member.getValue()).forEach(entry -> {\n");
-        writer.print(indent + "      if (entry.getValue() instanceof " + cast + ")\n");
-        writer.print(indent + "        map.put(entry.getKey(), " + before + "entry.getValue()" + after + ");\n");
-        writer.print(indent + "    });\n");
-        writer.print(indent + "    obj." + prop.getSetterMethod() + "(map);\n");
-      }
-      writer.print(indent + "  }\n");
-    } else {
-      if (prop.isSetter()) {
-        writer.print(indent + "  if (member.getValue() instanceof " + cast + ") {\n");
-        writer.print(indent + "    obj." + prop.getSetterMethod()+ "(" + before + "member.getValue()" + after + ");\n");
-        writer.print(indent + "  }\n");
-      }
+  public String generateHandler(ParamInfo param) {
+    TypeInfo typeArg = ((ParameterizedTypeInfo)((ParameterizedTypeInfo)param.getType()).getArg(0)).getArg(0);
+    if (typeArg.getKind() == ClassKind.LIST || typeArg.getKind() == ClassKind.SET) {
+      String coll = typeArg.getKind() == ClassKind.LIST ? "List" : "Set";
+      TypeInfo innerTypeArg = ((ParameterizedTypeInfo)typeArg).getArg(0);
+      if (innerTypeArg.getName().equals("java.lang.Character"))
+        return "HelperUtils.create" + coll + "CharHandler(msg)";
+      if (innerTypeArg.getKind() == ClassKind.DATA_OBJECT)
+        return "res -> {\n" +
+          "            if (res.failed()) {\n" +
+          "              if (res.cause() instanceof ServiceException) {\n" +
+          "                msg.reply(res.cause());\n" +
+          "              } else {\n" +
+          "                msg.reply(new ServiceException(-1, res.cause().getMessage()));\n" +
+          "              }\n" +
+          "            } else {\n" +
+          "              msg.reply(new JsonArray(res.result().stream().map(r -> r == null ? null : r.toJson()).collect(Collectors.toList())));\n" +
+          "            }\n" +
+          "         }";
+      return "HelperUtils.create" + coll + "Handler(msg)";
     }
-    writer.print(indent + "  break;\n");
+    if (typeArg.getKind() == ClassKind.DATA_OBJECT)
+      return "res -> {\n" +
+        "            if (res.failed()) {\n" +
+        "              if (res.cause() instanceof ServiceException) {\n" +
+        "                msg.reply(res.cause());\n" +
+        "              } else {\n" +
+        "                msg.reply(new ServiceException(-1, res.cause().getMessage()));\n" +
+        "              }\n" +
+        "            } else {\n" +
+        "              msg.reply(res.result() == null ? null : res.result().toJson());\n" +
+        "            }\n" +
+        "         }";
+    if (typeArg.getKind() == ClassKind.API && ((ApiTypeInfo)typeArg).isProxyGen())
+      return "res -> {\n" +
+        "            if (res.failed()) {\n" +
+        "                if (res.cause() instanceof ServiceException) {\n" +
+        "                  msg.reply(res.cause());\n" +
+        "                } else {\n" +
+        "                  msg.reply(new ServiceException(-1, res.cause().getMessage()));\n" +
+        "                }\n" +
+        "            } else {\n" +
+        "              String proxyAddress = UUID.randomUUID().toString();\n" +
+        "              ProxyHelper.registerService(" + typeArg.getSimpleName() + ".class, vertx, res.result(), proxyAddress, false, timeoutSeconds);\n" +
+        "              msg.reply(null, new DeliveryOptions().addHeader(\"proxyaddr\", proxyAddress));\n" +
+        "            }\n" +
+        "          }";
+    return "HelperUtils.createHandler(msg)";
   }
+
 }

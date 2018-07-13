@@ -81,28 +81,29 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
 
   private void generateMethods(ProxyModel model, CodeWriter writer) {
     for (MethodInfo m : model.getMethods()) {
-      writer.code("@Override\n");
-      writer.code("public ");
-      if (!m.getTypeParams().isEmpty()) {
-        writer.write("<");
-        writer.writeArray(", ", m.getTypeParams(), TypeParamInfo::getName);
-        writer.write(">");
+      if (!m.isStaticMethod()) {
+        writer.code("@Override\n");
+        writer.code("public ");
+        if (!m.getTypeParams().isEmpty()) {
+          writer.write("<");
+          writer.writeArray(", ", m.getTypeParams(), TypeParamInfo::getName);
+          writer.write(">");
+        }
+        writer.write(" " + m.getReturnType().getSimpleName() + " " + m.getName() + "(");
+        writer.writeArray(", ", m.getParams(), p -> p.getType().getSimpleName() + " " + p.getName());
+        writer.write("){\n");
+        writer.indent();
+        if (!((ProxyMethodInfo) m).isProxyIgnore()) generateMethodBody((ProxyMethodInfo) m, writer);
+        if (m.isFluent()) writer.stmt("return this");
+        writer.unindent();
+        writer.code("}\n");
       }
-      writer.write(" " + m.getReturnType().getSimpleName() + " " + m.getName() + "(");
-      writer.writeArray(", ", m.getParams(), p -> p.getType().getSimpleName() + " " + p.getName());
-      writer.write("){\n");
-      writer.indent();
-      if (!((ProxyMethodInfo)m).isProxyIgnore()) generateMethodBody((ProxyMethodInfo)m, writer);
-      if (m.isFluent()) writer.stmt("return this");
-      writer.unindent();
-      writer.code("]\n");
     }
   }
 
   private void generateMethodBody(ProxyMethodInfo method, CodeWriter writer) {
     ParamInfo lastParam = !method.getParams().isEmpty() ? method.getParam(method.getParams().size() - 1) : null;
     boolean hasResultHandler = utils.isResultHandler(lastParam);
-    int count = 0;
     if (hasResultHandler) {
       writer.code("if (closed) {\n");
       writer.indent();
@@ -125,7 +126,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
     paramsExcludedHandler.forEach(p -> generateAddToJsonStmt(p, writer));
     writer.newLine();
     writer.stmt("DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions()");
-    writer.stmt("_deliveryOptions.addHeader(\"action\", \"" + name + "\")");
+    writer.stmt("_deliveryOptions.addHeader(\"action\", \"" + method.getName() + "\")");
     if (hasResultHandler) {
       generateSendCallWithResultHandler(lastParam, writer);
     } else {
@@ -144,12 +145,12 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
       writer.stmt("_json.put(\"" + name + "\", " + name + " == null ? null : " + name + ".toString())");
     else if (t.getKind() == ClassKind.LIST) {
       if (((ParameterizedTypeInfo)t).getArg(0).getKind() == ClassKind.DATA_OBJECT)
-        writer.stmt("_json.put(\"" + name + "\", new JsonArray(" + name + ".stream().map(r -> r == null ? null : r.toJson()).collect(Collectors.toList()))");
+        writer.stmt("_json.put(\"" + name + "\", new JsonArray(" + name + ".stream().map(r -> r == null ? null : r.toJson()).collect(Collectors.toList())))");
       else
         writer.stmt("_json.put(\"" + name + "\", new JsonArray(" + name + "))");
     } else if (t.getKind() == ClassKind.SET) {
       if (((ParameterizedTypeInfo)t).getArg(0).getKind() == ClassKind.DATA_OBJECT)
-        writer.stmt("_json.put(\"" + name + "\", new JsonArray(" + name + ".stream().map(r -> r == null ? null : r.toJson()).collect(Collectors.toList()))");
+        writer.stmt("_json.put(\"" + name + "\", new JsonArray(" + name + ".stream().map(r -> r == null ? null : r.toJson()).collect(Collectors.toList())))");
       else
         writer.stmt("_json.put(\"" + name + "\", new JsonArray(new ArrayList<>(" + name + ")))");
     } else if (t.getKind() == ClassKind.MAP)
