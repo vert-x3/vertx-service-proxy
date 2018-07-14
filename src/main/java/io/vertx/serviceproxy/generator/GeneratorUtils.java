@@ -4,11 +4,10 @@ import io.vertx.codegen.ParamInfo;
 import io.vertx.codegen.type.ClassKind;
 import io.vertx.codegen.type.ParameterizedTypeInfo;
 
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Scanner;
 
 /**
  * @author <a href="http://slinkydeveloper.github.io">Francesco Guardiani @slinkydeveloper</a>
@@ -51,13 +50,10 @@ public class GeneratorUtils {
     w.print("import " + i + ";\n");
   }
 
-  private String loadResource(String resource) {
-    try {
-      Path p = Paths.get(GeneratorUtils.class.getResource("/" + resource + ".txt").toURI());
-      return String.join("\n", Files.readAllLines(p, StandardCharsets.UTF_8));
-    } catch (Exception e) { // Should never happen
-      e.printStackTrace();
-      return null;
+  public String loadResource(String resource) {
+    InputStream input = GeneratorUtils.class.getResourceAsStream("/" + resource + ".txt");
+    try (Scanner scanner = new Scanner(input, StandardCharsets.UTF_8.name())) {
+      return scanner.useDelimiter("\\A").next();
     }
   }
 

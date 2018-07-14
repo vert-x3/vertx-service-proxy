@@ -1,18 +1,14 @@
 package io.vertx.serviceproxy.generator;
 
-import io.vertx.codegen.DataObjectModel;
 import io.vertx.codegen.Generator;
 import io.vertx.codegen.ParamInfo;
-import io.vertx.codegen.PropertyInfo;
 import io.vertx.codegen.type.*;
 import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
 
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,8 +18,9 @@ import java.util.stream.Stream;
  */
 public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
 
-  final GeneratorUtils utils;
-  final Map<String, String> numericMapping = Stream.of(
+  public final GeneratorUtils utils;
+
+  public final Map<String, String> numericMapping = Stream.of(
     new SimpleEntry<>("byte", "byte"),
     new SimpleEntry<>("java.lang.Byte", "byte"),
     new SimpleEntry<>("short", "short"),
