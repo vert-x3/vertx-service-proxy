@@ -51,7 +51,11 @@ public class GeneratorUtils {
   }
 
   public String loadResource(String resource) {
-    InputStream input = GeneratorUtils.class.getResourceAsStream("/META-INF/vertx/vertx-service-proxy/" + resource + ".txt");
+    return loadResource(resource, "vertx-service-proxy");
+  }
+
+  public String loadResource(String resource, String moduleName) {
+    InputStream input = GeneratorUtils.class.getResourceAsStream("/META-INF/vertx/" + moduleName + "/" + resource + ".txt");
     try (Scanner scanner = new Scanner(input, StandardCharsets.UTF_8.name())) {
       return scanner.useDelimiter("\\A").next();
     }
