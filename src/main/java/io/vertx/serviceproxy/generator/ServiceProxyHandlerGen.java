@@ -9,6 +9,7 @@ import io.vertx.serviceproxy.generator.model.ProxyModel;
 import java.io.StringWriter;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,20 +21,22 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
 
   public final GeneratorUtils utils;
 
-  public final Map<String, String> numericMapping = Stream.of(
-    new SimpleEntry<>("byte", "byte"),
-    new SimpleEntry<>("java.lang.Byte", "byte"),
-    new SimpleEntry<>("short", "short"),
-    new SimpleEntry<>("java.lang.Short", "short"),
-    new SimpleEntry<>("int", "int"),
-    new SimpleEntry<>("java.lang.Integer", "int"),
-    new SimpleEntry<>("long", "long"),
-    new SimpleEntry<>("java.lang.Long", "long"),
-    new SimpleEntry<>("float", "float"),
-    new SimpleEntry<>("java.lang.Float", "float"),
-    new SimpleEntry<>("double", "double"),
-    new SimpleEntry<>("java.lang.Double", "double")
-  ).collect(Collectors.toMap((e) -> e.getKey(), (e) -> e.getValue()));
+  public final static Map<String, String> numericMapping = new HashMap<>();
+
+  static {
+    numericMapping.put("byte", "byte");
+    numericMapping.put("java.lang.Byte", "byte");
+    numericMapping.put("short", "short");
+    numericMapping.put("java.lang.Short", "short");
+    numericMapping.put("int", "int");
+    numericMapping.put("java.lang.Integer", "int");
+    numericMapping.put("long", "long");
+    numericMapping.put("java.lang.Long", "long");
+    numericMapping.put("float", "float");
+    numericMapping.put("java.lang.Float", "float");
+    numericMapping.put("double", "double");
+    numericMapping.put("java.lang.Double", "double");
+  }
 
   public ServiceProxyHandlerGen(GeneratorUtils utils) {
     kinds = Collections.singleton("proxy");
@@ -51,7 +54,10 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
   }
 
   public Stream<String> additionalImports(ProxyModel model) {
-    return model.getImportedTypes().stream().filter(c -> !c.getPackageName().equals("java.lang")).map(ClassTypeInfo::toString);
+    return model.getImportedTypes()
+      .stream()
+      .filter(c -> !c.getPackageName().equals("java.lang"))
+      .map(ClassTypeInfo::toString);
   }
 
   @Override
