@@ -107,11 +107,13 @@ public class @{ifaceSimpleName}VertxProxyHandler extends ProxyHandler {\n
     long now = System.nanoTime();\n
     if (now - lastAccessed > timeoutSeconds * 1000000000) {\n
 @foreach{method:methods}
-	@if{method.proxyClose}
-		@if{method.params.empty}
+	@if{!method.containingAnyJavaType}
+		@if{method.proxyClose}
+			@if{method.params.empty}
       service.@{method.name}();\n
-		@else{}
+			@else{}
       service.@{method.name}(done -> {});\n
+			@end{}
 		@end{}
 	@end{}
 @end{}

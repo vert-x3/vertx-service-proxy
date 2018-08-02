@@ -50,7 +50,7 @@ public class ProxyModel extends ClassModel {
   }
 
   @Override
-  protected void checkParamType(ExecutableElement elem, TypeMirror type, TypeInfo typeInfo, int pos, int numParams) {
+  protected void checkParamType(ExecutableElement elem, TypeMirror type, TypeInfo typeInfo, int pos, int numParams, boolean allowJavaTypes) {
     // Basic types, int, long, String etc
     // JsonObject or JsonArray
     if (typeInfo.getKind().basic || typeInfo.getKind().json) {
@@ -86,7 +86,7 @@ public class ProxyModel extends ClassModel {
   }
 
   @Override
-  protected void checkReturnType(ExecutableElement elem, TypeInfo type, TypeMirror typeMirror) {
+  protected void checkReturnType(ExecutableElement elem, TypeInfo type, TypeMirror typeMirror, boolean allowJavaTypes) {
 
     if (elem.getModifiers().contains(Modifier.STATIC)) {
       // Ignore static methods - we won't use them anyway
