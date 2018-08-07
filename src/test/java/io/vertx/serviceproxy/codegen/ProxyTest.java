@@ -192,4 +192,9 @@ public class ProxyTest {
       //OK
     }
   }
+
+  @Test
+  public void testProxyGenWithVertxGen() throws Exception {
+    generateProxyModel(ProxyWithVertxGen.class);
+  }
 }
