@@ -8,6 +8,7 @@ import io.vertx.core.Handler;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
+@VertxGen
 @ProxyGen
 public interface InvalidParams4 {
 

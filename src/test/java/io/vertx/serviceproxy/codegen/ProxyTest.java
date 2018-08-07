@@ -186,7 +186,7 @@ public class ProxyTest {
   @Test
   public void testProxyGenWithoutVertxGen() throws Exception {
     try {
-      generateProxyModel(InvalidClose1.class);
+      generateProxyModel(ProxyWithOutVertxGen.class);
       fail("Should throw exception");
     } catch(GenException e) {
       //OK
