@@ -19,6 +19,7 @@ package io.vertx.serviceproxy.model;
 import io.vertx.codegen.*;
 import io.vertx.codegen.annotations.ProxyClose;
 import io.vertx.codegen.annotations.ProxyIgnore;
+import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.codegen.doc.Doc;
 import io.vertx.codegen.doc.Text;
 import io.vertx.codegen.type.*;
@@ -47,6 +48,17 @@ public class ProxyModel extends ClassModel {
   @Override
   public String getKind() {
     return "proxy";
+  }
+
+  @Override
+  public boolean process() {
+    if (!processed) {
+      VertxGen vertxGen = modelElt.getAnnotation(VertxGen.class);
+      if (vertxGen == null) {
+        throw new GenException(modelElt, "require @VertxGen");
+      }
+    }
+    return super.process();
   }
 
   @Override

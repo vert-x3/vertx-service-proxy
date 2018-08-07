@@ -182,4 +182,15 @@ public class ProxyTest {
       // OK
     }
   }
+
+  @Test
+  public void testProxyGenWithoutVertxGen() throws Exception {
+    try {
+      generateProxyModel(InvalidClose1.class);
+      fail("Should throw exception");
+    } catch(GenException e) {
+      e.printStackTrace();
+      //OK
+    }
+  }
 }
