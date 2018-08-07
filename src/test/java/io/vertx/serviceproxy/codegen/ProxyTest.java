@@ -189,7 +189,6 @@ public class ProxyTest {
       generateProxyModel(InvalidClose1.class);
       fail("Should throw exception");
     } catch(GenException e) {
-      e.printStackTrace();
       //OK
     }
   }
