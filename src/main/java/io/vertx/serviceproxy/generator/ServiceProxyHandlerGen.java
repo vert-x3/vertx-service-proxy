@@ -3,6 +3,7 @@ package io.vertx.serviceproxy.generator;
 import io.vertx.codegen.Generator;
 import io.vertx.codegen.ParamInfo;
 import io.vertx.codegen.type.*;
+import io.vertx.codegen.utils.CodeWriter;
 import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
 
@@ -45,7 +46,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
   }
 
   @Override
-  public String relativeFilename(ProxyModel model) {
+  public String filename(ProxyModel model) {
     return model.getIfacePackageName() + "." + className(model) + ".java";
   }
 

@@ -2,6 +2,7 @@ package io.vertx.serviceproxy.generator;
 
 import io.vertx.codegen.*;
 import io.vertx.codegen.type.*;
+import io.vertx.codegen.utils.CodeWriter;
 import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
 
@@ -25,7 +26,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
   }
 
   @Override
-  public String relativeFilename(ProxyModel model) {
+  public String filename(ProxyModel model) {
     return model.getIfaceFQCN() + "VertxEBProxy.java";
   }
 
