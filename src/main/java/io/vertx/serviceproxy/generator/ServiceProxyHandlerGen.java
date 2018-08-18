@@ -3,7 +3,7 @@ package io.vertx.serviceproxy.generator;
 import io.vertx.codegen.Generator;
 import io.vertx.codegen.ParamInfo;
 import io.vertx.codegen.type.*;
-import io.vertx.codegen.utils.CodeWriter;
+import io.vertx.codegen.writer.CodeWriter;
 import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
 
@@ -156,19 +156,17 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
       .code("service." + m.getName() + "(")
       .indent();
     if (hasResultHandler) {
-      writer.writeArray(
-        ",\n" + writer.indentation(),
+      writer.writeSeq(
         Stream.concat(
           m.getParams().subList(0, m.getParams().size() - 1).stream().map(this::generateJsonParamExtract),
           Stream.of(generateHandler(lastParam))
-        ).collect(Collectors.toList()),
-        String::toString
+        ),
+        ",\n" + writer.indentation()
       );
     } else {
-      writer.writeArray(
-        ",\n" + writer.indentation(),
-        m.getParams().stream().map(this::generateJsonParamExtract).collect(Collectors.toList()),
-        String::toString
+      writer.writeSeq(
+        m.getParams().stream().map(this::generateJsonParamExtract),
+        ",\n" + writer.indentation()
       );
     }
     writer.unindent();

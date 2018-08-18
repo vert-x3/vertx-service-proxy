@@ -2,7 +2,7 @@ package io.vertx.serviceproxy.generator;
 
 import io.vertx.codegen.*;
 import io.vertx.codegen.type.*;
-import io.vertx.codegen.utils.CodeWriter;
+import io.vertx.codegen.writer.CodeWriter;
 import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
 
@@ -87,11 +87,11 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
         writer.code("public ");
         if (!m.getTypeParams().isEmpty()) {
           writer.write("<");
-          writer.writeArray(", ", m.getTypeParams(), TypeParamInfo::getName);
+          writer.writeSeq(m.getTypeParams().stream().map(TypeParamInfo::getName), ", ");
           writer.write(">");
         }
         writer.write(" " + m.getReturnType().getSimpleName() + " " + m.getName() + "(");
-        writer.writeArray(", ", m.getParams(), p -> p.getType().getSimpleName() + " " + p.getName());
+        writer.writeSeq(m.getParams().stream().map(p -> p.getType().getSimpleName() + " " + p.getName()), ", ");
         writer.write("){\n");
         writer.indent();
         if (!((ProxyMethodInfo) m).isProxyIgnore()) generateMethodBody((ProxyMethodInfo) m, writer);
