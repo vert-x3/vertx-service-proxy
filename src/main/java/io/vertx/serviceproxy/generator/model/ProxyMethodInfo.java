@@ -36,12 +36,12 @@ public class ProxyMethodInfo extends MethodInfo {
   private final boolean proxyIgnore;
   private final boolean proxyClose;
 
-  public ProxyMethodInfo(Set<ClassTypeInfo> ownerTypes, String name, MethodKind kind, TypeInfo returnType, Text returnDescription, boolean fluent,
+  public ProxyMethodInfo(Set<ClassTypeInfo> ownerTypes, String name, TypeInfo returnType, Text returnDescription, boolean fluent,
                          boolean cacheReturn, List<ParamInfo> params, String comment, Doc doc, boolean staticMethod, boolean defaultMethod,
                          List<TypeParamInfo.Method> typeParams, boolean proxyIgnore, boolean proxyClose, boolean deprecated, Text deprecatedDesc) {
 
 
-    super(ownerTypes, name, kind, returnType, returnDescription, fluent, cacheReturn, params, comment, doc, staticMethod, defaultMethod, typeParams, deprecated, deprecatedDesc);
+    super(ownerTypes, name, returnType, returnDescription, fluent, cacheReturn, params, comment, doc, staticMethod, defaultMethod, typeParams, deprecated, deprecatedDesc);
     this.proxyIgnore = proxyIgnore;
     this.proxyClose = proxyClose;
   }
