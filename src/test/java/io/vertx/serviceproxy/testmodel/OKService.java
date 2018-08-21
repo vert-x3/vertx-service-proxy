@@ -23,6 +23,9 @@ import io.vertx.core.Handler;
 
 @ProxyGen
 @VertxGen
+/**
+ *
+ */
 public interface OKService {
   void ok(Handler<AsyncResult<String>> resultHandler);
 }

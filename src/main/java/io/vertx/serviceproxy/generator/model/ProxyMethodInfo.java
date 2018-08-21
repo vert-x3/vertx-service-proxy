@@ -1,4 +1,4 @@
-package io.vertx.serviceproxy.model;
+package io.vertx.serviceproxy.generator.model;
 
 /*
  * Copyright 2014 Red Hat, Inc.
@@ -38,10 +38,10 @@ public class ProxyMethodInfo extends MethodInfo {
 
   public ProxyMethodInfo(Set<ClassTypeInfo> ownerTypes, String name, TypeInfo returnType, Text returnDescription, boolean fluent,
                          boolean cacheReturn, List<ParamInfo> params, String comment, Doc doc, boolean staticMethod, boolean defaultMethod,
-                         List<TypeParamInfo.Method> typeParams, boolean proxyIgnore, boolean proxyClose, boolean deprecated, Text methodDeprecatedDesc) {
+                         List<TypeParamInfo.Method> typeParams, boolean proxyIgnore, boolean proxyClose, boolean deprecated, Text deprecatedDesc) {
 
 
-    super(ownerTypes, name, returnType, returnDescription, fluent, cacheReturn, params, comment, doc, staticMethod, defaultMethod, typeParams, deprecated, methodDeprecatedDesc);
+    super(ownerTypes, name, returnType, returnDescription, fluent, cacheReturn, params, comment, doc, staticMethod, defaultMethod, typeParams, deprecated, deprecatedDesc);
     this.proxyIgnore = proxyIgnore;
     this.proxyClose = proxyClose;
   }

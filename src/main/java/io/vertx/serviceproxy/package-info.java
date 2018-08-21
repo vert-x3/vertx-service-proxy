@@ -254,7 +254,7 @@
  *   <artifactId>maven-compiler-plugin</artifactId>
  *   <configuration>
  *     <annotationProcessors>
- *       <annotationProcessor>io.vertx.serviceproxy.ServiceProxyProcessor</annotationProcessor>
+ *       <annotationProcessor>io.vertx.serviceproxy.generator.ServiceProxyProcessor</annotationProcessor>
  *     </annotationProcessors>
  *   </configuration>
  * </plugin>
