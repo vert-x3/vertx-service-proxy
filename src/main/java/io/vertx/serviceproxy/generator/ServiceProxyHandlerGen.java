@@ -41,7 +41,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
 
   public ServiceProxyHandlerGen(GeneratorUtils utils) {
     kinds = Collections.singleton("proxy");
-    name = "service_proxy_handler";
+    name = "service_proxies";
     this.utils = utils;
   }
 
