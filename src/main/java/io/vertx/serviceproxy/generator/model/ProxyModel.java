@@ -14,7 +14,7 @@
  * You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.serviceproxy.model;
+package io.vertx.serviceproxy.generator.model;
 
 import io.vertx.codegen.*;
 import io.vertx.codegen.annotations.ProxyClose;
@@ -62,7 +62,7 @@ public class ProxyModel extends ClassModel {
   }
 
   @Override
-  protected void checkParamType(ExecutableElement elem, TypeMirror type, TypeInfo typeInfo, int pos, int numParams, boolean allowJavaTypes) {
+  protected void checkParamType(ExecutableElement elem, TypeMirror type, TypeInfo typeInfo, int pos, int numParams, boolean allowAnyJavaType) {
     // Basic types, int, long, String etc
     // JsonObject or JsonArray
     if (typeInfo.getKind().basic || typeInfo.getKind().json) {
@@ -98,7 +98,7 @@ public class ProxyModel extends ClassModel {
   }
 
   @Override
-  protected void checkReturnType(ExecutableElement elem, TypeInfo type, TypeMirror typeMirror, boolean allowJavaTypes) {
+  protected void checkReturnType(ExecutableElement elem, TypeInfo type, TypeMirror typeMirror, boolean allowAnyJavaType) {
 
     if (elem.getModifiers().contains(Modifier.STATIC)) {
       // Ignore static methods - we won't use them anyway
@@ -121,20 +121,19 @@ public class ProxyModel extends ClassModel {
   }
 
   @Override
-  protected MethodInfo createMethodInfo(Set<ClassTypeInfo> ownerTypes, String methodName, String comment, Doc doc, MethodKind kind, TypeInfo returnType,
-                                        Text returnDescription,
-                                        boolean isFluent, boolean isCacheReturn, List<ParamInfo> mParams,
-                                        ExecutableElement methodElt, boolean isStatic, boolean isDefault, ArrayList<TypeParamInfo.Method> typeParams,
-                                        TypeElement declaringElt, boolean methodDeprecated) {
+  protected MethodInfo createMethodInfo(Set<ClassTypeInfo> ownerTypes, String methodName, String comment, Doc doc, TypeInfo returnType, Text returnDescription, boolean isFluent, boolean isCacheReturn, List<ParamInfo> mParams, ExecutableElement methodElt, boolean isStatic, boolean isDefault, ArrayList<TypeParamInfo.Method> typeParams, TypeElement declaringElt, boolean methodDeprecated, Text methodDeprecatedDesc) {
     AnnotationMirror proxyIgnoreAnnotation = Helper.resolveMethodAnnotation(ProxyIgnore.class, elementUtils, typeUtils, declaringElt, methodElt);
     boolean isProxyIgnore = proxyIgnoreAnnotation != null;
     AnnotationMirror proxyCloseAnnotation = Helper.resolveMethodAnnotation(ProxyClose.class, elementUtils, typeUtils, declaringElt, methodElt);
     boolean isProxyClose = proxyCloseAnnotation != null;
+    ProxyMethodInfo proxyMeth = new ProxyMethodInfo(ownerTypes, methodName, returnType, returnDescription,
+      isFluent, isCacheReturn, mParams, comment, doc, isStatic, isDefault, typeParams, isProxyIgnore,
+      isProxyClose, methodDeprecated, methodDeprecatedDesc);
     if (isProxyClose && mParams.size() > 0) {
       if (mParams.size() > 1) {
         throw new GenException(this.modelElt, "@ProxyClose methods can't have more than one parameter");
       }
-      if (kind != MethodKind.FUTURE) {
+      if (proxyMeth.getKind() != MethodKind.FUTURE) {
         throw new GenException(this.modelElt, "@ProxyClose parameter must be Handler<AsyncResult<Void>>");
       }
       TypeInfo type = mParams.get(0).getType();
@@ -144,9 +143,7 @@ public class ProxyModel extends ClassModel {
             "Handler<AsyncResult<Void>> instead of " + type);
       }
     }
-    return new ProxyMethodInfo(ownerTypes, methodName, kind, returnType, returnDescription,
-      isFluent, isCacheReturn, mParams, comment, doc, isStatic, isDefault, typeParams, isProxyIgnore,
-      isProxyClose, methodDeprecated);
+    return proxyMeth;
   }
 
   private boolean isLegalHandlerAsyncResultType(TypeInfo type) {

@@ -4,12 +4,10 @@ import io.vertx.codegen.*;
 import io.vertx.codegen.type.ClassKind;
 import io.vertx.codegen.type.ParameterizedTypeInfo;
 import io.vertx.serviceproxy.codegen.proxytestapi.*;
-import io.vertx.serviceproxy.model.ProxyMethodInfo;
-import io.vertx.serviceproxy.model.ProxyModel;
+import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
+import io.vertx.serviceproxy.generator.model.ProxyModel;
 import io.vertx.test.codegen.GeneratorHelper;
 import org.junit.Test;
-
-import java.util.function.Function;
 
 import static org.junit.Assert.*;
 
