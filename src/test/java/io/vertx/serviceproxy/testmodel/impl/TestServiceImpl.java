@@ -16,6 +16,17 @@
 
 package io.vertx.serviceproxy.testmodel.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -31,15 +42,6 @@ import io.vertx.serviceproxy.testmodel.TestConnection;
 import io.vertx.serviceproxy.testmodel.TestConnectionWithCloseFuture;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 import io.vertx.serviceproxy.testmodel.TestService;
-
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.junit.Assert.*;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -168,7 +170,7 @@ public class TestServiceImpl implements TestService {
   }
   
   @Override
-  public void listdataObjectTypeNull(List<TestDataObject> list) {
+  public void listdataObjectTypeHavingNullValues(List<TestDataObject> list) {
     assertEquals(3, list.size());
     assertEquals(new TestDataObject().setString("foo").setNumber(123).setBool(true), list.get(0));
     assertNull(list.get(1));
@@ -177,7 +179,7 @@ public class TestServiceImpl implements TestService {
   }
   
   @Override
-  public void setdataObjectTypeNull(Set<TestDataObject> set) {
+  public void setdataObjectTypeHavingNullValues(Set<TestDataObject> set) {
     Set<JsonObject> setJson = set.stream().map(d -> null == d ? null : d.toJson()).collect(Collectors.toSet());
     assertEquals(3, setJson.size());
     assertTrue(setJson.contains(new JsonObject().put("number", 123).put("string", "String foo").put("bool", true)));
@@ -610,6 +612,18 @@ public class TestServiceImpl implements TestService {
         null,
         new TestDataObject().setNumber(2).setString("String 2").setBool(true)));
     resultHandler.handle(Future.succeededFuture(set));
+  }
+
+  @Override
+  public void listdataObjectTypeNull(List<TestDataObject> list) {
+    assertTrue(list.isEmpty());
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
+  public void setdataObjectTypeNull(Set<TestDataObject> set) {
+    assertTrue(set.isEmpty());
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
 
 }

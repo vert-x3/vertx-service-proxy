@@ -93,6 +93,10 @@ public interface TestService {
 
   void dataObjectTypeNull(TestDataObject options);
   
+  void listdataObjectTypeHavingNullValues(List<TestDataObject> list);
+
+  void setdataObjectTypeHavingNullValues(Set<TestDataObject> set);
+  
   void listdataObjectTypeNull(List<TestDataObject> list);
 
   void setdataObjectTypeNull(Set<TestDataObject> set);

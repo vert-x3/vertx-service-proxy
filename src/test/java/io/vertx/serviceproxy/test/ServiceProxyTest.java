@@ -68,7 +68,7 @@ public class ServiceProxyTest extends VertxTestBase {
     consumer = new ServiceBinder(vertx).setAddress(SERVICE_ADDRESS)
       .register(TestService.class, service);
     localConsumer = new ServiceBinder(vertx).setAddress(SERVICE_LOCAL_ADDRESS)
-      .register(TestService.class, localService);
+      .registerLocal(TestService.class, localService);
 
     proxy = TestService.createProxy(vertx, SERVICE_ADDRESS);
     localProxy = TestService.createProxy(vertx, SERVICE_LOCAL_ADDRESS);
@@ -217,22 +217,34 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   
   @Test
-  public void testListDataObjectTypeNull() {
+  public void testlistdataObjectTypeHavingNullValues() {
     List<TestDataObject> testDataList = Arrays.asList(
       new TestDataObject().setString("foo").setNumber(123).setBool(true),
       null,
       new TestDataObject().setString("bar").setNumber(456).setBool(false));
-    proxy.listdataObjectTypeNull(testDataList);
+    proxy.listdataObjectTypeHavingNullValues(testDataList);
+    await();
+  }
+  
+  @Test
+  public void testListDataObjectTypeNull() {
+    proxy.listdataObjectTypeNull(null);
+    await();
+  }
+  
+  @Test
+  public void testSetdataObjectTypeHavingNullValues() {
+    Set<TestDataObject> testDataSet = new HashSet<>(Arrays.asList(
+      new TestDataObject().setString("String foo").setNumber(123).setBool(true),
+      null,
+      new TestDataObject().setString("String bar").setNumber(456).setBool(false)));
+    proxy.setdataObjectTypeHavingNullValues(testDataSet);
     await();
   }
   
   @Test
   public void testSetDataObjectTypeNull() {
-    Set<TestDataObject> testDataSet = new HashSet<>(Arrays.asList(
-      new TestDataObject().setString("String foo").setNumber(123).setBool(true),
-      null,
-      new TestDataObject().setString("String bar").setNumber(456).setBool(false)));
-    proxy.setdataObjectTypeNull(testDataSet);
+    proxy.setdataObjectTypeNull(null);
     await();
   }
 

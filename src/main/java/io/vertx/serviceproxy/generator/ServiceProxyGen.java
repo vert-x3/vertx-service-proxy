@@ -146,12 +146,12 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
       writer.stmt("_json.put(\"" + name + "\", " + name + " == null ? null : " + name + ".toString())");
     else if (t.getKind() == ClassKind.LIST) {
       if (((ParameterizedTypeInfo)t).getArg(0).getKind() == ClassKind.DATA_OBJECT)
-        writer.stmt("_json.put(\"" + name + "\", new JsonArray(" + name + ".stream().map(r -> r == null ? null : r.toJson()).collect(Collectors.toList())))");
+        writer.stmt("_json.put(\"" + name + "\", new JsonArray(" + name + " == null ? java.util.Collections.emptyList() : " + name + ".stream().map(r -> r == null ? null : r.toJson()).collect(Collectors.toList())))");
       else
         writer.stmt("_json.put(\"" + name + "\", new JsonArray(" + name + "))");
     } else if (t.getKind() == ClassKind.SET) {
       if (((ParameterizedTypeInfo)t).getArg(0).getKind() == ClassKind.DATA_OBJECT)
-        writer.stmt("_json.put(\"" + name + "\", new JsonArray(" + name + ".stream().map(r -> r == null ? null : r.toJson()).collect(Collectors.toList())))");
+        writer.stmt("_json.put(\"" + name + "\", new JsonArray(" + name + " == null ? java.util.Collections.emptyList() : " + name + ".stream().map(r -> r == null ? null : r.toJson()).collect(Collectors.toList())))");
       else
         writer.stmt("_json.put(\"" + name + "\", new JsonArray(new ArrayList<>(" + name + ")))");
     } else if (t.getKind() == ClassKind.MAP)
