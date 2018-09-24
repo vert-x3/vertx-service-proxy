@@ -93,9 +93,9 @@ public interface TestService {
 
   void dataObjectTypeNull(TestDataObject options);
   
-  void listdataObjectTypeNull(List<TestDataObject> options);
+  void listdataObjectTypeNull(List<TestDataObject> list);
 
-  void setdataObjectTypeNull(Set<TestDataObject> options);
+  void setdataObjectTypeNull(Set<TestDataObject> set);
 
   void listParams(List<String> listString, List<Byte> listByte, List<Short> listShort, List<Integer> listInt, List<Long> listLong, List<JsonObject> listJsonObject, List<JsonArray> listJsonArray, List<TestDataObject> listDataObject);
 

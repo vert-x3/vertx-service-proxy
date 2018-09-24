@@ -146,6 +146,7 @@ public class TestServiceImpl implements TestService {
   
   @Override
   public void listdataObjectType(List<TestDataObject> list) {
+    assertEquals(2, list.size());
     assertEquals(new TestDataObject().setString("foo").setNumber(123).setBool(true), list.get(0));
     assertEquals(new TestDataObject().setString("bar").setNumber(456).setBool(false), list.get(1));
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
@@ -167,9 +168,22 @@ public class TestServiceImpl implements TestService {
   }
   
   @Override
-  public void listdataObjectTypeNull(List<TestDataObject> options) {
-    // TODO Auto-generated method stub
-    
+  public void listdataObjectTypeNull(List<TestDataObject> list) {
+    assertEquals(3, list.size());
+    assertEquals(new TestDataObject().setString("foo").setNumber(123).setBool(true), list.get(0));
+    assertNull(list.get(1));
+    assertEquals(new TestDataObject().setString("bar").setNumber(456).setBool(false), list.get(2));
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+  
+  @Override
+  public void setdataObjectTypeNull(Set<TestDataObject> set) {
+    Set<JsonObject> setJson = set.stream().map(d -> null == d ? null : d.toJson()).collect(Collectors.toSet());
+    assertEquals(3, setJson.size());
+    assertTrue(setJson.contains(new JsonObject().put("number", 123).put("string", "String foo").put("bool", true)));
+    assertTrue(setJson.contains(new JsonObject().put("number", 456).put("string", "String bar").put("bool", false)));
+    assertTrue(setJson.contains(null));
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
 
   @Override
@@ -598,9 +612,4 @@ public class TestServiceImpl implements TestService {
     resultHandler.handle(Future.succeededFuture(set));
   }
 
-  @Override
-  public void setdataObjectTypeNull(Set<TestDataObject> options) {
-    // TODO Auto-generated method stub
-    
-  }
 }

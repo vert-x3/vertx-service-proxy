@@ -16,6 +16,19 @@
 
 package io.vertx.serviceproxy.test;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
+import org.junit.Test;
+
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.ReplyException;
@@ -30,14 +43,6 @@ import io.vertx.serviceproxy.testmodel.SomeEnum;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 import io.vertx.serviceproxy.testmodel.TestService;
 import io.vertx.test.core.VertxTestBase;
-import org.junit.Test;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-
-import static java.util.concurrent.TimeUnit.*;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -203,6 +208,26 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testDataObjectTypeNull() {
     proxy.dataObjectTypeNull(null);
+    await();
+  }
+  
+  @Test
+  public void testListDataObjectTypeNull() {
+    List<TestDataObject> testDataList = Arrays.asList(
+      new TestDataObject().setString("foo").setNumber(123).setBool(true),
+      null,
+      new TestDataObject().setString("bar").setNumber(456).setBool(false));
+    proxy.listdataObjectTypeNull(testDataList);
+    await();
+  }
+  
+  @Test
+  public void testSetDataObjectTypeNull() {
+    Set<TestDataObject> testDataSet = new HashSet<>(Arrays.asList(
+      new TestDataObject().setString("String foo").setNumber(123).setBool(true),
+      null,
+      new TestDataObject().setString("String bar").setNumber(456).setBool(false)));
+    proxy.setdataObjectTypeNull(testDataSet);
     await();
   }
 
