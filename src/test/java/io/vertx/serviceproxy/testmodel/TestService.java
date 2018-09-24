@@ -30,7 +30,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.serviceproxy.ProxyHelper;
+import io.vertx.serviceproxy.ServiceProxyBuilder;
 import io.vertx.serviceproxy.testmodel.impl.TestServiceImpl;
 
 /**
@@ -46,13 +46,13 @@ public interface TestService {
   }
 
   static TestService createProxy(Vertx vertx, String address) {
-    return ProxyHelper.createProxy(TestService.class, vertx, address);
+    return new ServiceProxyBuilder(vertx).setAddress(address).build(TestService.class);
   }
 
   static TestService createProxyLongDelivery(Vertx vertx, String address) {
     DeliveryOptions options = new DeliveryOptions();
     options.setSendTimeout(20*1000L);
-    return ProxyHelper.createProxy(TestService.class, vertx, address, options);
+    return new ServiceProxyBuilder(vertx).setAddress(address).setOptions(options).build(TestService.class);
   }
 
   void longDeliverySuccess(Handler<AsyncResult<String>> resultHandler);
