@@ -36,6 +36,7 @@ import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ProxyHelper;
+import io.vertx.serviceproxy.ServiceBinder;
 import io.vertx.serviceproxy.ServiceException;
 import io.vertx.serviceproxy.testmodel.MyServiceException;
 import io.vertx.serviceproxy.testmodel.MyServiceExceptionMessageCodec;
@@ -46,6 +47,7 @@ import io.vertx.test.core.VertxTestBase;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
+ * @author lalitrao
  */
 public class ServiceProxyTest extends VertxTestBase {
 
@@ -62,8 +64,11 @@ public class ServiceProxyTest extends VertxTestBase {
     super.setUp();
     service = TestService.create(vertx);
     localService = TestService.create(vertx);
-    consumer = ProxyHelper.registerService(TestService.class, vertx, service, SERVICE_ADDRESS);
-    localConsumer = ProxyHelper.registerLocalService(TestService.class, vertx, localService, SERVICE_LOCAL_ADDRESS);
+    
+    consumer = new ServiceBinder(vertx).setAddress(SERVICE_ADDRESS)
+      .register(TestService.class, service);
+    localConsumer = new ServiceBinder(vertx).setAddress(SERVICE_LOCAL_ADDRESS)
+      .register(TestService.class, localService);
 
     proxy = TestService.createProxy(vertx, SERVICE_ADDRESS);
     localProxy = TestService.createProxy(vertx, SERVICE_LOCAL_ADDRESS);
