@@ -35,6 +35,7 @@ import io.vertx.serviceproxy.testmodel.impl.TestServiceImpl;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
+ * @author lalitrao
  */
 @ProxyGen
 @VertxGen
@@ -85,8 +86,16 @@ public interface TestService {
   void enumTypeAsResultNull(Handler<AsyncResult<SomeEnum>> someEnum);
 
   void dataObjectType(TestDataObject options);
+  
+  void listdataObjectType(List<TestDataObject> list);
+
+  void setdataObjectType(Set<TestDataObject> set);
 
   void dataObjectTypeNull(TestDataObject options);
+  
+  void listdataObjectTypeNull(List<TestDataObject> options);
+
+  void setdataObjectTypeNull(Set<TestDataObject> options);
 
   void listParams(List<String> listString, List<Byte> listByte, List<Short> listShort, List<Integer> listInt, List<Long> listLong, List<JsonObject> listJsonObject, List<JsonArray> listJsonArray, List<TestDataObject> listDataObject);
 

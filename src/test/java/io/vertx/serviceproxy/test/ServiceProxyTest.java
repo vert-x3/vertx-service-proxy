@@ -181,6 +181,24 @@ public class ServiceProxyTest extends VertxTestBase {
     proxy.dataObjectType(new TestDataObject().setString("foo").setNumber(123).setBool(true));
     await();
   }
+  
+  @Test
+  public void testListdataObjectType() {
+    List<TestDataObject> testDataList = Arrays.asList(
+      new TestDataObject().setString("foo").setNumber(123).setBool(true),
+      new TestDataObject().setString("bar").setNumber(456).setBool(false));
+    proxy.listdataObjectType(testDataList);
+    await();
+  }
+  
+  @Test
+  public void testSetdataObjectType() {
+    Set<TestDataObject> testDataSet = new HashSet<>(Arrays.asList(
+      new TestDataObject().setString("String foo").setNumber(123).setBool(true),
+      new TestDataObject().setString("String bar").setNumber(456).setBool(false)));
+    proxy.setdataObjectType(testDataSet);
+    await();
+  }
 
   @Test
   public void testDataObjectTypeNull() {
