@@ -30,11 +30,12 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.serviceproxy.ProxyHelper;
+import io.vertx.serviceproxy.ServiceProxyBuilder;
 import io.vertx.serviceproxy.testmodel.impl.TestServiceImpl;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
+ * @author lalitrao
  */
 @ProxyGen
 @VertxGen
@@ -45,13 +46,13 @@ public interface TestService {
   }
 
   static TestService createProxy(Vertx vertx, String address) {
-    return ProxyHelper.createProxy(TestService.class, vertx, address);
+    return new ServiceProxyBuilder(vertx).setAddress(address).build(TestService.class);
   }
 
   static TestService createProxyLongDelivery(Vertx vertx, String address) {
     DeliveryOptions options = new DeliveryOptions();
     options.setSendTimeout(20*1000L);
-    return ProxyHelper.createProxy(TestService.class, vertx, address, options);
+    return new ServiceProxyBuilder(vertx).setAddress(address).setOptions(options).build(TestService.class);
   }
 
   void longDeliverySuccess(Handler<AsyncResult<String>> resultHandler);
@@ -85,8 +86,20 @@ public interface TestService {
   void enumTypeAsResultNull(Handler<AsyncResult<SomeEnum>> someEnum);
 
   void dataObjectType(TestDataObject options);
+  
+  void listdataObjectType(List<TestDataObject> list);
+
+  void setdataObjectType(Set<TestDataObject> set);
 
   void dataObjectTypeNull(TestDataObject options);
+  
+  void listdataObjectTypeHavingNullValues(List<TestDataObject> list);
+
+  void setdataObjectTypeHavingNullValues(Set<TestDataObject> set);
+  
+  void listdataObjectTypeNull(List<TestDataObject> list);
+
+  void setdataObjectTypeNull(Set<TestDataObject> set);
 
   void listParams(List<String> listString, List<Byte> listByte, List<Short> listShort, List<Integer> listInt, List<Long> listLong, List<JsonObject> listJsonObject, List<JsonArray> listJsonArray, List<TestDataObject> listDataObject);
 

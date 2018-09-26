@@ -16,6 +16,17 @@
 
 package io.vertx.serviceproxy.testmodel.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -32,17 +43,9 @@ import io.vertx.serviceproxy.testmodel.TestConnectionWithCloseFuture;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 import io.vertx.serviceproxy.testmodel.TestService;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.junit.Assert.*;
-
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
+ * @author lalitrao
  */
 public class TestServiceImpl implements TestService {
 
@@ -142,10 +145,46 @@ public class TestServiceImpl implements TestService {
     assertEquals(new TestDataObject().setString("foo").setNumber(123).setBool(true), options);
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
+  
+  @Override
+  public void listdataObjectType(List<TestDataObject> list) {
+    assertEquals(2, list.size());
+    assertEquals(new TestDataObject().setString("foo").setNumber(123).setBool(true), list.get(0));
+    assertEquals(new TestDataObject().setString("bar").setNumber(456).setBool(false), list.get(1));
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+  
+  @Override
+  public void setdataObjectType(Set<TestDataObject> set) {
+    Set<JsonObject> setJson = set.stream().map(d -> d.toJson()).collect(Collectors.toSet());
+    assertEquals(2, setJson.size());
+    assertTrue(setJson.contains(new JsonObject().put("number", 123).put("string", "String foo").put("bool", true)));
+    assertTrue(setJson.contains(new JsonObject().put("number", 456).put("string", "String bar").put("bool", false)));
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
 
   @Override
   public void dataObjectTypeNull(TestDataObject options) {
     assertNull(options);
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+  
+  @Override
+  public void listdataObjectTypeHavingNullValues(List<TestDataObject> list) {
+    assertEquals(3, list.size());
+    assertEquals(new TestDataObject().setString("foo").setNumber(123).setBool(true), list.get(0));
+    assertNull(list.get(1));
+    assertEquals(new TestDataObject().setString("bar").setNumber(456).setBool(false), list.get(2));
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+  
+  @Override
+  public void setdataObjectTypeHavingNullValues(Set<TestDataObject> set) {
+    Set<JsonObject> setJson = set.stream().map(d -> null == d ? null : d.toJson()).collect(Collectors.toSet());
+    assertEquals(3, setJson.size());
+    assertTrue(setJson.contains(new JsonObject().put("number", 123).put("string", "String foo").put("bool", true)));
+    assertTrue(setJson.contains(new JsonObject().put("number", 456).put("string", "String bar").put("bool", false)));
+    assertTrue(setJson.contains(null));
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
 
@@ -574,4 +613,17 @@ public class TestServiceImpl implements TestService {
         new TestDataObject().setNumber(2).setString("String 2").setBool(true)));
     resultHandler.handle(Future.succeededFuture(set));
   }
+
+  @Override
+  public void listdataObjectTypeNull(List<TestDataObject> list) {
+    assertTrue(list.isEmpty());
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
+  public void setdataObjectTypeNull(Set<TestDataObject> set) {
+    assertTrue(set.isEmpty());
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
 }

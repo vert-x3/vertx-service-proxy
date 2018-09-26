@@ -16,6 +16,19 @@
 
 package io.vertx.serviceproxy.test;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
+import org.junit.Test;
+
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.ReplyException;
@@ -23,6 +36,7 @@ import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ProxyHelper;
+import io.vertx.serviceproxy.ServiceBinder;
 import io.vertx.serviceproxy.ServiceException;
 import io.vertx.serviceproxy.testmodel.MyServiceException;
 import io.vertx.serviceproxy.testmodel.MyServiceExceptionMessageCodec;
@@ -30,17 +44,10 @@ import io.vertx.serviceproxy.testmodel.SomeEnum;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 import io.vertx.serviceproxy.testmodel.TestService;
 import io.vertx.test.core.VertxTestBase;
-import org.junit.Test;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-
-import static java.util.concurrent.TimeUnit.*;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
+ * @author lalitrao
  */
 public class ServiceProxyTest extends VertxTestBase {
 
@@ -57,8 +64,11 @@ public class ServiceProxyTest extends VertxTestBase {
     super.setUp();
     service = TestService.create(vertx);
     localService = TestService.create(vertx);
-    consumer = ProxyHelper.registerService(TestService.class, vertx, service, SERVICE_ADDRESS);
-    localConsumer = ProxyHelper.registerLocalService(TestService.class, vertx, localService, SERVICE_LOCAL_ADDRESS);
+    
+    consumer = new ServiceBinder(vertx).setAddress(SERVICE_ADDRESS)
+      .register(TestService.class, service);
+    localConsumer = new ServiceBinder(vertx).setAddress(SERVICE_LOCAL_ADDRESS)
+      .registerLocal(TestService.class, localService);
 
     proxy = TestService.createProxy(vertx, SERVICE_ADDRESS);
     localProxy = TestService.createProxy(vertx, SERVICE_LOCAL_ADDRESS);
@@ -181,10 +191,60 @@ public class ServiceProxyTest extends VertxTestBase {
     proxy.dataObjectType(new TestDataObject().setString("foo").setNumber(123).setBool(true));
     await();
   }
+  
+  @Test
+  public void testListdataObjectType() {
+    List<TestDataObject> testDataList = Arrays.asList(
+      new TestDataObject().setString("foo").setNumber(123).setBool(true),
+      new TestDataObject().setString("bar").setNumber(456).setBool(false));
+    proxy.listdataObjectType(testDataList);
+    await();
+  }
+  
+  @Test
+  public void testSetdataObjectType() {
+    Set<TestDataObject> testDataSet = new HashSet<>(Arrays.asList(
+      new TestDataObject().setString("String foo").setNumber(123).setBool(true),
+      new TestDataObject().setString("String bar").setNumber(456).setBool(false)));
+    proxy.setdataObjectType(testDataSet);
+    await();
+  }
 
   @Test
   public void testDataObjectTypeNull() {
     proxy.dataObjectTypeNull(null);
+    await();
+  }
+  
+  @Test
+  public void testlistdataObjectTypeHavingNullValues() {
+    List<TestDataObject> testDataList = Arrays.asList(
+      new TestDataObject().setString("foo").setNumber(123).setBool(true),
+      null,
+      new TestDataObject().setString("bar").setNumber(456).setBool(false));
+    proxy.listdataObjectTypeHavingNullValues(testDataList);
+    await();
+  }
+  
+  @Test
+  public void testListDataObjectTypeNull() {
+    proxy.listdataObjectTypeNull(null);
+    await();
+  }
+  
+  @Test
+  public void testSetdataObjectTypeHavingNullValues() {
+    Set<TestDataObject> testDataSet = new HashSet<>(Arrays.asList(
+      new TestDataObject().setString("String foo").setNumber(123).setBool(true),
+      null,
+      new TestDataObject().setString("String bar").setNumber(456).setBool(false)));
+    proxy.setdataObjectTypeHavingNullValues(testDataSet);
+    await();
+  }
+  
+  @Test
+  public void testSetDataObjectTypeNull() {
+    proxy.setdataObjectTypeNull(null);
     await();
   }
 

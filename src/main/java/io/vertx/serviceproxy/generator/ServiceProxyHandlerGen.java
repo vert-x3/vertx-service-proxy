@@ -197,7 +197,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
       String coll = type.getKind() == ClassKind.LIST ? "List" : "Set";
       TypeInfo typeArg = ((ParameterizedTypeInfo)type).getArg(0);
       if (typeArg.getKind() == ClassKind.DATA_OBJECT)
-        return "json.getJsonArray(\"" + name + "\").stream().map(o -> new " + typeArg.getName() + "((JsonObject)o)).collect(Collectors.to" + coll + "())";
+        return "json.getJsonArray(\"" + name + "\").stream().map(o -> o == null ? null : new " + typeArg.getName() + "((JsonObject)o)).collect(Collectors.to" + coll + "())";
       if (typeArg.getName().equals("java.lang.Byte") || typeArg.getName().equals("java.lang.Short") ||
         typeArg.getName().equals("java.lang.Integer") || typeArg.getName().equals("java.lang.Long"))
         return "json.getJsonArray(\"" + name + "\").stream().map(o -> ((Number)o)." + numericMapping.get(typeArg.getName()) + "Value()).collect(Collectors.to" + coll + "())";
