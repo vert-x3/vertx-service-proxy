@@ -512,6 +512,7 @@ the service is remote.
 
 Let `JSON` = `JsonObject | JsonArray`
 Let `PRIMITIVE` = Any primitive type or boxed primitive type
+Let `DATAOBJECT` = Any class annotated with `@DataObject`
 
 Parameters can be any of:
 
@@ -523,8 +524,10 @@ Parameters can be any of:
 * `Set<PRIMITIVE>`
 * `Map<String, JSON>`
 * `Map<String, PRIMITIVE>`
+* `DATAOBJECT`
+* `List<DATAOBJECT>`
+* `Set<DATAOBJECT>`
 * Any _Enum_ type
-* Any class annotated with `@DataObject`
 
 If an asynchronous result is required a last parameter of type `Handler<AsyncResult<R>>` can be provided.
 
@@ -536,8 +539,10 @@ If an asynchronous result is required a last parameter of type `Handler<AsyncRes
 * `List<PRIMITIVE>`
 * `Set<JSON>`
 * `Set<PRIMITIVE>`
+* `DATAOBJECT`
+* `List<DATAOBJECT>`
+* `Set<DATAOBJECT>`
 * Any _Enum_ type
-* Any class annotated with `@DataObject`
 * Another proxy
 
 === Overloaded methods
