@@ -72,7 +72,6 @@
       <artifactId>vertx-codegen</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
-      <version>3.6.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
