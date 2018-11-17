@@ -61,6 +61,13 @@
       <version>4.12</version>
       <scope>test</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-unit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
@@ -154,6 +161,47 @@
             </additionalClasspathElements>
           </configuration>
         </plugin>
+        
+        <!--This plugin's configuration is used to store Eclipse m2e settings 
+		only. It has no influence on the Maven build itself. -->
+		<plugin>
+			<groupId>org.eclipse.m2e</groupId>
+			<artifactId>lifecycle-mapping</artifactId>
+			<version>1.0.0</version>
+			<configuration>
+				<lifecycleMappingMetadata>
+					<pluginExecutions>
+						<pluginExecution>
+							<pluginExecutionFilter>
+								<groupId>org.codehaus.mojo</groupId>
+								<artifactId>buildhelper-maven-plugin</artifactId>
+								<versionRange>[1.8,)</versionRange>
+								<goals>
+									<goal>add-test-source</goal>
+								</goals>
+							</pluginExecutionFilter>
+							<action>
+								<execute />
+							</action>
+						</pluginExecution>
+						<pluginExecution>
+							<pluginExecutionFilter>
+								<groupId>org.apache.maven.plugins</groupId>
+								<artifactId>maven-dependency-plugin</artifactId>
+								<versionRange>[2.10,)</versionRange>
+								<goals>
+									<goal>copy</goal>
+									<goal>properties</goal>
+								</goals>
+							</pluginExecutionFilter>
+							<action>
+								<execute />
+							</action>
+						</pluginExecution>
+					</pluginExecutions>
+				</lifecycleMappingMetadata>
+			</configuration>
+		</plugin>
 
       </plugins>
 
@@ -279,6 +327,24 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+		<groupId>org.codehaus.mojo</groupId>
+		  <artifactId>build-helper-maven-plugin</artifactId>
+		  <executions>
+		     <execution>
+		        <id>add-test-source</id>
+		        <phase>generate-test-sources</phase>
+		        <goals>
+		           <goal>add-test-source</goal>
+		        </goals>
+		        <configuration>
+		          <sources>
+		            <source>${project.build.directory}/generated-test-sources/tests-annotations/</source>
+		          </sources>
+		        </configuration>
+		     </execution>
+		  </executions>
       </plugin>
     </plugins>
   </build>
