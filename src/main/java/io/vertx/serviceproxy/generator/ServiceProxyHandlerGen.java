@@ -2,16 +2,17 @@ package io.vertx.serviceproxy.generator;
 
 import io.vertx.codegen.Generator;
 import io.vertx.codegen.ParamInfo;
+import io.vertx.codegen.annotations.ModuleGen;
+import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.type.*;
 import io.vertx.codegen.writer.CodeWriter;
 import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
 
 import java.io.StringWriter;
+import java.lang.annotation.Annotation;
+import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,6 +44,11 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
     kinds = Collections.singleton("proxy");
     name = "service_proxy_handler";
     this.utils = utils;
+  }
+
+  @Override
+  public Collection<Class<? extends Annotation>> annotations() {
+    return Arrays.asList(ProxyGen.class, ModuleGen.class);
   }
 
   @Override

@@ -26,12 +26,4 @@ import java.util.function.Predicate;
 @javax.annotation.processing.SupportedOptions({})
 @javax.annotation.processing.SupportedSourceVersion(javax.lang.model.SourceVersion.RELEASE_8)
 public class ServiceProxyProcessor extends CodeGenProcessor {
-
-  private static final Predicate<Generator> FILTER = generator ->
-    generator.name.contains("service_proxies") || generator.name.equals("data_object_converters");
-
-  @Override
-  protected Predicate<Generator> filterGenerators() {
-    return FILTER;
-  }
 }
