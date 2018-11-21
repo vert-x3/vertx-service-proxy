@@ -219,7 +219,8 @@
  * The _codegen_ annotation processor generates these classes at compilation time. It is a feature of the Java
  * compiler so _no extra step_ is required, it is just a matter of configuring correctly your build:
  *
- * Just add the `io.vertx:vertx-service-proxy:processor` dependency to your build.
+ * Just add the `io.vertx:vertx-codegen:processor` and `io.vertx:vertx-service-proxy`
+ * dependencies to your build.
  *
  * Here a configuration example for Maven:
  *
@@ -227,9 +228,14 @@
  * ----
  * <dependency>
  *   <groupId>io.vertx</groupId>
- *   <artifactId>vertx-service-proxy</artifactId>
+ *   <artifactId>vertx-codegen</artifactId>
  *   <version>${maven.version}</version>
  *   <classifier>processor</classifier>
+ * </dependency>
+ * <dependency>
+ *   <groupId>io.vertx</groupId>
+ *   <artifactId>vertx-service-proxy</artifactId>
+ *   <version>${maven.version}</version>
  * </dependency>
  * ----
  *
@@ -237,12 +243,13 @@
  *
  * [source]
  * ----
- * compile "io.vertx:vertx-service-proxy:${maven.version}:processor"
+ * compile "io.vertx:vertx-codegen:${maven.version}:processor"
+ * compile "io.vertx:vertx-service-proxy:${maven.version}"
  * ----
  *
  * IDE provides usually support for annotation processors.
  *
- * The `processor` classifier adds to the jar the automatic configuration of the service proxy annotation processor
+ * The codegen `processor` classifier adds to the jar the automatic configuration of the service proxy annotation processor
  * via the `META-INF/services` plugin mechanism.
  *
  * If you want you can use it too with the regular jar but you need then to declare the annotation processor
@@ -254,7 +261,7 @@
  *   <artifactId>maven-compiler-plugin</artifactId>
  *   <configuration>
  *     <annotationProcessors>
- *       <annotationProcessor>io.vertx.serviceproxy.generator.ServiceProxyProcessor</annotationProcessor>
+ *       <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
  *     </annotationProcessors>
  *   </configuration>
  * </plugin>
