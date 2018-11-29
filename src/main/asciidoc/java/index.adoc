@@ -25,7 +25,7 @@ your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-service-proxy</artifactId>
-  <version>3.6.0-SNAPSHOT</version>
+  <version>4.0.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -33,7 +33,7 @@ your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-proxy:3.6.0-SNAPSHOT'
+compile 'io.vertx:vertx-service-proxy:4.0.0-SNAPSHOT'
 ----
 
 To *implement* service proxies, also add:
@@ -45,7 +45,7 @@ To *implement* service proxies, also add:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-codegen</artifactId>
-  <version>3.6.0-SNAPSHOT</version>
+  <version>4.0.0-SNAPSHOT</version>
   <scope>provided</scope>
 </dependency>
 ----
@@ -54,7 +54,7 @@ To *implement* service proxies, also add:
 
 [source,groovy,subs="+attributes"]
 ----
-compileOnly 'io.vertx:vertx-codegen:3.6.0-SNAPSHOT'
+compileOnly 'io.vertx:vertx-codegen:4.0.0-SNAPSHOT'
 ----
 
 Be aware that as the service proxy mechanism relies on code generation, so modifications to the _service interface_
@@ -222,7 +222,8 @@ that are necessary for using data objects in service proxies.
 The _codegen_ annotation processor generates these classes at compilation time. It is a feature of the Java
 compiler so _no extra step_ is required, it is just a matter of configuring correctly your build:
 
-Just add the `io.vertx:vertx-service-proxy:processor` dependency to your build.
+Just add the `io.vertx:vertx-codegen:processor` and `io.vertx:vertx-service-proxy`
+dependencies to your build.
 
 Here a configuration example for Maven:
 
@@ -230,9 +231,14 @@ Here a configuration example for Maven:
 ----
 <dependency>
   <groupId>io.vertx</groupId>
-  <artifactId>vertx-service-proxy</artifactId>
-  <version>3.6.0-SNAPSHOT</version>
+  <artifactId>vertx-codegen</artifactId>
+  <version>4.0.0-SNAPSHOT</version>
   <classifier>processor</classifier>
+</dependency>
+<dependency>
+  <groupId>io.vertx</groupId>
+  <artifactId>vertx-service-proxy</artifactId>
+  <version>4.0.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -240,12 +246,13 @@ This feature can also be used in Gradle:
 
 [source]
 ----
-compile "io.vertx:vertx-service-proxy:3.6.0-SNAPSHOT:processor"
+compile "io.vertx:vertx-codegen:4.0.0-SNAPSHOT:processor"
+compile "io.vertx:vertx-service-proxy:4.0.0-SNAPSHOT"
 ----
 
 IDE provides usually support for annotation processors.
 
-The `processor` classifier adds to the jar the automatic configuration of the service proxy annotation processor
+The codegen `processor` classifier adds to the jar the automatic configuration of the service proxy annotation processor
 via the `META-INF/services` plugin mechanism.
 
 If you want you can use it too with the regular jar but you need then to declare the annotation processor
@@ -257,7 +264,7 @@ explicitly, for instance in Maven:
   <artifactId>maven-compiler-plugin</artifactId>
   <configuration>
     <annotationProcessors>
-      <annotationProcessor>io.vertx.serviceproxy.generator.ServiceProxyProcessor</annotationProcessor>
+      <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
     </annotationProcessors>
   </configuration>
 </plugin>
