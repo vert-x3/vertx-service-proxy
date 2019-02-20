@@ -233,12 +233,13 @@ Here a configuration example for Maven:
   <groupId>io.vertx</groupId>
   <artifactId>vertx-codegen</artifactId>
   <version>4.0.0-SNAPSHOT</version>
-  <classifier>processor</classifier>
+  <scope>provided</scope>
 </dependency>
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-service-proxy</artifactId>
   <version>4.0.0-SNAPSHOT</version>
+  <classifier>processor</classifier>
 </dependency>
 ----
 
@@ -246,8 +247,8 @@ This feature can also be used in Gradle:
 
 [source]
 ----
-compile "io.vertx:vertx-codegen:4.0.0-SNAPSHOT:processor"
-compile "io.vertx:vertx-service-proxy:4.0.0-SNAPSHOT"
+compile "io.vertx:vertx-codegen:4.0.0-SNAPSHOT"
+compile "io.vertx:vertx-service-proxy:4.0.0-SNAPSHOT:processor"
 ----
 
 IDE provides usually support for annotation processors.
