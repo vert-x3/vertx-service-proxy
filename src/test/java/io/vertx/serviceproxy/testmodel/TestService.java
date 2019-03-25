@@ -16,6 +16,7 @@
 
 package io.vertx.serviceproxy.testmodel;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -92,6 +93,14 @@ public interface TestService {
   void setdataObjectType(Set<TestDataObject> set);
 
   void dataObjectTypeNull(TestDataObject options);
+
+  void dateTimeType(ZonedDateTime dateTime);
+
+  void listDateTimeType(List<ZonedDateTime> list);
+
+  void setDateTimeType(Set<ZonedDateTime> set);
+
+  void mapDateTimeType(Map<String, ZonedDateTime> map);
   
   void listdataObjectTypeHavingNullValues(List<TestDataObject> list);
 
@@ -100,6 +109,8 @@ public interface TestService {
   void listdataObjectTypeNull(List<TestDataObject> list);
 
   void setdataObjectTypeNull(Set<TestDataObject> set);
+
+  void mapDataObjectType(Map<String, TestDataObject> map);
 
   void listParams(List<String> listString, List<Byte> listByte, List<Short> listShort, List<Integer> listInt, List<Long> listLong, List<JsonObject> listJsonObject, List<JsonArray> listJsonArray, List<TestDataObject> listDataObject);
 
@@ -209,17 +220,49 @@ public interface TestService {
 
   void setBoolHandler(Handler<AsyncResult<Set<Boolean>>> resultHandler);
 
+  void mapStringHandler(Handler<AsyncResult<Map<String, String>>> resultHandler);
+
+  void mapByteHandler(Handler<AsyncResult<Map<String, Byte>>> resultHandler);
+
+  void mapShortHandler(Handler<AsyncResult<Map<String, Short>>> resultHandler);
+
+  void mapIntHandler(Handler<AsyncResult<Map<String, Integer>>> resultHandler);
+
+  void mapLongHandler(Handler<AsyncResult<Map<String, Long>>> resultHandler);
+
+  void mapFloatHandler(Handler<AsyncResult<Map<String, Float>>> resultHandler);
+
+  void mapDoubleHandler(Handler<AsyncResult<Map<String, Double>>> resultHandler);
+
+  void mapCharHandler(Handler<AsyncResult<Map<String, Character>>> resultHandler);
+
+  void mapBoolHandler(Handler<AsyncResult<Map<String, Boolean>>> resultHandler);
+
   void setJsonObjectHandler(Handler<AsyncResult<Set<JsonObject>>> resultHandler);
+
+  void mapJsonObjectHandler(Handler<AsyncResult<Map<String, JsonObject>>> resultHandler);
 
   void setJsonArrayHandler(Handler<AsyncResult<Set<JsonArray>>> resultHandler);
 
+  void mapJsonArrayHandler(Handler<AsyncResult<Map<String, JsonArray>>> resultHandler);
+
   void setDataObjectHandler(Handler<AsyncResult<Set<TestDataObject>>> resultHandler);
+
+  void mapDataObject(Handler<AsyncResult<Map<String, TestDataObject>>> resultHandler);
 
   void failingCall(String value, Handler<AsyncResult<JsonObject>> resultHandler);
 
   void listDataObjectContainingNullHandler(Handler<AsyncResult<List<TestDataObject>>> resultHandler);
 
   void setDataObjectContainingNullHandler(Handler<AsyncResult<Set<TestDataObject>>> resultHandler);
+
+  void zonedDateTimeHandler(Handler<AsyncResult<ZonedDateTime>> resultHandler);
+
+  void listZonedDateTimeHandler(Handler<AsyncResult<List<ZonedDateTime>>> resultHandler);
+
+  void setZonedDateTimeHandler(Handler<AsyncResult<Set<ZonedDateTime>>> resultHandler);
+
+  void mapZonedDateTimeHandler(Handler<AsyncResult<Map<String, ZonedDateTime>>> resultHandler);
 
   @ProxyIgnore
   void ignoredMethod();

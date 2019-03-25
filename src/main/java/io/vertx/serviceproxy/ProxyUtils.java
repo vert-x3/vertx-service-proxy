@@ -6,6 +6,7 @@ import io.vertx.core.json.JsonObject;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author <a href="http://slinkydeveloper.github.io">Francesco Guardiani @slinkydeveloper</a>
@@ -14,21 +15,20 @@ import java.util.stream.Collectors;
 public class ProxyUtils {
 
   public static List<Character> convertToListChar(JsonArray arr) {
-    List<Character> list = new ArrayList<>();
-    for (Object obj: arr) {
-      Integer jobj = (Integer)obj;
-      list.add((char)(int)jobj);
-    }
-    return list;
+    return arr.stream().map(ProxyUtils::javaObjToChar).collect(Collectors.toList());
   }
 
   public static Set<Character> convertToSetChar(JsonArray arr) {
-    Set<Character> set = new HashSet<>();
-    for (Object obj: arr) {
-      Integer jobj = (Integer)obj;
-      set.add((char)(int)jobj);
-    }
-    return set;
+    return arr.stream().map(ProxyUtils::javaObjToChar).collect(Collectors.toSet());
+  }
+
+  public static Map<String, Character> convertToMapChar(JsonObject obj) {
+    return obj.stream().collect(Collectors.toMap(Map.Entry::getKey, e -> javaObjToChar(e.getValue())));
+  }
+
+  public static Character javaObjToChar(Object obj) {
+    Integer jobj = (Integer)obj;
+    return (char)(int)jobj;
   }
 
   public static <T> Map<String, T> convertMap(Map map) {

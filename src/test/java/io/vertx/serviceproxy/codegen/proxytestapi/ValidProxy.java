@@ -8,6 +8,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +35,7 @@ public interface ValidProxy {
   void enumType(SomeEnum someEnum);
 
   void dataObjectType(ProxyDataObject dataObject);
+  void jsonCodec(ZonedDateTime dateTime);
 
   void dataObjectWithParentType(ProxyDataObjectWithParent dataObject);
   void dataObjectWithParentAndOverride(ProxyDataObjectWithParentOverride dataObject);
@@ -74,6 +76,10 @@ public interface ValidProxy {
   void handler32(Handler<AsyncResult<Set<Boolean>>> boolSetHandler);
   void handler33(Handler<AsyncResult<Set<JsonObject>>> jsonObjectSetHandler);
   void handler34(Handler<AsyncResult<Set<JsonArray>>> jsonArraySetHandler);
+
+  void handler35(Handler<AsyncResult<ZonedDateTime>> zonedDateTime);
+  void handler36(Handler<AsyncResult<List<ZonedDateTime>>> zonedDateTimeListHandler);
+  void handler37(Handler<AsyncResult<Set<ZonedDateTime>>> zonedDateTimeSetHandler);
 
   @ProxyIgnore
   void ignored();

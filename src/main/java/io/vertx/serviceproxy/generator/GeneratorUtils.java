@@ -2,12 +2,16 @@ package io.vertx.serviceproxy.generator;
 
 import io.vertx.codegen.ParamInfo;
 import io.vertx.codegen.type.ClassKind;
+import io.vertx.codegen.type.ClassTypeInfo;
+import io.vertx.codegen.type.DataObjectTypeInfo;
 import io.vertx.codegen.type.ParameterizedTypeInfo;
+import io.vertx.serviceproxy.generator.model.ProxyModel;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
+import java.util.stream.Stream;
 
 /**
  * @author <a href="http://slinkydeveloper.github.io">Francesco Guardiani @slinkydeveloper</a>
@@ -28,6 +32,20 @@ public class GeneratorUtils {
     handlerConstructorBody = loadResource("handler_constructor_body") + "\n";
     handlerCloseAccessed = loadResource("handler_close_accessed") + "\n";
     roger = loadResource("roger") + "\n";
+  }
+
+  public Stream<String> additionalImports(ProxyModel model) {
+    return Stream
+      .concat(
+        model.getImportedTypes().stream(),
+        model.getReferencedDataObjectTypes()
+          .stream()
+          .filter(t -> t.getTargetJsonType() instanceof ClassTypeInfo)
+          .map(t -> (ClassTypeInfo) t.getTargetJsonType())
+      )
+      .filter(c -> !c.getPackageName().equals("java.lang") && !c.getPackageName().equals("io.vertx.core.json"))
+      .map(ClassTypeInfo::toString)
+      .distinct();
   }
 
   public void classHeader(PrintWriter w) {

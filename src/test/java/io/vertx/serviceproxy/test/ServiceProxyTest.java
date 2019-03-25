@@ -18,11 +18,8 @@ package io.vertx.serviceproxy.test;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.time.ZonedDateTime;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -226,6 +223,52 @@ public class ServiceProxyTest extends VertxTestBase {
       new TestDataObject().setString("String foo").setNumber(123).setBool(true),
       new TestDataObject().setString("String bar").setNumber(456).setBool(false)));
     proxy.setdataObjectType(testDataSet);
+    await();
+  }
+
+  @Test
+  public void testMapdataObjectType() {
+    Map<String, TestDataObject> map = new HashMap<>();
+    map.put("do1", new TestDataObject().setNumber(1).setString("String 1").setBool(false));
+    map.put("do2", new TestDataObject().setNumber(2).setString("String 2").setBool(true));
+    proxy.mapDataObjectType(map);
+    await();
+  }
+
+  @Test
+  public void testDateTimeType() {
+    proxy.dateTimeType(ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"));
+    await();
+  }
+
+  @Test
+  public void testListDateTimeType() {
+    proxy.listDateTimeType(
+      Arrays.asList(
+        ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"),
+        ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1)
+      )
+    );
+    await();
+  }
+
+  @Test
+  public void testSetDateTimeType() {
+    proxy.setDateTimeType(
+      new HashSet<>(Arrays.asList(
+        ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"),
+        ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1)
+      ))
+    );
+    await();
+  }
+
+  @Test
+  public void testMapDateTimeType() {
+    Map<String, ZonedDateTime> expected = new HashMap<>();
+    expected.put("date1", ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"));
+    expected.put("date2", ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1));
+    proxy.mapDateTimeType(expected);
     await();
   }
 
@@ -847,6 +890,123 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
+  public void testMapStringHandler() {
+    Map<String, String> expected = new HashMap<>();
+    expected.put("1", "foo");
+    expected.put("2", "bar");
+    expected.put("3", "wibble");
+    proxy.mapStringHandler(onSuccess(map -> {
+      assertEquals(expected, map);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testMapByteHandler() {
+    Map<String, Byte> expected = new HashMap<>();
+    expected.put("1", (byte)1);
+    expected.put("2", (byte)2);
+    expected.put("3", (byte)3);
+    proxy.mapByteHandler(onSuccess(map -> {
+      assertEquals(expected, map);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testMapShortHandler() {
+    Map<String, Short> expected = new HashMap<>();
+    expected.put("1", (short)11);
+    expected.put("2", (short)12);
+    expected.put("3", (short)13);
+    proxy.mapShortHandler(onSuccess(map -> {
+      assertEquals(expected, map);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testMapIntHandler() {
+    Map<String, Integer> expected = new HashMap<>();
+    expected.put("1", 100);
+    expected.put("2", 101);
+    expected.put("3", 102);
+    proxy.mapIntHandler(onSuccess(map -> {
+      assertEquals(expected, map);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testMapLongHandler() {
+    Map<String, Long> expected = new HashMap<>();
+    expected.put("1", 1000l);
+    expected.put("2", 1001l);
+    expected.put("3", 1002l);
+    proxy.mapLongHandler(onSuccess(map -> {
+      assertEquals(expected, map);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testMapFloatHandler() {
+    Map<String, Float> expected = new HashMap<>();
+    expected.put("1", 1.1f);
+    expected.put("2", 1.2f);
+    expected.put("3", 1.3f);
+    proxy.mapFloatHandler(onSuccess(map -> {
+      assertEquals(expected, map);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testMapDoubleHandler() {
+    Map<String, Double> expected = new HashMap<>();
+    expected.put("1", 1.11d);
+    expected.put("2", 1.12d);
+    expected.put("3", 1.13d);
+    proxy.mapDoubleHandler(onSuccess(map -> {
+      assertEquals(expected, map);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testMapCharHandler() {
+    Map<String, Character> expected = new HashMap<>();
+    expected.put("1", 'X');
+    expected.put("2", 'Y');
+    expected.put("3", 'Z');
+    proxy.mapCharHandler(onSuccess(map -> {
+      assertEquals(expected, map);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testMapBoolHandler() {
+    Map<String, Boolean> expected = new HashMap<>();
+    expected.put("1", true);
+    expected.put("2", false);
+    expected.put("3", true);
+    proxy.mapBoolHandler(onSuccess(map -> {
+      assertEquals(expected, map);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
   public void testSetJsonObjectHandler() {
     proxy.setJsonObjectHandler(onSuccess(set -> {
       assertTrue(set.contains(new JsonObject().put("a", "foo")));
@@ -858,11 +1018,37 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
+  public void testMapJsonObjectHandler() {
+    Map<String, JsonObject> expected = new HashMap<>();
+    expected.put("1", new JsonObject().put("a", "foo"));
+    expected.put("2", new JsonObject().put("b", "bar"));
+    expected.put("3", new JsonObject().put("c", "wibble"));
+    proxy.mapJsonObjectHandler(onSuccess(map -> {
+      assertEquals(expected, map);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
   public void setSetJsonArrayHandler() {
     proxy.setJsonArrayHandler(onSuccess(set -> {
       assertTrue(set.contains(new JsonArray().add("foo")));
       assertTrue(set.contains(new JsonArray().add("bar")));
       assertTrue(set.contains(new JsonArray().add("wibble")));
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testMapJsonArrayHandler() {
+    Map<String, JsonArray> expected = new HashMap<>();
+    expected.put("1", new JsonArray().add("foo"));
+    expected.put("2", new JsonArray().add("bar"));
+    expected.put("3", new JsonArray().add("wibble"));
+    proxy.mapJsonArrayHandler(onSuccess(map -> {
+      assertEquals(expected, map);
       testComplete();
     }));
     await();
@@ -889,6 +1075,63 @@ public class ServiceProxyTest extends VertxTestBase {
       assertEquals(2, setJson.size());
       assertTrue(setJson.contains(new JsonObject().put("number", 1).put("string", "String 1").put("bool", false)));
       assertTrue(setJson.contains(new JsonObject().put("number", 2).put("string", "String 2").put("bool", true)));
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testMapDataObjectHandler() {
+    Map<String, TestDataObject> expected = new HashMap<>();
+    expected.put("do1", new TestDataObject().setNumber(1).setString("String 1").setBool(false));
+    expected.put("do2", new TestDataObject().setNumber(2).setString("String 2").setBool(true));
+    proxy.mapDataObject(onSuccess(map -> {
+      assertEquals(expected, map);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testDateTimeHandler() {
+    proxy.zonedDateTimeHandler(onSuccess(dateTime -> {
+      assertEquals(ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"), dateTime);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testListDateTimeHandler() {
+    proxy.listZonedDateTimeHandler(onSuccess(list -> {
+      assertEquals(Arrays.asList(
+        ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"),
+        ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1)
+      ), list);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testSetDateTimeHandler() {
+    proxy.setZonedDateTimeHandler(onSuccess(set -> {
+      assertEquals(new HashSet<>(Arrays.asList(
+        ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"),
+        ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1)
+      )), set);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testMapDateTimeHandler() {
+    Map<String, ZonedDateTime> expected = new HashMap<>();
+    expected.put("date1", ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"));
+    expected.put("date2", ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1));
+    proxy.mapZonedDateTimeHandler(onSuccess(map -> {
+      assertEquals(expected, map);
       testComplete();
     }));
     await();

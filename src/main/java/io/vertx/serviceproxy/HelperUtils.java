@@ -49,6 +49,16 @@ public class HelperUtils {
     };
   }
 
+  public static <T> Handler<AsyncResult<Map<String, T>>> createMapHandler(Message msg, boolean includeDebugInfo) {
+    return res -> {
+      if (res.failed()) {
+        manageFailure(msg, res.cause(), includeDebugInfo);
+      } else {
+        msg.reply(new JsonObject(new HashMap<>(res.result())));
+      }
+    };
+  }
+
   public static Handler<AsyncResult<List<Character>>> createListCharHandler(Message msg, boolean includeDebugInfo) {
     return res -> {
       if (res.failed()) {
@@ -73,6 +83,20 @@ public class HelperUtils {
           arr.add((int) chr);
         }
         msg.reply(arr);
+      }
+    };
+  }
+
+  public static Handler<AsyncResult<Map<String, Character>>> createMapCharHandler(Message msg, boolean includeDebugInfo) {
+    return res -> {
+      if (res.failed()) {
+        manageFailure(msg, res.cause(), includeDebugInfo);
+      } else {
+        JsonObject obj = new JsonObject();
+        for (Map.Entry<String, Character> chr: res.result().entrySet()) {
+          obj.put(chr.getKey(), (int) chr.getValue());
+        }
+        msg.reply(obj);
       }
     };
   }
