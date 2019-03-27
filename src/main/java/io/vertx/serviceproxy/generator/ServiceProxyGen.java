@@ -220,7 +220,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
       }
     } else if (t.getKind() == ClassKind.API && t instanceof ApiTypeInfo && ((ApiTypeInfo)t).isProxyGen()) {
       writer.stmt("String addr = res.result().headers().get(\"proxyaddr\")");
-      writer.stmt(name + ".handle(Future.succeededFuture(ProxyHelper.createProxy(" + t.getSimpleName() + ".class, _vertx, addr)))");
+      writer.stmt(name + ".handle(Future.succeededFuture(new " + t.getSimpleName() + "VertxEBProxy(_vertx, addr)))");
     } else if (t.getKind() == ClassKind.DATA_OBJECT)
       writer.stmt(name + ".handle(Future.succeededFuture(res.result().body() == null ? null : new " + t.getSimpleName() + "(res.result().body())))");
     else if (t.getKind() == ClassKind.ENUM)

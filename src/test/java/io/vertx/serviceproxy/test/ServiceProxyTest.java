@@ -35,7 +35,6 @@ import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.serviceproxy.ServiceBinder;
 import io.vertx.serviceproxy.ServiceException;
 import io.vertx.serviceproxy.testmodel.MyServiceException;
@@ -909,7 +908,10 @@ public class ServiceProxyTest extends VertxTestBase {
   public void testConnectionTimeout() {
 
     consumer.unregister();
-    consumer = ProxyHelper.registerService(TestService.class, vertx, service, SERVICE_ADDRESS, (long) 2);
+    consumer = new ServiceBinder(vertx)
+      .setAddress(SERVICE_ADDRESS)
+      .setTimeoutSeconds(2)
+      .register(TestService.class, service);
 
     checkConnection(proxy, 2L);
 
@@ -920,7 +922,10 @@ public class ServiceProxyTest extends VertxTestBase {
   public void testConnectionWithCloseFutureTimeout() {
 
     consumer.unregister();
-    consumer = ProxyHelper.registerService(TestService.class, vertx, service, SERVICE_ADDRESS, (long) 2);
+    consumer = new ServiceBinder(vertx)
+      .setAddress(SERVICE_ADDRESS)
+      .setTimeoutSeconds(2)
+      .register(TestService.class, service);
 
     checkConnectionWithCloseFuture(proxy, System.currentTimeMillis(), 2L);
 
@@ -931,7 +936,10 @@ public class ServiceProxyTest extends VertxTestBase {
   public void testLocalServiceConnectionTimeout() {
 
     localConsumer.unregister();
-    localConsumer = ProxyHelper.registerLocalService(TestService.class, vertx, localService, SERVICE_LOCAL_ADDRESS, 2L);
+    localConsumer = new ServiceBinder(vertx)
+      .setAddress(SERVICE_LOCAL_ADDRESS)
+      .setTimeoutSeconds(2)
+      .register(TestService.class, localService);
 
     checkConnection(localProxy, 2L);
 
@@ -942,7 +950,10 @@ public class ServiceProxyTest extends VertxTestBase {
   public void testLocalServiceConnectionWithCloseFutureTimeout() {
 
     localConsumer.unregister();
-    localConsumer = ProxyHelper.registerLocalService(TestService.class, vertx, localService, SERVICE_LOCAL_ADDRESS, 2L);
+    localConsumer = new ServiceBinder(vertx)
+      .setAddress(SERVICE_LOCAL_ADDRESS)
+      .setTimeoutSeconds(2)
+      .register(TestService.class, localService);
 
     checkConnectionWithCloseFuture(localProxy, System.currentTimeMillis(), 2L);
 
@@ -976,8 +987,10 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testUnregisteringTheService() {
     proxy.booleanHandler(ar -> {
-      ProxyHelper.unregisterService(consumer);
-      testComplete();
+      consumer.unregister(ar1 -> {
+        if (ar1.failed()) fail(ar1.cause());
+        else testComplete();
+      });
     });
     await();
 

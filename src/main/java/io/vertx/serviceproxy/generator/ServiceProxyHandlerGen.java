@@ -265,7 +265,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
         "                }\n" +
         "            } else {\n" +
         "              String proxyAddress = UUID.randomUUID().toString();\n" +
-        "              ProxyHelper.registerService(" + typeArg.getSimpleName() + ".class, vertx, res.result(), proxyAddress, false, timeoutSeconds);\n" +
+        "              new ServiceBinder(vertx).setAddress(proxyAddress).setTopLevel(false).setTimeoutSeconds(timeoutSeconds).register(" + typeArg.getSimpleName() + ".class, res.result());\n" +
         "              msg.reply(null, new DeliveryOptions().addHeader(\"proxyaddr\", proxyAddress));\n" +
         "            }\n" +
         "          }";
