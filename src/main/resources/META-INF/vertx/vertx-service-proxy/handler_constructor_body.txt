@@ -1,5 +1,6 @@
     this.vertx = vertx;
     this.service = service;
+    this.includeDebugInfo = includeDebugInfo;
     this.timeoutSeconds = timeoutSeconds;
     try {
       this.vertx.eventBus().registerDefaultCodec(ServiceException.class,

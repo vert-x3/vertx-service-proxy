@@ -16,11 +16,9 @@
 package io.vertx.serviceproxy;
 
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
-import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
 
 import java.lang.reflect.Constructor;
@@ -42,6 +40,7 @@ public class ServiceBinder {
   private boolean topLevel = true;
   private long timeoutSeconds = DEFAULT_CONNECTION_TIMEOUT;
   private List<Function<Message<JsonObject>, Future<Message<JsonObject>>>> interceptors;
+  private boolean includeDebugInfo = false;
 
   /**
    * Creates a factory.
@@ -84,6 +83,18 @@ public class ServiceBinder {
    */
   public ServiceBinder setTimeoutSeconds(long timeoutSeconds) {
     this.timeoutSeconds = timeoutSeconds;
+    return this;
+  }
+
+  /**
+   * When an exception is thrown by the service or the underlying handler, include
+   * debugging info in the ServiceException, that you can access with {@link ServiceException#getDebugInfo()}
+   *
+   * @param includeDebugInfo
+   * @return self
+   */
+  public ServiceBinder setIncludeDebugInfo(boolean includeDebugInfo) {
+    this.includeDebugInfo = includeDebugInfo;
     return this;
   }
 
@@ -143,8 +154,8 @@ public class ServiceBinder {
   private <T> ProxyHandler getProxyHandler(Class<T> clazz, T service) {
     String handlerClassName = clazz.getName() + "VertxProxyHandler";
     Class<?> handlerClass = loadClass(handlerClassName, clazz);
-    Constructor constructor = getConstructor(handlerClass, Vertx.class, clazz, boolean.class, long.class);
-    Object instance = createInstance(constructor, vertx, service, topLevel, timeoutSeconds);
+    Constructor constructor = getConstructor(handlerClass, Vertx.class, clazz, boolean.class, long.class, boolean.class);
+    Object instance = createInstance(constructor, vertx, service, topLevel, timeoutSeconds, includeDebugInfo);
     return (ProxyHandler) instance;
   }
 
