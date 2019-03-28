@@ -26,7 +26,7 @@ import java.util.Objects;
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
-public class ServiceProxyBuilder {
+public class ServiceProxyBuilder implements ProxyBuilder {
 
   private final Vertx vertx;
 
@@ -51,6 +51,7 @@ public class ServiceProxyBuilder {
    * @param address an eventbus address
    * @return self
    */
+  @Override
   public ServiceProxyBuilder setAddress(String address) {
     this.address = address;
     return this;
@@ -62,6 +63,7 @@ public class ServiceProxyBuilder {
    * @param token a JWT token
    * @return self
    */
+  @Override
   public ServiceProxyBuilder setToken(String token) {
     this.token = token;
     return this;
@@ -73,6 +75,7 @@ public class ServiceProxyBuilder {
    * @param options delivery options
    * @return self
    */
+  @Override
   public ServiceProxyBuilder setOptions(DeliveryOptions options) {
     this.options = options;
     return this;
@@ -85,6 +88,7 @@ public class ServiceProxyBuilder {
    * @param <T>     the type of the service interface
    * @return a proxy to the service
    */
+  @Override
   public <T> T build(Class<T> clazz) {
     Objects.requireNonNull(address);
 

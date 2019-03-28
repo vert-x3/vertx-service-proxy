@@ -16,15 +16,15 @@
 package io.vertx.serviceproxy;
 
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
-import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
 
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -32,7 +32,7 @@ import java.util.function.Function;
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
-public class ServiceBinder {
+public class ServiceBinder implements Binder {
 
   public static final long DEFAULT_CONNECTION_TIMEOUT = 5 * 60; // 5 minutes
 
@@ -60,6 +60,7 @@ public class ServiceBinder {
    * @param address an eventbus address
    * @return self
    */
+  @Override
   public ServiceBinder setAddress(String address) {
     this.address = address;
     return this;
@@ -71,6 +72,7 @@ public class ServiceBinder {
    * @param topLevel true for top level (default: true)
    * @return self
    */
+  @Override
   public ServiceBinder setTopLevel(boolean topLevel) {
     this.topLevel = topLevel;
     return this;
@@ -82,11 +84,14 @@ public class ServiceBinder {
    * @param timeoutSeconds the default timeout (default: 5 minutes)
    * @return self
    */
+  @Override
   public ServiceBinder setTimeoutSeconds(long timeoutSeconds) {
     this.timeoutSeconds = timeoutSeconds;
     return this;
   }
 
+
+  @Override
   public ServiceBinder addInterceptor(Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
     if (interceptors == null) {
       interceptors = new ArrayList<>();
@@ -103,6 +108,7 @@ public class ServiceBinder {
    * @param <T>     the type of the service interface
    * @return the consumer used to unregister the service
    */
+  @Override
   public <T> MessageConsumer<JsonObject> register(Class<T> clazz, T service) {
     Objects.requireNonNull(address);
     // register
@@ -118,6 +124,7 @@ public class ServiceBinder {
    * @param <T>     the type of the service interface
    * @return the consumer used to unregister the service
    */
+  @Override
   public <T> MessageConsumer<JsonObject> registerLocal(Class<T> clazz, T service) {
     Objects.requireNonNull(address);
     // register
@@ -129,6 +136,7 @@ public class ServiceBinder {
    *
    * @param consumer the consumer returned by {@link #register(Class, Object)}.
    */
+  @Override
   public void unregister(MessageConsumer<JsonObject> consumer) {
     Objects.requireNonNull(consumer);
 
