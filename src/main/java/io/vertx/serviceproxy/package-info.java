@@ -65,11 +65,18 @@
  * </dependency>
  * ----
  *
- * * Gradle (in your `build.gradle` file):
+ * * Gradle < 5 (in your `build.gradle` file):
  *
  * [source,groovy,subs="+attributes"]
  * ----
  * compileOnly '${maven.groupId}:vertx-codegen:${maven.version}'
+ * ----
+ * * Gradle >= 5 (in your `build.gradle` file):
+ *
+ * [source,groovy,subs="+attributes"]
+ * ----
+ * annotationProcessor '${maven.groupId}:vertx-codegen:${maven.version}:processor'
+ * annotationProcessor '${maven.groupId}:${maven.artifactId}:${maven.version}'
  * ----
  *
  * Be aware that as the service proxy mechanism relies on code generation, so modifications to the _service interface_
