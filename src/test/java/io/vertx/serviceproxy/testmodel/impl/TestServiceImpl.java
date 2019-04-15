@@ -589,6 +589,8 @@ public class TestServiceImpl implements TestService {
       resultHandler.handle(ServiceException.fail(25, "Call has failed", new JsonObject().put("test", "val")));
     } else if (value.equals("Fail subclass")) {
       resultHandler.handle(MyServiceException.fail(25, "Call has failed", "some extra"));
+    } else if (value.equals("Fail with cause")) {
+      resultHandler.handle(Future.failedFuture(new IllegalArgumentException("Failed!").fillInStackTrace()));
     } else {
       resultHandler.handle(Future.succeededFuture(new JsonObject()));
     }

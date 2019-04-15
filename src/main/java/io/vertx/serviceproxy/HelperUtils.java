@@ -4,6 +4,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -14,14 +15,10 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class HelperUtils {
 
-  public static <T> Handler<AsyncResult<T>> createHandler(Message msg) {
+  public static <T> Handler<AsyncResult<T>> createHandler(Message msg, boolean includeDebugInfo) {
     return res -> {
       if (res.failed()) {
-        if (res.cause() instanceof ServiceException) {
-          msg.reply(res.cause());
-        } else {
-          msg.reply(new ServiceException(-1, res.cause().getMessage()));
-        }
+        manageFailure(msg, res.cause(), includeDebugInfo);
       } else {
         if (res.result() != null  && res.result().getClass().isEnum()) {
           msg.reply(((Enum) res.result()).name());
@@ -32,42 +29,30 @@ public class HelperUtils {
     };
   }
 
-  public static <T> Handler<AsyncResult<List<T>>> createListHandler(Message msg) {
+  public static <T> Handler<AsyncResult<List<T>>> createListHandler(Message msg, boolean includeDebugInfo) {
     return res -> {
       if (res.failed()) {
-        if (res.cause() instanceof ServiceException) {
-          msg.reply(res.cause());
-        } else {
-          msg.reply(new ServiceException(-1, res.cause().getMessage()));
-        }
+        manageFailure(msg, res.cause(), includeDebugInfo);
       } else {
         msg.reply(new JsonArray(res.result()));
       }
     };
   }
 
-  public static <T> Handler<AsyncResult<Set<T>>> createSetHandler(Message msg) {
+  public static <T> Handler<AsyncResult<Set<T>>> createSetHandler(Message msg, boolean includeDebugInfo) {
     return res -> {
       if (res.failed()) {
-        if (res.cause() instanceof ServiceException) {
-          msg.reply(res.cause());
-        } else {
-          msg.reply(new ServiceException(-1, res.cause().getMessage()));
-        }
+        manageFailure(msg, res.cause(), includeDebugInfo);
       } else {
         msg.reply(new JsonArray(new ArrayList<>(res.result())));
       }
     };
   }
 
-  public static Handler<AsyncResult<List<Character>>> createListCharHandler(Message msg) {
+  public static Handler<AsyncResult<List<Character>>> createListCharHandler(Message msg, boolean includeDebugInfo) {
     return res -> {
       if (res.failed()) {
-        if (res.cause() instanceof ServiceException) {
-          msg.reply(res.cause());
-        } else {
-          msg.reply(new ServiceException(-1, res.cause().getMessage()));
-        }
+        manageFailure(msg, res.cause(), includeDebugInfo);
       } else {
         JsonArray arr = new JsonArray();
         for (Character chr: res.result()) {
@@ -78,14 +63,10 @@ public class HelperUtils {
     };
   }
 
-  public static Handler<AsyncResult<Set<Character>>> createSetCharHandler(Message msg) {
+  public static Handler<AsyncResult<Set<Character>>> createSetCharHandler(Message msg, boolean includeDebugInfo) {
     return res -> {
       if (res.failed()) {
-        if (res.cause() instanceof ServiceException) {
-          msg.reply(res.cause());
-        } else {
-          msg.reply(new ServiceException(-1, res.cause().getMessage()));
-        }
+        manageFailure(msg, res.cause(), includeDebugInfo);
       } else {
         JsonArray arr = new JsonArray();
         for (Character chr: res.result()) {
@@ -94,6 +75,17 @@ public class HelperUtils {
         msg.reply(arr);
       }
     };
+  }
+
+  public static void manageFailure(Message msg, Throwable cause, boolean includeDebugInfo) {
+    if (cause instanceof ServiceException) {
+      msg.reply(cause);
+    } else {
+      if (includeDebugInfo)
+        msg.reply(new ServiceException(-1, cause.getMessage(), generateDebugInfo(cause)));
+      else
+        msg.reply(new ServiceException(-1, cause.getMessage()));
+    }
   }
 
   public static <T> Map<String, T> convertMap(Map map) {
@@ -108,5 +100,21 @@ public class HelperUtils {
     return new HashSet<T>((List<T>)list);
   }
 
+  public static JsonObject generateDebugInfo(Throwable cause) {
+    if (cause == null) return null;
+    JsonObject obj = new JsonObject();
+    obj.put("causeName", cause.getClass().getCanonicalName());
+    obj.put("causeMessage", cause.getMessage());
+    obj.put("causeStackTrace", convertStackTrace(cause));
+    return obj;
+  }
+
+  public static JsonArray convertStackTrace(Throwable cause) {
+    if (cause == null || cause.getStackTrace() == null) return new JsonArray();
+    return Arrays
+      .stream(cause.getStackTrace())
+      .map(StackTraceElement::toString)
+      .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+  }
 
 }
