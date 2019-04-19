@@ -43,6 +43,9 @@ public interface TestConnection {
   @Fluent
   TestConnection rollback(Handler<AsyncResult<String>> resultHandler);
 
+  @Fluent
+  TestConnection failing(Handler<AsyncResult<String>> resultHandler);
+
   @ProxyClose
   void close();
 

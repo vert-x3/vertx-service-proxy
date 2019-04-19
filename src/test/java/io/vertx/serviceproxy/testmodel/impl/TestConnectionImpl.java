@@ -21,6 +21,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.serviceproxy.ServiceException;
 import io.vertx.serviceproxy.testmodel.TestConnection;
 
 /**
@@ -57,6 +58,12 @@ public class TestConnectionImpl implements TestConnection {
   @Override
   public TestConnection rollback(Handler<AsyncResult<String>> resultHandler) {
     resultHandler.handle(Future.succeededFuture(str));
+    return this;
+  }
+
+  @Override
+  public TestConnection failing(Handler<AsyncResult<String>> resultHandler) {
+    resultHandler.handle(Future.failedFuture(new ServiceException(404, "bla")));
     return this;
   }
 

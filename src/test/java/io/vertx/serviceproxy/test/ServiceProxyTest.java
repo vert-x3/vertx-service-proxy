@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import io.vertx.serviceproxy.clustered.Service;
 import org.junit.Test;
 
 import io.vertx.core.eventbus.DeliveryOptions;
@@ -1070,6 +1071,20 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testLocalServiceFromLocalSender() {
     localProxy.noParams();
+    await();
+  }
+
+  @Test
+  public void testNestedServicesErrorPropagation() {
+    proxy.createConnection("bla", onSuccess(testConnection -> {
+      testConnection.failing(onFailure(t -> {
+        assertEquals(ServiceException.class, t.getClass());
+        ServiceException se = (ServiceException) t;
+        assertEquals(404, se.failureCode());
+        assertEquals("bla", se.getMessage());
+        testComplete();
+      }));
+    }));
     await();
   }
 

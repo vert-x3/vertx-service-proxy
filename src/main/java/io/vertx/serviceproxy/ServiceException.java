@@ -28,7 +28,6 @@ public class ServiceException extends ReplyException {
   public ServiceException(int failureCode, String message, JsonObject debugInfo) {
     super(ReplyFailure.RECIPIENT_FAILURE, failureCode, message);
     this.debugInfo = debugInfo;
-
   }
 
   /**
