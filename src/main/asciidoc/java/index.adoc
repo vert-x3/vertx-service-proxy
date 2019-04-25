@@ -46,15 +46,22 @@ To *implement* service proxies, also add:
   <groupId>io.vertx</groupId>
   <artifactId>vertx-codegen</artifactId>
   <version>4.0.0-SNAPSHOT</version>
-  <scope>provided</scope>
+  <classifier>processor</classifier>
 </dependency>
 ----
 
-* Gradle (in your `build.gradle` file):
+* Gradle < 5 (in your `build.gradle` file):
 
 [source,groovy,subs="+attributes"]
 ----
-compileOnly 'io.vertx:vertx-codegen:4.0.0-SNAPSHOT'
+compileOnly 'io.vertx:vertx-codegen:4.0.0-SNAPSHOT:processor'
+----
+* Gradle >= 5 (in your `build.gradle` file):
+
+[source,groovy,subs="+attributes"]
+----
+annotationProcessor 'io.vertx:vertx-codegen:4.0.0-SNAPSHOT:processor'
+annotationProcessor 'io.vertx:vertx-service-proxy:4.0.0-SNAPSHOT'
 ----
 
 Be aware that as the service proxy mechanism relies on code generation, so modifications to the _service interface_

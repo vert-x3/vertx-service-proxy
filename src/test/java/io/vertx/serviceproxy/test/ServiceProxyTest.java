@@ -35,7 +35,6 @@ import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.serviceproxy.ServiceBinder;
 import io.vertx.serviceproxy.ServiceException;
 import io.vertx.serviceproxy.testmodel.MyServiceException;
@@ -52,12 +51,13 @@ import io.vertx.test.core.VertxTestBase;
 public class ServiceProxyTest extends VertxTestBase {
 
   public final static String SERVICE_ADDRESS = "someaddress";
+  public final static String SERVICE_WITH_DEBUG_ADDRESS = "someaddressdebug";
   public final static String SERVICE_LOCAL_ADDRESS = "someaddress.local";
   public final static String TEST_ADDRESS = "testaddress";
 
-  MessageConsumer<JsonObject> consumer, localConsumer;
+  MessageConsumer<JsonObject> consumer, localConsumer, consumerWithDebugEnabled;
   TestService service, localService;
-  TestService proxy, localProxy;
+  TestService proxy, localProxy, proxyWithDebug;
 
   @Override
   public void setUp() throws Exception {
@@ -67,11 +67,16 @@ public class ServiceProxyTest extends VertxTestBase {
     
     consumer = new ServiceBinder(vertx).setAddress(SERVICE_ADDRESS)
       .register(TestService.class, service);
+    consumerWithDebugEnabled = new ServiceBinder(vertx)
+      .setAddress(SERVICE_WITH_DEBUG_ADDRESS)
+      .setIncludeDebugInfo(true)
+      .register(TestService.class, service);
     localConsumer = new ServiceBinder(vertx).setAddress(SERVICE_LOCAL_ADDRESS)
       .registerLocal(TestService.class, localService);
 
     proxy = TestService.createProxy(vertx, SERVICE_ADDRESS);
     localProxy = TestService.createProxy(vertx, SERVICE_LOCAL_ADDRESS);
+    proxyWithDebug = TestService.createProxy(vertx, SERVICE_WITH_DEBUG_ADDRESS);
     vertx.eventBus().<String>consumer(TEST_ADDRESS).handler(msg -> {
       assertEquals("ok", msg.body());
       testComplete();
@@ -110,6 +115,20 @@ public class ServiceProxyTest extends VertxTestBase {
     });
     await();
 
+  }
+
+  @Test
+  public void testCauseErrorHandling() {
+    proxyWithDebug.failingCall("Fail with cause", handler -> {
+      assertTrue(handler.cause() instanceof ServiceException);
+      ServiceException cause = (ServiceException) handler.cause();
+      assertEquals("Failed!", handler.cause().getMessage());
+      assertEquals(IllegalArgumentException.class.getCanonicalName(), cause.getDebugInfo().getString("causeName"));
+      assertEquals("Failed!", cause.getDebugInfo().getString("causeMessage"));
+      assertFalse(cause.getDebugInfo().getJsonArray("causeStackTrace").isEmpty());
+      testComplete();
+    });
+    await();
   }
 
   @Test
@@ -547,9 +566,10 @@ public class ServiceProxyTest extends VertxTestBase {
   public void testFailingMethod() {
     proxy.failingMethod(onFailure(t -> {
       assertTrue(t instanceof ReplyException);
-      ReplyException re = (ReplyException) t;
-      assertEquals(ReplyFailure.RECIPIENT_FAILURE, re.failureType());
-      assertEquals("wibble", re.getMessage());
+      ServiceException se = (ServiceException) t;
+      assertEquals(ReplyFailure.RECIPIENT_FAILURE, se.failureType());
+      assertEquals("wibble", se.getMessage());
+      assertTrue(se.getDebugInfo().isEmpty());
       testComplete();
     }));
     await();
@@ -576,11 +596,12 @@ public class ServiceProxyTest extends VertxTestBase {
     message.put("object", new JsonObject().put("foo", "bar"));
     message.put("str", "blah");
     message.put("i", 1234);
-    vertx.eventBus().send("someaddress", message, new DeliveryOptions().addHeader("action", "yourmum").setSendTimeout(500), onFailure(t -> {
-      assertTrue(t instanceof ReplyException);
-      ReplyException re = (ReplyException) t;
+    vertx.eventBus().send(SERVICE_WITH_DEBUG_ADDRESS, message, new DeliveryOptions().addHeader("action", "yourmum").setSendTimeout(500), onFailure(t -> {
+      assertTrue(t instanceof ServiceException);
+      ServiceException se = (ServiceException) t;
       // This will as operation will fail to be invoked
-      assertEquals(ReplyFailure.RECIPIENT_FAILURE, re.failureType());
+      assertEquals(ReplyFailure.RECIPIENT_FAILURE, se.failureType());
+      assertEquals(IllegalStateException.class.getCanonicalName(), se.getDebugInfo().getString("causeName"));
       testComplete();
     }));
     await();
@@ -590,15 +611,17 @@ public class ServiceProxyTest extends VertxTestBase {
   public void testCallWithMessageParamWrongType() {
     JsonObject message = new JsonObject();
     message.put("object", new JsonObject().put("foo", "bar"));
-    message.put("str", 76523);
+    message.put("str", 76523); // <- wrong one
     message.put("i", 1234);
     message.put("char", (int)'X'); // chars are mapped to ints
     message.put("enum", SomeEnum.BAR.toString()); // enums are mapped to strings
-    vertx.eventBus().send("someaddress", message, new DeliveryOptions().addHeader("action", "invokeWithMessage").setSendTimeout(500), onFailure(t -> {
-      assertTrue(t instanceof ReplyException);
-      ReplyException re = (ReplyException) t;
+    vertx.eventBus().send(SERVICE_WITH_DEBUG_ADDRESS, message, new DeliveryOptions().addHeader("action", "invokeWithMessage").setSendTimeout(500), onFailure(t -> {
+      assertTrue(t instanceof ServiceException);
+      ServiceException se = (ServiceException) t;
       // This will as operation will fail to be invoked
-      assertEquals(ReplyFailure.RECIPIENT_FAILURE, re.failureType());
+      assertEquals(ReplyFailure.RECIPIENT_FAILURE, se.failureType());
+      assertEquals(ClassCastException.class.getCanonicalName(), se.getDebugInfo().getString("causeName"));
+      assertFalse(se.getDebugInfo().getJsonArray("causeStackTrace").isEmpty());
       testComplete();
     }));
     await();
@@ -909,7 +932,10 @@ public class ServiceProxyTest extends VertxTestBase {
   public void testConnectionTimeout() {
 
     consumer.unregister();
-    consumer = ProxyHelper.registerService(TestService.class, vertx, service, SERVICE_ADDRESS, (long) 2);
+    consumer = new ServiceBinder(vertx)
+      .setAddress(SERVICE_ADDRESS)
+      .setTimeoutSeconds(2)
+      .register(TestService.class, service);
 
     checkConnection(proxy, 2L);
 
@@ -920,7 +946,10 @@ public class ServiceProxyTest extends VertxTestBase {
   public void testConnectionWithCloseFutureTimeout() {
 
     consumer.unregister();
-    consumer = ProxyHelper.registerService(TestService.class, vertx, service, SERVICE_ADDRESS, (long) 2);
+    consumer = new ServiceBinder(vertx)
+      .setAddress(SERVICE_ADDRESS)
+      .setTimeoutSeconds(2)
+      .register(TestService.class, service);
 
     checkConnectionWithCloseFuture(proxy, System.currentTimeMillis(), 2L);
 
@@ -931,7 +960,10 @@ public class ServiceProxyTest extends VertxTestBase {
   public void testLocalServiceConnectionTimeout() {
 
     localConsumer.unregister();
-    localConsumer = ProxyHelper.registerLocalService(TestService.class, vertx, localService, SERVICE_LOCAL_ADDRESS, 2L);
+    localConsumer = new ServiceBinder(vertx)
+      .setAddress(SERVICE_LOCAL_ADDRESS)
+      .setTimeoutSeconds(2)
+      .register(TestService.class, localService);
 
     checkConnection(localProxy, 2L);
 
@@ -942,7 +974,10 @@ public class ServiceProxyTest extends VertxTestBase {
   public void testLocalServiceConnectionWithCloseFutureTimeout() {
 
     localConsumer.unregister();
-    localConsumer = ProxyHelper.registerLocalService(TestService.class, vertx, localService, SERVICE_LOCAL_ADDRESS, 2L);
+    localConsumer = new ServiceBinder(vertx)
+      .setAddress(SERVICE_LOCAL_ADDRESS)
+      .setTimeoutSeconds(2)
+      .register(TestService.class, localService);
 
     checkConnectionWithCloseFuture(localProxy, System.currentTimeMillis(), 2L);
 
@@ -976,8 +1011,10 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testUnregisteringTheService() {
     proxy.booleanHandler(ar -> {
-      ProxyHelper.unregisterService(consumer);
-      testComplete();
+      consumer.unregister(ar1 -> {
+        if (ar1.failed()) fail(ar1.cause());
+        else testComplete();
+      });
     });
     await();
 

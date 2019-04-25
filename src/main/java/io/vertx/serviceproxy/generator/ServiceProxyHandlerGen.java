@@ -90,6 +90,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
       .stmt("private final long timerID")
       .stmt("private long lastAccessed")
       .stmt("private final long timeoutSeconds")
+      .stmt("private final boolean includeDebugInfo")
       .newLine()
       .code("public " + className + "(Vertx vertx, " + model.getIfaceSimpleName() + " service){\n")
       .indent()
@@ -103,7 +104,13 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
       .unindent()
       .code("}\n")
       .newLine()
-      .code("public " + className + "(Vertx vertx, " + model.getIfaceSimpleName() + " service, boolean topLevel, long timeoutSeconds) {\n");
+      .code("public "+ className + "(Vertx vertx, " + model.getIfaceSimpleName() + " service, boolean topLevel, long timeoutInSecond){\n")
+      .indent()
+      .stmt("this(vertx, service, true, timeoutInSecond, false)")
+      .unindent()
+      .code("}\n")
+      .newLine()
+      .code("public " + className + "(Vertx vertx, " + model.getIfaceSimpleName() + " service, boolean topLevel, long timeoutSeconds, boolean includeDebugInfo) {\n");
     utils.handlerConstructorBody(writer);
     writer.code("private void checkTimedOut(long id) {\n")
       .indent()
@@ -142,7 +149,8 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
       .unindent()
       .code("} catch (Throwable t) {\n")
       .indent()
-      .stmt("msg.reply(new ServiceException(500, t.getMessage()))")
+      .stmt("if (includeDebugInfo) msg.reply(new ServiceException(500, t.getMessage(), HelperUtils.generateDebugInfo(t)))")
+      .stmt("else msg.reply(new ServiceException(500, t.getMessage()))")
       .stmt("throw t")
       .unindent()
       .code("}\n")
@@ -228,29 +236,21 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
       String coll = typeArg.getKind() == ClassKind.LIST ? "List" : "Set";
       TypeInfo innerTypeArg = ((ParameterizedTypeInfo)typeArg).getArg(0);
       if (innerTypeArg.getName().equals("java.lang.Character"))
-        return "HelperUtils.create" + coll + "CharHandler(msg)";
+        return "HelperUtils.create" + coll + "CharHandler(msg, includeDebugInfo)";
       if (innerTypeArg.getKind() == ClassKind.DATA_OBJECT)
         return "res -> {\n" +
           "            if (res.failed()) {\n" +
-          "              if (res.cause() instanceof ServiceException) {\n" +
-          "                msg.reply(res.cause());\n" +
-          "              } else {\n" +
-          "                msg.reply(new ServiceException(-1, res.cause().getMessage()));\n" +
-          "              }\n" +
+          "              HelperUtils.manageFailure(msg, res.cause(), includeDebugInfo);\n" +
           "            } else {\n" +
           "              msg.reply(new JsonArray(res.result().stream().map(r -> r == null ? null : r.toJson()).collect(Collectors.toList())));\n" +
           "            }\n" +
           "         }";
-      return "HelperUtils.create" + coll + "Handler(msg)";
+      return "HelperUtils.create" + coll + "Handler(msg, includeDebugInfo)";
     }
     if (typeArg.getKind() == ClassKind.DATA_OBJECT)
       return "res -> {\n" +
         "            if (res.failed()) {\n" +
-        "              if (res.cause() instanceof ServiceException) {\n" +
-        "                msg.reply(res.cause());\n" +
-        "              } else {\n" +
-        "                msg.reply(new ServiceException(-1, res.cause().getMessage()));\n" +
-        "              }\n" +
+        "              HelperUtils.manageFailure(msg, res.cause(), includeDebugInfo);\n" +
         "            } else {\n" +
         "              msg.reply(res.result() == null ? null : res.result().toJson());\n" +
         "            }\n" +
@@ -258,18 +258,14 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
     if (typeArg.getKind() == ClassKind.API && ((ApiTypeInfo)typeArg).isProxyGen())
       return "res -> {\n" +
         "            if (res.failed()) {\n" +
-        "                if (res.cause() instanceof ServiceException) {\n" +
-        "                  msg.reply(res.cause());\n" +
-        "                } else {\n" +
-        "                  msg.reply(new ServiceException(-1, res.cause().getMessage()));\n" +
-        "                }\n" +
+        "              HelperUtils.manageFailure(msg, res.cause(), includeDebugInfo);\n" +
         "            } else {\n" +
         "              String proxyAddress = UUID.randomUUID().toString();\n" +
-        "              ProxyHelper.registerService(" + typeArg.getSimpleName() + ".class, vertx, res.result(), proxyAddress, false, timeoutSeconds);\n" +
+        "              new ServiceBinder(vertx).setAddress(proxyAddress).setTopLevel(false).setTimeoutSeconds(timeoutSeconds).register(" + typeArg.getSimpleName() + ".class, res.result());\n" +
         "              msg.reply(null, new DeliveryOptions().addHeader(\"proxyaddr\", proxyAddress));\n" +
         "            }\n" +
         "          }";
-    return "HelperUtils.createHandler(msg)";
+    return "HelperUtils.createHandler(msg, includeDebugInfo)";
   }
 
 }
