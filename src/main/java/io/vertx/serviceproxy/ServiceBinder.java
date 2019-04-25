@@ -98,6 +98,7 @@ public class ServiceBinder implements Binder {
    * @param includeDebugInfo
    * @return self
    */
+  @Override
   public ServiceBinder setIncludeDebugInfo(boolean includeDebugInfo) {
     this.includeDebugInfo = includeDebugInfo;
     return this;
