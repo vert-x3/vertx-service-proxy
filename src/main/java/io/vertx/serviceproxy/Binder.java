@@ -50,6 +50,16 @@ public interface Binder {
   @Fluent
   Binder setTimeoutSeconds(long timeoutSeconds);
 
+  /**
+   * When an exception is thrown by the service or the underlying handler, include
+   * debugging info in the ServiceException, that you can access with {@link ServiceException#getDebugInfo()}
+   *
+   * @param includeDebugInfo
+   * @return self
+   */
+  @Fluent
+  Binder setIncludeDebugInfo(boolean includeDebugInfo);
+
   @GenIgnore
   Binder addInterceptor(Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor);
 
