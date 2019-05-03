@@ -148,7 +148,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
     else if ("java.lang.Character".equals(t.getName()))
       writer.stmt("_json.put(\"" + name + "\", " + name + " == null ? null : (int)" + name + ")");
     else if (t.getKind() == ClassKind.ENUM)
-      writer.stmt("_json.put(\"" + name + "\", " + name + " == null ? null : " + name + ".toString())");
+      writer.stmt("_json.put(\"" + name + "\", " + name + " == null ? null : " + name + ".name())");
     else if (t.getKind() == ClassKind.LIST) {
       if (((ParameterizedTypeInfo)t).getArg(0).getKind() == ClassKind.DATA_OBJECT)
         writer.stmt("_json.put(\"" + name + "\", new JsonArray(" + name + " == null ? java.util.Collections.emptyList() : " + name + ".stream().map(r -> r == null ? null : r.toJson()).collect(Collectors.toList())))");
