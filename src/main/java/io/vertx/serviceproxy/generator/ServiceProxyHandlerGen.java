@@ -148,7 +148,9 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
       .unindent()
       .code("}\n")
       .unindent()
-      .code("}\n")
+      .code("}\n");
+    generateAdditionalMethods(model, writer);
+    writer
       .unindent()
       .code("}");
     return buffer.toString();
@@ -291,5 +293,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
         "          }";
     return "HelperUtils.createHandler(msg, includeDebugInfo)";
   }
+
+  public void generateAdditionalMethods(ProxyModel model, CodeWriter writer) {}
 
 }
