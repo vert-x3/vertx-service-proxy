@@ -256,7 +256,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
     if (typeArg.getKind() == ClassKind.MAP) {
       TypeInfo innerTypeArg = ((ParameterizedTypeInfo)typeArg).getArg(1);
       if (innerTypeArg.getName().equals("java.lang.Character"))
-        return "HelperUtils.createMapCharHandler(msg)";
+        return "HelperUtils.createMapCharHandler(msg, includeDebugInfo)";
       if (innerTypeArg.getKind() == ClassKind.DATA_OBJECT)
         return "res -> {\n" +
           "            if (res.failed()) {\n" +
@@ -269,7 +269,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
           "              msg.reply(new JsonObject(res.result().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e ->  e.getValue() != null ? " + ((DataObjectTypeInfo)innerTypeArg).getJsonEncoderFQCN() + ".INSTANCE.encode(e.getValue()) : null))));\n" +
           "            }\n" +
           "         }";
-      return "HelperUtils.createMapHandler(msg)";
+      return "HelperUtils.createMapHandler(msg, includeDebugInfo)";
     }
     if (typeArg.getKind() == ClassKind.DATA_OBJECT)
       return "res -> {\n" +

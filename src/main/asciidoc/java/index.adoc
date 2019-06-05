@@ -46,7 +46,7 @@ To *implement* service proxies, also add:
   <groupId>io.vertx</groupId>
   <artifactId>vertx-codegen</artifactId>
   <version>4.0.0-SNAPSHOT</version>
-  <classifier>processor</classifier>
+  <scope>provided</scope>
 </dependency>
 ----
 
@@ -54,7 +54,7 @@ To *implement* service proxies, also add:
 
 [source,groovy,subs="+attributes"]
 ----
-compileOnly 'io.vertx:vertx-codegen:4.0.0-SNAPSHOT:processor'
+compileOnly 'io.vertx:vertx-codegen:4.0.0-SNAPSHOT'
 ----
 * Gradle >= 5 (in your `build.gradle` file):
 
@@ -68,7 +68,7 @@ Be aware that as the service proxy mechanism relies on code generation, so modif
 require to re-compile the sources to regenerate the code.
 
 To generate the proxies in different languages, you will need to add the _language_ dependency such as
-`vertx-lang-groovy` for Groovy or `vertx-rx-java2-gen` for RxJava 2
+`vertx-lang-groovy` for Groovy.
 
 == Introduction to service proxies
 
@@ -539,7 +539,6 @@ Parameters can be any of:
 * `Map<String, PRIMITIVE>`
 * Any _Enum_ type
 * Any class annotated with `@DataObject`
-* Any class that provides a `JsonCodec` registered in `@ModuleGen` annotation
 
 If an asynchronous result is required a last parameter of type `Handler<AsyncResult<R>>` can be provided.
 
@@ -554,12 +553,6 @@ If an asynchronous result is required a last parameter of type `Handler<AsyncRes
 * Any _Enum_ type
 * Any class annotated with `@DataObject`
 * Another proxy
-* Any class that provides a `JsonCodec` registered in `@ModuleGen` annotation
-
-=== Json Codecs
-
-To use a type of your choice freely in your service proxy, you must provide a way to encode and decode it to a Json type.
-You must implement the {@link io.vertx.core.spi.json.JsonCodec} interface and then register it to the {@link io.vertx.core.spi.json.ModuleGen} annotation, like:
 
 === Overloaded methods
 
