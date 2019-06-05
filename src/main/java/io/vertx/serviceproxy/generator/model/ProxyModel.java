@@ -63,14 +63,12 @@ public class ProxyModel extends ClassModel {
     if (isLegalContainerParam(typeInfo)) {
       return;
     }
-    // We also allow data object as parameter types if they have a 'public JsonObject toJson()' method
+    // We also allow data object as parameter types if they have a complete codec
     if (typeInfo.getKind() == ClassKind.DATA_OBJECT) {
-      if (type instanceof DeclaredType) {
-        if (Helper.isJsonifiable(elementUtils, typeUtils, (TypeElement) ((DeclaredType) type).asElement())) {
-          return;
-        }
-        throw new GenException(elem, "type " + typeInfo + " does not have a valid 'public JsonObject toJson()' method.");
+      if (((DataObjectTypeInfo)typeInfo).hasJsonEncoder() && ((DataObjectTypeInfo)typeInfo).hasJsonDecoder()) {
+        return;
       }
+      throw new GenException(elem, "Data Object " + typeInfo + " must have a valid encoder and decoder");
     }
     if (isLegalHandlerAsyncResultType(typeInfo)) {
       if (pos != numParams - 1) {
@@ -140,7 +138,7 @@ public class ProxyModel extends ClassModel {
       if (eventType.getErased().getKind() == ClassKind.ASYNC_RESULT) {
         TypeInfo resultType = ((ParameterizedTypeInfo) eventType).getArgs().get(0);
         if (resultType.getKind().json || resultType.getKind().basic ||
-          isLegalListSetMapResult(resultType) || resultType.getKind() == ClassKind.VOID ||
+          isLegalContainerParam(resultType) || resultType.getKind() == ClassKind.VOID ||
           resultType.getKind() == ClassKind.ENUM || resultType.getKind() == ClassKind.DATA_OBJECT) {
           return true;
         }
@@ -155,25 +153,11 @@ public class ProxyModel extends ClassModel {
     return false;
   }
 
-  private boolean isLegalListSetMapResult(TypeInfo type) {
-    if (type instanceof ParameterizedTypeInfo) {
-      if (type.getKind() == ClassKind.LIST || type.getKind() == ClassKind.SET) {
-        TypeInfo elementType = ((ParameterizedTypeInfo) type).getArgs().get(0);
-        if (elementType.getKind().basic || elementType.getKind().json || elementType.getKind() == ClassKind.DATA_OBJECT) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  // TODO should we allow enums/Data objects in List/Set/Map params
-
   protected boolean isLegalContainerParam(TypeInfo type) {
     TypeInfo raw = type.getRaw();
     if (raw.getName().equals(List.class.getName()) || raw.getName().equals(Set.class.getName())) {
       TypeInfo argument = ((ParameterizedTypeInfo) type).getArgs().get(0);
-      if (argument.getKind().basic || argument.getKind().json || argument.getKind() == ClassKind.DATA_OBJECT) {
+      if (argument.getKind().basic || argument.getKind().json || isValidDataObject(argument)) {
         return true;
       }
     } else if (raw.getName().equals(Map.class.getName())) {
@@ -182,10 +166,14 @@ public class ProxyModel extends ClassModel {
         return false;
       }
       TypeInfo argument1 = ((ParameterizedTypeInfo) type).getArgs().get(1);
-      if (argument1.getKind().basic || argument1.getKind().json) {
+      if (argument1.getKind().basic || argument1.getKind().json || isValidDataObject(argument1)) {
         return true;
       }
     }
     return false;
+  }
+
+  protected boolean isValidDataObject(TypeInfo typeInfo) {
+    return typeInfo.getKind() == ClassKind.DATA_OBJECT && ((DataObjectTypeInfo)typeInfo).hasJsonEncoder() && ((DataObjectTypeInfo)typeInfo).hasJsonDecoder();
   }
 }

@@ -20,11 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.time.ZonedDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import io.vertx.core.AsyncResult;
@@ -42,6 +39,7 @@ import io.vertx.serviceproxy.testmodel.TestConnection;
 import io.vertx.serviceproxy.testmodel.TestConnectionWithCloseFuture;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 import io.vertx.serviceproxy.testmodel.TestService;
+import org.assertj.core.api.ZonedDateTimeAssert;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -168,7 +166,38 @@ public class TestServiceImpl implements TestService {
     assertNull(options);
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
-  
+
+  @Override
+  public void dateTimeType(ZonedDateTime dateTime) {
+    assertEquals(ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"), dateTime);
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
+  public void listDateTimeType(List<ZonedDateTime> list) {
+    assertEquals(2, list.size());
+    assertEquals(ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"), list.get(0));
+    assertEquals(ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1), list.get(1));
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
+  public void setDateTimeType(Set<ZonedDateTime> set) {
+    assertEquals(2, set.size());
+    assertTrue(set.contains(ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]")));
+    assertTrue(set.contains(ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1)));
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
+  public void mapDateTimeType(Map<String, ZonedDateTime> map) {
+    Map<String, ZonedDateTime> expected = new HashMap<>();
+    expected.put("date1", ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"));
+    expected.put("date2", ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1));
+    assertEquals(expected, map);
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
   @Override
   public void listdataObjectTypeHavingNullValues(List<TestDataObject> list) {
     assertEquals(3, list.size());
@@ -537,6 +566,87 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
+  public void mapStringHandler(Handler<AsyncResult<Map<String, String>>> resultHandler) {
+    Map<String, String> map = new HashMap<>();
+    map.put("1", "foo");
+    map.put("2", "bar");
+    map.put("3", "wibble");
+    resultHandler.handle(Future.succeededFuture(map));
+  }
+
+  @Override
+  public void mapByteHandler(Handler<AsyncResult<Map<String, Byte>>> resultHandler) {
+    Map<String, Byte> map = new HashMap<>();
+    map.put("1", (byte)1);
+    map.put("2", (byte)2);
+    map.put("3", (byte)3);
+    resultHandler.handle(Future.succeededFuture(map));
+  }
+
+  @Override
+  public void mapShortHandler(Handler<AsyncResult<Map<String, Short>>> resultHandler) {
+    Map<String, Short> map = new HashMap<>();
+    map.put("1", (short)11);
+    map.put("2", (short)12);
+    map.put("3", (short)13);
+    resultHandler.handle(Future.succeededFuture(map));
+  }
+
+  @Override
+  public void mapIntHandler(Handler<AsyncResult<Map<String, Integer>>> resultHandler) {
+    Map<String, Integer> map = new HashMap<>();
+    map.put("1", 100);
+    map.put("2", 101);
+    map.put("3", 102);
+    resultHandler.handle(Future.succeededFuture(map));
+  }
+
+  @Override
+  public void mapLongHandler(Handler<AsyncResult<Map<String, Long>>> resultHandler) {
+    Map<String, Long> map = new HashMap<>();
+    map.put("1", 1000l);
+    map.put("2", 1001l);
+    map.put("3", 1002l);
+    resultHandler.handle(Future.succeededFuture(map));
+  }
+
+  @Override
+  public void mapFloatHandler(Handler<AsyncResult<Map<String, Float>>> resultHandler) {
+    Map<String, Float> map = new HashMap<>();
+    map.put("1", 1.1f);
+    map.put("2", 1.2f);
+    map.put("3", 1.3f);
+    resultHandler.handle(Future.succeededFuture(map));
+  }
+
+  @Override
+  public void mapDoubleHandler(Handler<AsyncResult<Map<String, Double>>> resultHandler) {
+    Map<String, Double> map = new HashMap<>();
+    map.put("1", 1.11d);
+    map.put("2", 1.12d);
+    map.put("3", 1.13d);
+    resultHandler.handle(Future.succeededFuture(map));
+  }
+
+  @Override
+  public void mapCharHandler(Handler<AsyncResult<Map<String, Character>>> resultHandler) {
+    Map<String, Character> map = new HashMap<>();
+    map.put("1", 'X');
+    map.put("2", 'Y');
+    map.put("3", 'Z');
+    resultHandler.handle(Future.succeededFuture(map));
+  }
+
+  @Override
+  public void mapBoolHandler(Handler<AsyncResult<Map<String, Boolean>>> resultHandler) {
+    Map<String, Boolean> map = new HashMap<>();
+    map.put("1", true);
+    map.put("2", false);
+    map.put("3", true);
+    resultHandler.handle(Future.succeededFuture(map));
+  }
+
+  @Override
   public void setJsonObjectHandler(Handler<AsyncResult<Set<JsonObject>>> resultHandler) {
     Set<JsonObject> set = new LinkedHashSet<>(Arrays.asList(new JsonObject().put("a", "foo"),
       new JsonObject().put("b", "bar"), new JsonObject().put("c", "wibble")));
@@ -544,10 +654,28 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
+  public void mapJsonObjectHandler(Handler<AsyncResult<Map<String, JsonObject>>> resultHandler) {
+    Map<String, JsonObject> map = new HashMap<>();
+    map.put("1", new JsonObject().put("a", "foo"));
+    map.put("2", new JsonObject().put("b", "bar"));
+    map.put("3", new JsonObject().put("c", "wibble"));
+    resultHandler.handle(Future.succeededFuture(map));
+  }
+
+  @Override
   public void setJsonArrayHandler(Handler<AsyncResult<Set<JsonArray>>> resultHandler) {
     Set<JsonArray> set = new LinkedHashSet<>(Arrays.asList(new JsonArray().add("foo"),
       new JsonArray().add("bar"), new JsonArray().add("wibble")));
     resultHandler.handle(Future.succeededFuture(set));
+  }
+
+  @Override
+  public void mapJsonArrayHandler(Handler<AsyncResult<Map<String, JsonArray>>> resultHandler) {
+    Map<String, JsonArray> map = new HashMap<>();
+    map.put("1", new JsonArray().add("foo"));
+    map.put("2", new JsonArray().add("bar"));
+    map.put("3", new JsonArray().add("wibble"));
+    resultHandler.handle(Future.succeededFuture(map));
   }
 
   @Override
@@ -567,6 +695,14 @@ public class TestServiceImpl implements TestService {
     Set<TestDataObject> set =
         new LinkedHashSet<>(Arrays.asList(new TestDataObject().setNumber(1).setString("String 1").setBool(false), new TestDataObject().setNumber(2).setString("String 2").setBool(true)));
     resultHandler.handle(Future.succeededFuture(set));
+  }
+
+  @Override
+  public void mapDataObject(Handler<AsyncResult<Map<String, TestDataObject>>> resultHandler) {
+    Map<String, TestDataObject> map = new HashMap<>();
+    map.put("do1", new TestDataObject().setNumber(1).setString("String 1").setBool(false));
+    map.put("do2", new TestDataObject().setNumber(2).setString("String 2").setBool(true));
+    resultHandler.handle(Future.succeededFuture(map));
   }
 
   @Override
@@ -617,6 +753,35 @@ public class TestServiceImpl implements TestService {
   }
 
   @Override
+  public void zonedDateTimeHandler(Handler<AsyncResult<ZonedDateTime>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]")));
+  }
+
+  @Override
+  public void listZonedDateTimeHandler(Handler<AsyncResult<List<ZonedDateTime>>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(Arrays.asList(
+      ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"),
+      ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1)
+    )));
+  }
+
+  @Override
+  public void setZonedDateTimeHandler(Handler<AsyncResult<Set<ZonedDateTime>>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(new HashSet<>(Arrays.asList(
+      ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"),
+      ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1)
+    ))));
+  }
+
+  @Override
+  public void mapZonedDateTimeHandler(Handler<AsyncResult<Map<String, ZonedDateTime>>> resultHandler) {
+    Map<String, ZonedDateTime> zonedDateTimeMap = new HashMap<>();
+    zonedDateTimeMap.put("date1", ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"));
+    zonedDateTimeMap.put("date2", ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1));
+    resultHandler.handle(Future.succeededFuture(zonedDateTimeMap));
+  }
+
+  @Override
   public void listdataObjectTypeNull(List<TestDataObject> list) {
     assertTrue(list.isEmpty());
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
@@ -625,6 +790,15 @@ public class TestServiceImpl implements TestService {
   @Override
   public void setdataObjectTypeNull(Set<TestDataObject> set) {
     assertTrue(set.isEmpty());
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
+  public void mapDataObjectType(Map<String, TestDataObject> map) {
+    Map<String, TestDataObject> expected = new HashMap<>();
+    expected.put("do1", new TestDataObject().setNumber(1).setString("String 1").setBool(false));
+    expected.put("do2", new TestDataObject().setNumber(2).setString("String 2").setBool(true));
+    assertEquals(expected, map);
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
 
