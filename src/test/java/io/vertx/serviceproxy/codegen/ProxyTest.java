@@ -180,4 +180,19 @@ public class ProxyTest {
       // OK
     }
   }
+
+  @Test
+  public void testProxyGenWithoutVertxGen() throws Exception {
+    try {
+      generateProxyModel(ProxyWithOutVertxGen.class);
+      fail("Should throw exception");
+    } catch(GenException e) {
+      //OK
+    }
+  }
+
+  @Test
+  public void testProxyGenWithVertxGen() throws Exception {
+    generateProxyModel(ProxyWithVertxGen.class);
+  }
 }

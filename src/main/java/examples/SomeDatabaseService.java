@@ -11,6 +11,7 @@ import io.vertx.core.json.JsonObject;
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
+@VertxGen
 @ProxyGen
 public interface SomeDatabaseService {
 
