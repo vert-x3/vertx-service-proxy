@@ -60,6 +60,8 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
     return model.getIfaceSimpleName() + "VertxProxyHandler";
   }
 
+  public Stream<String> additionalImports() { return Stream.empty(); }
+
   @Override
   public String render(ProxyModel model, int index, int size, Map<String, Object> session) {
     StringWriter buffer = new StringWriter();
@@ -70,7 +72,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
     writer.newLine();
     utils.writeImport(writer, model.getIfaceFQCN());
     utils.handlerGenImports(writer);
-    utils.additionalImports(model).forEach(i -> utils.writeImport(writer, i));
+    Stream.concat(utils.additionalImports(model), additionalImports()).distinct().forEach(i -> utils.writeImport(writer, i));
     utils.roger(writer);
     writer
       .code("@SuppressWarnings({\"unchecked\", \"rawtypes\"})\n")
@@ -148,7 +150,9 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
       .unindent()
       .code("}\n")
       .unindent()
-      .code("}\n")
+      .code("}\n");
+    generateAdditionalMethods(model, writer);
+    writer
       .unindent()
       .code("}");
     return buffer.toString();
@@ -291,5 +295,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
         "          }";
     return "HelperUtils.createHandler(msg, includeDebugInfo)";
   }
+
+  public void generateAdditionalMethods(ProxyModel model, CodeWriter writer) {}
 
 }
