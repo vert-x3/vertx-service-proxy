@@ -3,6 +3,7 @@ package io.vertx.serviceproxy;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.eventbus.ReplyFailure;
@@ -82,18 +83,18 @@ public class ServiceJWTInterceptor implements Function<Message<JsonObject>, Futu
       return Future.failedFuture(new ReplyException(ReplyFailure.RECIPIENT_FAILURE, 401, "Unauthorized"));
     }
 
-    Future<Message<JsonObject>> fut = Future.future();
+    Promise<Message<JsonObject>> promise = Promise.promise();
 
     jwtAuth.authenticate(new JsonObject().put("jwt", authorization), authenticate -> {
       if (authenticate.failed()) {
-        fut.fail(new ReplyException(ReplyFailure.RECIPIENT_FAILURE, 500, authenticate.cause().getMessage()));
+        promise.fail(new ReplyException(ReplyFailure.RECIPIENT_FAILURE, 500, authenticate.cause().getMessage()));
         return;
       }
 
       final User user = authenticate.result();
 
       if (user == null) {
-        fut.fail(new ReplyException(ReplyFailure.RECIPIENT_FAILURE, 403, "Forbidden"));
+        promise.fail(new ReplyException(ReplyFailure.RECIPIENT_FAILURE, 403, "Forbidden"));
         return;
       }
 
@@ -109,15 +110,15 @@ public class ServiceJWTInterceptor implements Function<Message<JsonObject>, Futu
             if (res.result()) {
               if (count.incrementAndGet() == requiredcount) {
                 // Has all required authorities
-                fut.complete(msg);
+                promise.complete(msg);
               }
             } else {
               if (sentFailure.compareAndSet(false, true)) {
-                fut.fail(new ReplyException(ReplyFailure.RECIPIENT_FAILURE, 403, "Forbidden"));
+                promise.fail(new ReplyException(ReplyFailure.RECIPIENT_FAILURE, 403, "Forbidden"));
               }
             }
           } else {
-            fut.fail(new ReplyException(ReplyFailure.RECIPIENT_FAILURE, 500, res.cause().getMessage()));
+            promise.fail(new ReplyException(ReplyFailure.RECIPIENT_FAILURE, 500, res.cause().getMessage()));
           }
         };
         for (String authority : authorities) {
@@ -127,10 +128,10 @@ public class ServiceJWTInterceptor implements Function<Message<JsonObject>, Futu
         }
       } else {
         // No auth required
-        fut.complete(msg);
+        promise.complete(msg);
       }
     });
 
-    return fut;
+    return promise.future();
   }
 }
