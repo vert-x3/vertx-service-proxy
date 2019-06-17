@@ -65,7 +65,7 @@ public class ProxyModel extends ClassModel {
     }
     // We also allow data object as parameter types if they have a complete codec
     if (typeInfo.getKind() == ClassKind.DATA_OBJECT) {
-      if (((DataObjectTypeInfo)typeInfo).hasJsonEncoder() && ((DataObjectTypeInfo)typeInfo).hasJsonDecoder()) {
+      if (((DataObjectTypeInfo)typeInfo).isEncodable() && ((DataObjectTypeInfo)typeInfo).isDecodable()){
         return;
       }
       throw new GenException(elem, "Data Object " + typeInfo + " must have a valid encoder and decoder");
@@ -174,6 +174,6 @@ public class ProxyModel extends ClassModel {
   }
 
   protected boolean isValidDataObject(TypeInfo typeInfo) {
-    return typeInfo.getKind() == ClassKind.DATA_OBJECT && ((DataObjectTypeInfo)typeInfo).hasJsonEncoder() && ((DataObjectTypeInfo)typeInfo).hasJsonDecoder();
+    return typeInfo.getKind() == ClassKind.DATA_OBJECT && ((DataObjectTypeInfo)typeInfo).isEncodable() && ((DataObjectTypeInfo)typeInfo).isDecodable();
   }
 }
