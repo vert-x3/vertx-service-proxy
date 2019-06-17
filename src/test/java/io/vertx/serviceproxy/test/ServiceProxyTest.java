@@ -562,7 +562,7 @@ public class ServiceProxyTest extends VertxTestBase {
     message.put("i", 1234);
     message.put("chr", (int)'X'); // chars are mapped to ints
     message.put("senum", SomeEnum.BAR.toString()); // enums are mapped to strings
-    vertx.eventBus().<String>send("someaddress", message, new DeliveryOptions().addHeader("action", "invokeWithMessage"), onSuccess(res -> {
+    vertx.eventBus().<String>request("someaddress", message, new DeliveryOptions().addHeader("action", "invokeWithMessage"), onSuccess(res -> {
       assertEquals("goats", res.body());
       testComplete();
     }));
@@ -575,7 +575,7 @@ public class ServiceProxyTest extends VertxTestBase {
     message.put("object", new JsonObject().put("foo", "bar"));
     message.put("str", "blah");
     message.put("i", 1234);
-    vertx.eventBus().send("someaddress", message, new DeliveryOptions().addHeader("action", "yourmum").setSendTimeout(500), onFailure(t -> {
+    vertx.eventBus().request("someaddress", message, new DeliveryOptions().addHeader("action", "yourmum").setSendTimeout(500), onFailure(t -> {
       assertTrue(t instanceof ReplyException);
       ReplyException re = (ReplyException) t;
       // This will as operation will fail to be invoked
@@ -593,7 +593,7 @@ public class ServiceProxyTest extends VertxTestBase {
     message.put("i", 1234);
     message.put("char", (int)'X'); // chars are mapped to ints
     message.put("enum", SomeEnum.BAR.toString()); // enums are mapped to strings
-    vertx.eventBus().send("someaddress", message, new DeliveryOptions().addHeader("action", "invokeWithMessage").setSendTimeout(500), onFailure(t -> {
+    vertx.eventBus().request("someaddress", message, new DeliveryOptions().addHeader("action", "invokeWithMessage").setSendTimeout(500), onFailure(t -> {
       assertTrue(t instanceof ReplyException);
       ReplyException re = (ReplyException) t;
       // This will as operation will fail to be invoked

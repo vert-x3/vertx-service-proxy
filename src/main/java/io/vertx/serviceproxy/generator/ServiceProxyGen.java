@@ -171,7 +171,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
     String name = lastParam.getName();
     TypeInfo t = ((ParameterizedTypeInfo)((ParameterizedTypeInfo)lastParam.getType()).getArg(0)).getArg(0);
     writer
-      .code("_vertx.eventBus().<" + sendTypeParameter(t) + ">send(_address, _json, _deliveryOptions, res -> {\n")
+      .code("_vertx.eventBus().<" + sendTypeParameter(t) + ">request(_address, _json, _deliveryOptions, res -> {\n")
       .indent()
         .code("if (res.failed()) {\n")
         .indent()

@@ -19,7 +19,7 @@ public class Examples {
     message.put("collection", "mycollection")
         .put("document", new JsonObject().put("name", "tim"));
     DeliveryOptions options = new DeliveryOptions().addHeader("action", "save");
-    vertx.eventBus().send("database-service-address", message, options, res2 -> {
+    vertx.eventBus().request("database-service-address", message, options, res2 -> {
       if (res2.succeeded()) {
         // done
       } else {
