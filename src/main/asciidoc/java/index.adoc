@@ -539,6 +539,7 @@ Parameters can be any of:
 * `Map<String, PRIMITIVE>`
 * Any _Enum_ type
 * Any class annotated with `@DataObject`
+* Any class that provides a `JsonCodec`
 
 If an asynchronous result is required a last parameter of type `Handler<AsyncResult<R>>` can be provided.
 
@@ -552,7 +553,31 @@ If an asynchronous result is required a last parameter of type `Handler<AsyncRes
 * `Set<PRIMITIVE>`
 * Any _Enum_ type
 * Any class annotated with `@DataObject`
+* Any class that provides a `JsonCodec`
 * Another proxy
+
+==== JsonCodec
+
+If you want to define a custom way to encode and decode types to Json, you can define a {@link io.vertx.core.spi.json.JsonCodec} for it.
+A `JsonCodec` for type `X` is a concrete class that implements the interface `JsonCodec<X, J>`, where `J` must be any of these:
+
+* `JsonArray` or `JsonObject`
+* `Number`
+* `String`
+* `Boolean`
+
+After you define the {@link io.vertx.core.spi.json.JsonCodec}, you must add it tp `@ModuleGen` annotation in your `package-info.java`, e.g.:
+
+[source,java]
+----
+@ModuleGen(
+  name = "mypackage",
+  groupPackage = "io.something",
+  codecs = [
+    ZonedDateTimeCodec.class
+  ]
+)
+----
 
 === Overloaded methods
 

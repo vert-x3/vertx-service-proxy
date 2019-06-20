@@ -12,8 +12,6 @@ import io.vertx.serviceproxy.generator.model.ProxyModel;
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.util.*;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -207,8 +205,15 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
     if (type.getKind() == ClassKind.LIST || type.getKind() == ClassKind.SET) {
       String coll = type.getKind() == ClassKind.LIST ? "List" : "Set";
       TypeInfo typeArg = ((ParameterizedTypeInfo)type).getArg(0);
-      if (typeArg.getKind() == ClassKind.DATA_OBJECT)
-        return "json.getJsonArray(\"" + name + "\").stream().map(v -> (" + ((DataObjectTypeInfo)typeArg).getTargetJsonType().toString() + ")v).map(v -> v != null ? " + ((DataObjectTypeInfo)typeArg).getJsonDecoderFQCN() + ".INSTANCE.decode(v) : null).collect(Collectors.to" + coll + "())";
+      if (typeArg.getKind() == ClassKind.DATA_OBJECT) {
+        DataObjectTypeInfo doType = ((DataObjectTypeInfo) typeArg);
+        return String.format(
+          "json.getJsonArray(\"%s\").stream().map(v -> %s).collect(Collectors.to%s())",
+          name,
+          GeneratorUtils.generateDecodeDataObject("v", doType),
+          coll
+        );
+      }
       if (typeArg.getName().equals("java.lang.Byte") || typeArg.getName().equals("java.lang.Short") ||
         typeArg.getName().equals("java.lang.Integer") || typeArg.getName().equals("java.lang.Long"))
         return "json.getJsonArray(\"" + name + "\").stream().map(o -> ((Number)o)." + numericMapping.get(typeArg.getName()) + "Value()).collect(Collectors.to" + coll + "())";
@@ -220,14 +225,20 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
         typeArg.getName().equals("java.lang.Integer") || typeArg.getName().equals("java.lang.Long") ||
         typeArg.getName().equals("java.lang.Float") || typeArg.getName().equals("java.lang.Double"))
         return "json.getJsonObject(\"" + name + "\").getMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> ((java.lang.Number)entry.getValue())." + numericMapping.get(typeArg.getName()) + "Value()))";
-      if (typeArg.getKind() == ClassKind.DATA_OBJECT)
-        return "json.getJsonObject(\"" + name + "\").stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue() != null ? " + ((DataObjectTypeInfo)typeArg).getJsonDecoderFQCN() + ".INSTANCE.decode((" + ((DataObjectTypeInfo)typeArg).getTargetJsonType().getSimpleName() + ")e.getValue()) : null))";
+      if (typeArg.getKind() == ClassKind.DATA_OBJECT) {
+        DataObjectTypeInfo doType = ((DataObjectTypeInfo) typeArg);
+        return String.format(
+          "json.getJsonObject(\"%s\").stream().collect(Collectors.toMap(Map.Entry::getKey, e -> %s))",
+          name,
+          GeneratorUtils.generateDecodeDataObject("e.getValue()", doType)
+        );
+      }
       return "HelperUtils.convertMap(json.getJsonObject(\"" + name + "\").getMap())";
     }
     if (type.getKind() == ClassKind.DATA_OBJECT) {
       DataObjectTypeInfo doTypeInfo = (DataObjectTypeInfo)type;
       String valueExtractionStmt = "json." + resolveDataObjectJsonExtractorMethod(doTypeInfo) + "(\"" + name + "\")";
-      return valueExtractionStmt + " != null ? " + doTypeInfo.getJsonDecoderFQCN() + ".INSTANCE.decode((" + doTypeInfo.getTargetJsonType().getSimpleName() + ")" + valueExtractionStmt + ") : null";
+      return GeneratorUtils.generateDecodeDataObject(valueExtractionStmt, doTypeInfo);
     }
     return "(" + type.getName() + ")json.getValue(\"" + name + "\")";
   }
@@ -252,7 +263,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
           "            if (res.failed()) {\n" +
           "              HelperUtils.manageFailure(msg, res.cause(), includeDebugInfo);\n" +
           "            } else {\n" +
-          "              msg.reply(new JsonArray(res.result().stream().map(v -> v != null ? " + ((DataObjectTypeInfo)innerTypeArg).getJsonEncoderFQCN() + ".INSTANCE.encode(v) : null).collect(Collectors.toList())));\n" +
+          "              msg.reply(new JsonArray(res.result().stream().map(v -> " + GeneratorUtils.generateEncodeDataObject("v", (DataObjectTypeInfo)innerTypeArg) + ").collect(Collectors.toList())));\n" +
           "            }\n" +
           "         }";
       return "HelperUtils.create" + coll + "Handler(msg, includeDebugInfo)";
@@ -270,7 +281,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
           "                msg.reply(new ServiceException(-1, res.cause().getMessage()));\n" +
           "              }\n" +
           "            } else {\n" +
-          "              msg.reply(new JsonObject(res.result().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e ->  e.getValue() != null ? " + ((DataObjectTypeInfo)innerTypeArg).getJsonEncoderFQCN() + ".INSTANCE.encode(e.getValue()) : null))));\n" +
+          "              msg.reply(new JsonObject(res.result().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> " + GeneratorUtils.generateEncodeDataObject("e.getValue()", (DataObjectTypeInfo)innerTypeArg) + "))));\n" +
           "            }\n" +
           "         }";
       return "HelperUtils.createMapHandler(msg, includeDebugInfo)";
@@ -280,7 +291,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
         "            if (res.failed()) {\n" +
         "              HelperUtils.manageFailure(msg, res.cause(), includeDebugInfo);\n" +
         "            } else {\n" +
-        "              msg.reply(res.result() != null ? " + ((DataObjectTypeInfo)typeArg).getJsonEncoderFQCN() + ".INSTANCE.encode(res.result()) : null);\n" +
+        "              msg.reply(" + GeneratorUtils.generateEncodeDataObject("res.result()", (DataObjectTypeInfo)typeArg) + ");\n" +
         "            }\n" +
         "         }";
     if (typeArg.getKind() == ClassKind.API && ((ApiTypeInfo)typeArg).isProxyGen())
