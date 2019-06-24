@@ -274,6 +274,15 @@
  * </plugin>
  * ----
  *
+ * You also need to add a `package-info.java` in the same package where are the service interfaces, and you must annotate the package
+ * with {@link io.vertx.codegen.annotations.ModuleGen}:
+ *
+ * [source,java]
+ * ----
+ * @ModuleGen(name = "mypackage", groupPackage = "io.mygroup")
+ * package mypackage;
+ * ----
+ *
  * == Exposing your service
  *
  * Once you have your _service interface_, compile the source to generate the stub and proxies. Then, you need some
