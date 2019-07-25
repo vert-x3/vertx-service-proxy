@@ -25,7 +25,7 @@ your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-service-proxy</artifactId>
-  <version>4.0.0-SNAPSHOT</version>
+  <version>4.0.0-milestone1</version>
 </dependency>
 ----
 
@@ -33,7 +33,7 @@ your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-proxy:4.0.0-SNAPSHOT'
+compile 'io.vertx:vertx-service-proxy:4.0.0-milestone1'
 ----
 
 To *implement* service proxies, also add:
@@ -45,7 +45,7 @@ To *implement* service proxies, also add:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-codegen</artifactId>
-  <version>4.0.0-SNAPSHOT</version>
+  <version>4.0.0-milestone1</version>
   <scope>provided</scope>
 </dependency>
 ----
@@ -54,14 +54,14 @@ To *implement* service proxies, also add:
 
 [source,groovy,subs="+attributes"]
 ----
-compileOnly 'io.vertx:vertx-codegen:4.0.0-SNAPSHOT'
+compileOnly 'io.vertx:vertx-codegen:4.0.0-milestone1'
 ----
 * Gradle >= 5 (in your `build.gradle` file):
 
 [source,groovy,subs="+attributes"]
 ----
-annotationProcessor 'io.vertx:vertx-codegen:4.0.0-SNAPSHOT:processor'
-annotationProcessor 'io.vertx:vertx-service-proxy:4.0.0-SNAPSHOT'
+annotationProcessor 'io.vertx:vertx-codegen:4.0.0-milestone1:processor'
+annotationProcessor 'io.vertx:vertx-service-proxy:4.0.0-milestone1'
 ----
 
 Be aware that as the service proxy mechanism relies on code generation, so modifications to the _service interface_
@@ -239,13 +239,13 @@ Here a configuration example for Maven:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-codegen</artifactId>
-  <version>4.0.0-SNAPSHOT</version>
+  <version>4.0.0-milestone1</version>
   <classifier>processor</classifier>
 </dependency>
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-service-proxy</artifactId>
-  <version>4.0.0-SNAPSHOT</version>
+  <version>4.0.0-milestone1</version>
 </dependency>
 ----
 
@@ -253,8 +253,8 @@ This feature can also be used in Gradle:
 
 [source]
 ----
-compile "io.vertx:vertx-codegen:4.0.0-SNAPSHOT:processor"
-compile "io.vertx:vertx-service-proxy:4.0.0-SNAPSHOT"
+compile "io.vertx:vertx-codegen:4.0.0-milestone1:processor"
+compile "io.vertx:vertx-service-proxy:4.0.0-milestone1"
 ----
 
 IDE provides usually support for annotation processors.
@@ -539,7 +539,6 @@ Parameters can be any of:
 * `Map<String, PRIMITIVE>`
 * Any _Enum_ type
 * Any class annotated with `@DataObject`
-* Any class that provides a `JsonCodec`
 
 If an asynchronous result is required a last parameter of type `Handler<AsyncResult<R>>` can be provided.
 
@@ -553,31 +552,7 @@ If an asynchronous result is required a last parameter of type `Handler<AsyncRes
 * `Set<PRIMITIVE>`
 * Any _Enum_ type
 * Any class annotated with `@DataObject`
-* Any class that provides a `JsonCodec`
 * Another proxy
-
-==== JsonCodec
-
-If you want to define a custom way to encode and decode types to Json, you can define a {@link io.vertx.core.spi.json.JsonCodec} for it.
-A `JsonCodec` for type `X` is a concrete class that implements the interface `JsonCodec<X, J>`, where `J` must be any of these:
-
-* `JsonArray` or `JsonObject`
-* `Number`
-* `String`
-* `Boolean`
-
-After you define the {@link io.vertx.core.spi.json.JsonCodec}, you must add it tp `@ModuleGen` annotation in your `package-info.java`, e.g.:
-
-[source,java]
-----
-@ModuleGen(
-  name = "mypackage",
-  groupPackage = "io.something",
-  codecs = [
-    ZonedDateTimeCodec.class
-  ]
-)
-----
 
 === Overloaded methods
 
