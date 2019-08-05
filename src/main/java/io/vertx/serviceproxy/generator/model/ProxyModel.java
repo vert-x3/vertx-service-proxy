@@ -101,7 +101,7 @@ public class ProxyModel extends ClassModel {
   protected void checkMethod(MethodInfo methodInfo) {
     // We don't allow overloaded methods in proxies
     List<MethodInfo> methodsByName = methodMap.get(methodInfo.getName());
-    if (methodsByName != null) {
+    if (methodsByName != null && methodsByName.size() > 1) {
       throw new GenException(this.modelElt, "Overloaded methods are not allowed in ProxyGen interfaces " + methodInfo.getName());
     }
   }
