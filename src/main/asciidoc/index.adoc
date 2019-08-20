@@ -2,9 +2,7 @@
 :toc: left
 
 When you compose a Vert.x application, you may want to isolate a functionality somewhere and make it available to
-the rest of your application.
-
-That's the main purpose of service proxies. It lets you expose a _service_ on the
+the rest of your application. That's the main purpose of service proxies. It lets you expose a _service_ on the
 event bus, so, any other Vert.x component can consume it, as soon as they know the _address_ on which the service
 is published.
 
@@ -23,9 +21,9 @@ your build descriptor:
 [source,xml,subs="+attributes"]
 ----
 <dependency>
-  <groupId>io.vertx</groupId>
-  <artifactId>vertx-service-proxy</artifactId>
-  <version>4.0.0-SNAPSHOT</version>
+  <groupId>${maven.groupId}</groupId>
+  <artifactId>${maven.artifactId}</artifactId>
+  <version>${maven.version}</version>
 </dependency>
 ----
 
@@ -33,7 +31,7 @@ your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-proxy:4.0.0-SNAPSHOT'
+compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
 ----
 
 To *implement* service proxies, also add:
@@ -43,9 +41,9 @@ To *implement* service proxies, also add:
 [source,xml,subs="+attributes"]
 ----
 <dependency>
-  <groupId>io.vertx</groupId>
+  <groupId>${maven.groupId}</groupId>
   <artifactId>vertx-codegen</artifactId>
-  <version>4.0.0-SNAPSHOT</version>
+  <version>${maven.version}</version>
   <scope>provided</scope>
 </dependency>
 ----
@@ -54,14 +52,14 @@ To *implement* service proxies, also add:
 
 [source,groovy,subs="+attributes"]
 ----
-compileOnly 'io.vertx:vertx-codegen:4.0.0-SNAPSHOT'
+compileOnly '${maven.groupId}:vertx-codegen:${maven.version}'
 ----
 * Gradle >= 5 (in your `build.gradle` file):
 
 [source,groovy,subs="+attributes"]
 ----
-annotationProcessor 'io.vertx:vertx-codegen:4.0.0-SNAPSHOT:processor'
-annotationProcessor 'io.vertx:vertx-service-proxy:4.0.0-SNAPSHOT'
+annotationProcessor '${maven.groupId}:vertx-codegen:${maven.version}:processor'
+annotationProcessor '${maven.groupId}:${maven.artifactId}:${maven.version}'
 ----
 
 Be aware that as the service proxy mechanism relies on code generation, so modifications to the _service interface_
@@ -77,17 +75,7 @@ exposed on the event bus, you should do something like this:
 
 [source,java]
 ----
-JsonObject message = new JsonObject();
-message.put("collection", "mycollection")
-    .put("document", new JsonObject().put("name", "tim"));
-DeliveryOptions options = new DeliveryOptions().addHeader("action", "save");
-vertx.eventBus().request("database-service-address", message, options, res2 -> {
-  if (res2.succeeded()) {
-    // done
-  } else {
-    // failure
-  }
-});
+{@link examples.Examples#example1(io.vertx.core.Vertx)}
 ----
 
 When creating a service there's a certain amount of boilerplate code to listen on the event bus for incoming
@@ -127,15 +115,7 @@ That means you can interact with your service like this:
 
 [source,java]
 ----
-SomeDatabaseService service = SomeDatabaseService.createProxy(vertx,
-    "database-service-address");
-
-// Save some data in the database - this time using the proxy
-service.save("mycollection", new JsonObject().put("name", "tim"), res2 -> {
-  if (res2.succeeded()) {
-    // done
-  }
-});
+{@link examples.Examples#example2(io.vertx.core.Vertx)}
 ----
 
 You can also combine `@ProxyGen` with language API code generation (`@VertxGen`) in order to create service stubs
@@ -239,13 +219,13 @@ Here a configuration example for Maven:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-codegen</artifactId>
-  <version>4.0.0-SNAPSHOT</version>
+  <version>${maven.version}</version>
   <classifier>processor</classifier>
 </dependency>
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-service-proxy</artifactId>
-  <version>4.0.0-SNAPSHOT</version>
+  <version>${maven.version}</version>
 </dependency>
 ----
 
@@ -253,8 +233,8 @@ This feature can also be used in Gradle:
 
 [source]
 ----
-compile "io.vertx:vertx-codegen:4.0.0-SNAPSHOT:processor"
-compile "io.vertx:vertx-service-proxy:4.0.0-SNAPSHOT"
+compile "io.vertx:vertx-codegen:${maven.version}:processor"
+compile "io.vertx:vertx-service-proxy:${maven.version}"
 ----
 
 IDE provides usually support for annotation processors.
@@ -284,11 +264,7 @@ code to "register" your service on the event bus:
 
 [source, java]
 ----
-SomeDatabaseService service = new SomeDatabaseServiceImpl();
-// Register the handler
-new ServiceBinder(vertx)
-  .setAddress("database-service-address")
-  .register(SomeDatabaseService.class, service);
+{@link examples.Examples#register(io.vertx.core.Vertx)}
 ----
 
 This can be done in a verticle, or anywhere in your code.
@@ -296,41 +272,25 @@ This can be done in a verticle, or anywhere in your code.
 Once registered, the service becomes accessible. If you are running your application on a cluster, the service is
 available from any host.
 
-To withdraw your service, use the `link:../../apidocs/io/vertx/serviceproxy/ServiceBinder.html#unregister-io.vertx.core.eventbus.MessageConsumer-[unregister]`
+To withdraw your service, use the {@link io.vertx.serviceproxy.ServiceBinder#unregister(io.vertx.core.eventbus.MessageConsumer)}
 method:
 
 [source, java]
 ----
-ServiceBinder binder = new ServiceBinder(vertx);
-
-// Create an instance of your service implementation
-SomeDatabaseService service = new SomeDatabaseServiceImpl();
-// Register the handler
-MessageConsumer<JsonObject> consumer = binder
-  .setAddress("database-service-address")
-  .register(SomeDatabaseService.class, service);
-
-// ....
-
-// Unregister your service.
-binder.unregister(consumer);
+{@link examples.Examples#unregister(io.vertx.core.Vertx)}
 ----
 
 == Proxy creation
 
 Now that the service is exposed, you probably want to consume it. For this, you need to create a proxy. The proxy
-can be created using the `link:../../apidocs/io/vertx/serviceproxy/ServiceProxyBuilder.html[ServiceProxyBuilder]` class:
+can be created using the {@link io.vertx.serviceproxy.ServiceProxyBuilder} class:
 
 [source, java]
 ----
-ServiceProxyBuilder builder = new ServiceProxyBuilder(vertx).setAddress("database-service-address");
-
-SomeDatabaseService service = builder.build(SomeDatabaseService.class);
-// or with delivery options:
-SomeDatabaseService service2 = builder.setOptions(options).build(SomeDatabaseService.class);
+{@link examples.Examples#proxyCreation(io.vertx.core.Vertx, io.vertx.core.eventbus.DeliveryOptions)}
 ----
 
-The second method takes an instance of `link:../../apidocs/io/vertx/core/eventbus/DeliveryOptions.html[DeliveryOptions]` where you can configure the
+The second method takes an instance of {@link io.vertx.core.eventbus.DeliveryOptions} where you can configure the
 message delivery (such as the timeout).
 
 Alternatively, you can use the generated proxy class. The proxy class name is the _service interface_ class name
@@ -355,10 +315,10 @@ public interface SomeDatabaseService {
 
 == Error Handling
 
-Service methods may return errors to the client by passing a failed `Future` containing a `link:../../apidocs/io/vertx/serviceproxy/ServiceException.html[ServiceException]`
+Service methods may return errors to the client by passing a failed `Future` containing a {@link io.vertx.serviceproxy.ServiceException}
 instance to the method's `Handler`. A `ServiceException` contains an `int` failure code, a message, and an optional
 `JsonObject` containing any extra information deemed important to return to the caller. For convenience, the
-`link:../../apidocs/io/vertx/serviceproxy/ServiceException.html#fail-int-java.lang.String-[ServiceException.fail]` factory method can be used to create an instance of
+{@link io.vertx.serviceproxy.ServiceException#fail} factory method can be used to create an instance of
 `ServiceException` already wrapped in a failed `Future`. For example:
 
 [source,java]
