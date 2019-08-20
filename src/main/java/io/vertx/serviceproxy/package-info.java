@@ -300,7 +300,7 @@
  * == Proxy creation
  *
  * Now that the service is exposed, you probably want to consume it. For this, you need to create a proxy. The proxy
- * can be created using the `ProxyHelper` class:
+ * can be created using the {@link io.vertx.serviceproxy.ServiceProxyBuilder} class:
  *
  * [source, java]
  * ----
