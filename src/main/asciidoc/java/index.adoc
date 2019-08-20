@@ -25,7 +25,7 @@ your build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-service-proxy</artifactId>
-  <version>3.8.0</version>
+  <version>3.8.1-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -33,7 +33,7 @@ your build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-proxy:3.8.0'
+compile 'io.vertx:vertx-service-proxy:3.8.1-SNAPSHOT'
 ----
 
 To *implement* service proxies, also add:
@@ -45,7 +45,7 @@ To *implement* service proxies, also add:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-codegen</artifactId>
-  <version>3.8.0</version>
+  <version>3.8.1-SNAPSHOT</version>
   <scope>provided</scope>
 </dependency>
 ----
@@ -54,7 +54,7 @@ To *implement* service proxies, also add:
 
 [source,groovy,subs="+attributes"]
 ----
-compileOnly 'io.vertx:vertx-codegen:3.8.0'
+compileOnly 'io.vertx:vertx-codegen:3.8.1-SNAPSHOT'
 ----
 
 Be aware that as the service proxy mechanism relies on code generation, so modifications to the _service interface_
@@ -232,13 +232,13 @@ Here a configuration example for Maven:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-codegen</artifactId>
-  <version>3.8.0</version>
+  <version>3.8.1-SNAPSHOT</version>
   <classifier>processor</classifier>
 </dependency>
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-service-proxy</artifactId>
-  <version>3.8.0</version>
+  <version>3.8.1-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -246,8 +246,8 @@ This feature can also be used in Gradle:
 
 [source]
 ----
-compile "io.vertx:vertx-codegen:3.8.0:processor"
-compile "io.vertx:vertx-service-proxy:3.8.0"
+compile "io.vertx:vertx-codegen:3.8.1-SNAPSHOT:processor"
+compile "io.vertx:vertx-service-proxy:3.8.1-SNAPSHOT"
 ----
 
 IDE provides usually support for annotation processors.
@@ -312,7 +312,7 @@ binder.unregister(consumer);
 == Proxy creation
 
 Now that the service is exposed, you probably want to consume it. For this, you need to create a proxy. The proxy
-can be created using the `ProxyHelper` class:
+can be created using the `link:../../apidocs/io/vertx/serviceproxy/ServiceProxyBuilder.html[ServiceProxyBuilder]` class:
 
 [source, java]
 ----

@@ -9,7 +9,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.serviceproxy.ProxyHelper;
+import io.vertx.serviceproxy.ServiceProxyBuilder;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
 import io.vertx.serviceproxy.testmodel.SomeVertxEnum;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
@@ -24,7 +24,9 @@ import java.util.List;
 public interface Service {
 
   static Service createProxy(Vertx vertx, String address) {
-    return ProxyHelper.createProxy(Service.class, vertx, address);
+    return new ServiceProxyBuilder(vertx)
+      .setAddress(address)
+      .build(Service.class);
   }
 
   @Fluent

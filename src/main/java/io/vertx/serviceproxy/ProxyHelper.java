@@ -26,17 +26,25 @@ import java.util.Objects;
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  *
- * @deprecated for a more robust proxy creation see: {@link ServiceBinder}
+ * @deprecated for a more robust proxy creation see: {@link ServiceBinder} and {@link ServiceProxyBuilder}
  */
 @Deprecated
 public class ProxyHelper {
 
+  /**
+   * @deprecated use instead  {@link ServiceProxyBuilder}
+   */
+  @Deprecated
   public static <T> T createProxy(Class<T> clazz, Vertx vertx, String address) {
     return new ServiceProxyBuilder(vertx)
       .setAddress(address)
       .build(clazz);
   }
 
+  /**
+   * @deprecated use instead  {@link ServiceProxyBuilder}
+   */
+  @Deprecated
   public static <T> T createProxy(Class<T> clazz, Vertx vertx, String address, DeliveryOptions options) {
     return new ServiceProxyBuilder(vertx)
       .setAddress(address)
@@ -55,13 +63,19 @@ public class ProxyHelper {
    * @param address the address on which the service is published
    * @param <T>     the type of the service interface
    * @return the consumer used to unregister the service
+   * @deprecated use instead  {@link ServiceBinder}
    */
+  @Deprecated
   public static <T> MessageConsumer<JsonObject> registerService(Class<T> clazz, Vertx vertx, T service, String address) {
     return new ServiceBinder(vertx)
       .setAddress(address)
       .register(clazz, service);
   }
 
+  /**
+   * @deprecated use instead  {@link ServiceBinder}
+   */
+  @Deprecated
   public static <T> MessageConsumer<JsonObject> registerService(Class<T> clazz, Vertx vertx, T service, String address,
                                                                 long timeoutSeconds) {
     return new ServiceBinder(vertx)
@@ -70,6 +84,10 @@ public class ProxyHelper {
       .register(clazz, service);
   }
 
+  /**
+   * @deprecated use instead  {@link ServiceBinder}
+   */
+  @Deprecated
   public static <T> MessageConsumer<JsonObject> registerService(Class<T> clazz, Vertx vertx, T service, String address,
                                                                 boolean topLevel,
                                                                 long timeoutSeconds) {
@@ -90,13 +108,19 @@ public class ProxyHelper {
    * @param address the address on which the service is published
    * @param <T>     the type of the service interface
    * @return the consumer used to unregister the service
+   * @deprecated use instead  {@link ServiceBinder}
    */
+  @Deprecated
   public static <T> MessageConsumer<JsonObject> registerLocalService(Class<T> clazz, Vertx vertx, T service, String address) {
     return new ServiceBinder(vertx)
       .setAddress(address)
       .registerLocal(clazz, service);
   }
 
+  /**
+   * @deprecated use instead  {@link ServiceBinder}
+   */
+  @Deprecated
   public static <T> MessageConsumer<JsonObject> registerLocalService(Class<T> clazz, Vertx vertx, T service, String address,
                                                                 long timeoutSeconds) {
     return new ServiceBinder(vertx)
@@ -105,6 +129,10 @@ public class ProxyHelper {
       .registerLocal(clazz, service);
   }
 
+  /**
+   * @deprecated use instead  {@link ServiceBinder}
+   */
+  @Deprecated
   public static <T> MessageConsumer<JsonObject> registerLocalService(Class<T> clazz, Vertx vertx, T service, String address,
                                                                 boolean topLevel,
                                                                 long timeoutSeconds) {
@@ -119,7 +147,9 @@ public class ProxyHelper {
    * Unregisters a published service.
    *
    * @param consumer the consumer returned by {@link #registerService(Class, Vertx, Object, String)}.
+   * @deprecated use {@link MessageConsumer#unregister()}
    */
+  @Deprecated
   public static void unregisterService(MessageConsumer<JsonObject> consumer) {
     Objects.requireNonNull(consumer);
     if (consumer instanceof ProxyHandler) {
