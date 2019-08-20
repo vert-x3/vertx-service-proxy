@@ -66,7 +66,7 @@ To generate the proxies in different languages, you will need to add the _langua
 Let's have a look at service proxies and why they can be useful. Let's imagine you have a _database service_
 exposed on the event bus, you should do something like this:
 
-[source,$lang]
+[source,java]
 ----
 {@link examples.Examples#example1(io.vertx.core.Vertx)}
 ----
@@ -80,7 +80,7 @@ You write your service as a Java interface and annotate it with the `@ProxyGen` 
 
 [source,java]
 ----
-&#64;ProxyGen
+@ProxyGen
 public interface SomeDatabaseService {
 
   // A couple of factory methods to create an instance and a proxy
@@ -106,7 +106,7 @@ work irrespective of where your service actually lives on the event bus (potenti
 
 That means you can interact with your service like this:
 
-[source,$lang]
+[source,java]
 ----
 {@link examples.Examples#example2(io.vertx.core.Vertx)}
 ----
@@ -118,8 +118,8 @@ the event bus entirely. For this don't forget to add the dependency on your lang
 
 [source, java]
 ----
-&#64;ProxyGen // Generate service proxies
-&#64;VertxGen // Generate the clients
+@ProxyGen // Generate service proxies
+@VertxGen // Generate the clients
 public interface SomeDatabaseService {
   // ...
 }
@@ -135,7 +135,7 @@ Let's see an example:
 
 [source,java]
 ----
-&#64;ProxyGen
+@ProxyGen
 public interface SomeDatabaseService {
 
  // A couple of factory methods to create an instance and a proxy
@@ -167,15 +167,15 @@ with:
 
 [source,java]
 ----
-&#64;ProxyGen
-&#64;VertxGen
+@ProxyGen
+@VertxGen
 public interface MyDatabaseConnection {
 
  void insert(JsonObject someData);
 
  void commit(Handler<AsyncResult<Void>> resultHandler);
 
- &#64;ProxyClose
+ @ProxyClose
  void close();
 }
 ----
@@ -294,7 +294,7 @@ Generally, _service interface_ contains a `createProxy` static method to create 
 
 [source,java]
 ----
-&#64;ProxyGen
+@ProxyGen
 public interface SomeDatabaseService {
 
  // Method to create the proxy.
@@ -468,7 +468,7 @@ Must be one of:
 
 [source,java]
 ----
-&#64;Fluent
+@Fluent
 SomeDatabaseService doSomething();
 ----
 

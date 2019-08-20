@@ -105,24 +105,6 @@
             </execution>
           </executions>
         </plugin>
-        <plugin>
-          <artifactId>maven-clean-plugin</artifactId>
-          <executions>
-            <execution>
-              <id>default-clean</id>
-              <configuration>
-                <filesets>
-                  <fileset>
-                    <directory>src/main/asciidoc</directory>
-                  </fileset>
-                  <fileset>
-                    <directory>${asciidoc.dir}</directory>
-                  </fileset>
-                </filesets>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
         <!-- Configure the execution of the compiler to execute the codegen processor -->
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
@@ -256,7 +238,8 @@
               </processors>
               <optionMap>
                 <codegen.output>${project.basedir}/target/generated-for-docs</codegen.output>
-                <docgen.output>${asciidoc.dir}/$lang</docgen.output>
+                <docgen.source>${asciidoc.dir}</docgen.source>
+                <docgen.output>${project.build.directory}/asciidoc/java</docgen.output>
                 <maven.groupId>${project.groupId}</maven.groupId>
                 <maven.artifactId>${project.artifactId}</maven.artifactId>
                 <maven.version>${project.version}</maven.version>
