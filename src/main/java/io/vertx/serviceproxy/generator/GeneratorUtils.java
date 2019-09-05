@@ -85,16 +85,16 @@ public class GeneratorUtils {
       ((ParameterizedTypeInfo)param.getType()).getArg(0).getKind() == ClassKind.ASYNC_RESULT;
   }
 
-  public static String generateDecodeDataObject(String stmt, DataObjectTypeInfo doTypeInfo) {
+  public static String generateDeserializeDataObject(String stmt, DataObjectTypeInfo doTypeInfo) {
     return String.format("%s != null ? %s : null", stmt, doTypeInfo.match(
-      jc -> String.format("%s.INSTANCE.decode((%s)%s)", jc.getJsonDecoderFQCN(), doTypeInfo.getTargetJsonType().getSimpleName(), stmt),
+      jc -> String.format("%s.INSTANCE.deserialize((%s)%s)", jc.getJsonDeserializerFQCN(), doTypeInfo.getTargetJsonType().getSimpleName(), stmt),
       doa -> String.format("new %s((%s)%s)", doTypeInfo.getName(), doTypeInfo.getTargetJsonType().getSimpleName(), stmt)
     ));
   }
 
-  public static String generateEncodeDataObject(String stmt, DataObjectTypeInfo doTypeInfo) {
+  public static String generateSerializeDataObject(String stmt, DataObjectTypeInfo doTypeInfo) {
     return String.format("%s != null ? %s : null", stmt, doTypeInfo.match(
-      jc -> String.format("%s.INSTANCE.encode(%s)", jc.getJsonEncoderFQCN(), stmt),
+      jc -> String.format("%s.INSTANCE.serialize(%s)", jc.getJsonSerializerFQCN(), stmt),
       doa -> String.format("%s.toJson()", stmt)
     ));
   }

@@ -210,7 +210,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
         return String.format(
           "json.getJsonArray(\"%s\").stream().map(v -> %s).collect(Collectors.to%s())",
           name,
-          GeneratorUtils.generateDecodeDataObject("v", doType),
+          GeneratorUtils.generateDeserializeDataObject("v", doType),
           coll
         );
       }
@@ -230,7 +230,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
         return String.format(
           "json.getJsonObject(\"%s\").stream().collect(Collectors.toMap(Map.Entry::getKey, e -> %s))",
           name,
-          GeneratorUtils.generateDecodeDataObject("e.getValue()", doType)
+          GeneratorUtils.generateDeserializeDataObject("e.getValue()", doType)
         );
       }
       return "HelperUtils.convertMap(json.getJsonObject(\"" + name + "\").getMap())";
@@ -238,7 +238,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
     if (type.getKind() == ClassKind.DATA_OBJECT) {
       DataObjectTypeInfo doTypeInfo = (DataObjectTypeInfo)type;
       String valueExtractionStmt = "json." + resolveDataObjectJsonExtractorMethod(doTypeInfo) + "(\"" + name + "\")";
-      return GeneratorUtils.generateDecodeDataObject(valueExtractionStmt, doTypeInfo);
+      return GeneratorUtils.generateDeserializeDataObject(valueExtractionStmt, doTypeInfo);
     }
     return "(" + type.getName() + ")json.getValue(\"" + name + "\")";
   }
@@ -263,7 +263,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
           "            if (res.failed()) {\n" +
           "              HelperUtils.manageFailure(msg, res.cause(), includeDebugInfo);\n" +
           "            } else {\n" +
-          "              msg.reply(new JsonArray(res.result().stream().map(v -> " + GeneratorUtils.generateEncodeDataObject("v", (DataObjectTypeInfo)innerTypeArg) + ").collect(Collectors.toList())));\n" +
+          "              msg.reply(new JsonArray(res.result().stream().map(v -> " + GeneratorUtils.generateSerializeDataObject("v", (DataObjectTypeInfo)innerTypeArg) + ").collect(Collectors.toList())));\n" +
           "            }\n" +
           "         }";
       return "HelperUtils.create" + coll + "Handler(msg, includeDebugInfo)";
@@ -281,7 +281,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
           "                msg.reply(new ServiceException(-1, res.cause().getMessage()));\n" +
           "              }\n" +
           "            } else {\n" +
-          "              msg.reply(new JsonObject(res.result().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> " + GeneratorUtils.generateEncodeDataObject("e.getValue()", (DataObjectTypeInfo)innerTypeArg) + "))));\n" +
+          "              msg.reply(new JsonObject(res.result().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> " + GeneratorUtils.generateSerializeDataObject("e.getValue()", (DataObjectTypeInfo)innerTypeArg) + "))));\n" +
           "            }\n" +
           "         }";
       return "HelperUtils.createMapHandler(msg, includeDebugInfo)";
@@ -291,7 +291,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
         "            if (res.failed()) {\n" +
         "              HelperUtils.manageFailure(msg, res.cause(), includeDebugInfo);\n" +
         "            } else {\n" +
-        "              msg.reply(" + GeneratorUtils.generateEncodeDataObject("res.result()", (DataObjectTypeInfo)typeArg) + ");\n" +
+        "              msg.reply(" + GeneratorUtils.generateSerializeDataObject("res.result()", (DataObjectTypeInfo)typeArg) + ");\n" +
         "            }\n" +
         "         }";
     if (typeArg.getKind() == ClassKind.API && ((ApiTypeInfo)typeArg).isProxyGen())

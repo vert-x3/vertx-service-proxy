@@ -65,10 +65,10 @@ public class ProxyModel extends ClassModel {
     }
     // We also allow data object as parameter types if they have a complete codec
     if (typeInfo.getKind() == ClassKind.DATA_OBJECT) {
-      if (((DataObjectTypeInfo)typeInfo).isEncodable() && ((DataObjectTypeInfo)typeInfo).isDecodable()){
+      if (((DataObjectTypeInfo)typeInfo).isSerializable() && ((DataObjectTypeInfo)typeInfo).isDeserializable()){
         return;
       }
-      throw new GenException(elem, "Data Object " + typeInfo + " must have a valid encoder and decoder");
+      throw new GenException(elem, "Data Object " + typeInfo + " must have a valid serializer and deserializer");
     }
     if (isLegalHandlerAsyncResultType(typeInfo)) {
       if (pos != numParams - 1) {
@@ -174,6 +174,6 @@ public class ProxyModel extends ClassModel {
   }
 
   protected boolean isValidDataObject(TypeInfo typeInfo) {
-    return typeInfo.getKind() == ClassKind.DATA_OBJECT && ((DataObjectTypeInfo)typeInfo).isEncodable() && ((DataObjectTypeInfo)typeInfo).isDecodable();
+    return typeInfo.getKind() == ClassKind.DATA_OBJECT && ((DataObjectTypeInfo)typeInfo).isSerializable() && ((DataObjectTypeInfo)typeInfo).isDeserializable();
   }
 }

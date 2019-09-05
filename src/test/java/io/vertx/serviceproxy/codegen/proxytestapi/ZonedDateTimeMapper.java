@@ -1,12 +1,12 @@
-package io.vertx.serviceproxy.testmodel;
+package io.vertx.serviceproxy.codegen.proxytestapi;
 
 import io.vertx.core.spi.json.JsonMapper;
 
 import java.time.ZonedDateTime;
 
-public class ZonedDateTimeCodec implements JsonMapper<ZonedDateTime, String> {
+public class ZonedDateTimeMapper implements JsonMapper<ZonedDateTime, String> {
 
-  public static final ZonedDateTimeCodec INSTANCE = new ZonedDateTimeCodec();
+  public static final ZonedDateTimeMapper INSTANCE = new ZonedDateTimeMapper();
 
   @Override
   public String serialize(ZonedDateTime value) throws IllegalArgumentException {

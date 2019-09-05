@@ -155,7 +155,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
           name,
           name,
           name,
-          GeneratorUtils.generateEncodeDataObject("v", doType)
+          GeneratorUtils.generateSerializeDataObject("v", doType)
         ));
       } else
         writer.stmt("_json.put(\"" + name + "\", new JsonArray(" + name + "))");
@@ -167,7 +167,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
           name,
           name,
           name,
-          GeneratorUtils.generateEncodeDataObject("v", doType)
+          GeneratorUtils.generateSerializeDataObject("v", doType)
         ));
       } else
         writer.stmt("_json.put(\"" + name + "\", new JsonArray(new ArrayList<>(" + name + ")))");
@@ -179,7 +179,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
           name,
           name,
           name,
-          GeneratorUtils.generateEncodeDataObject("e.getValue()", doTypeInfo)
+          GeneratorUtils.generateSerializeDataObject("e.getValue()", doTypeInfo)
         ));
       } else
         writer.stmt("_json.put(\"" + name + "\", new JsonObject(ProxyUtils.convertMap(" + name + ")))");
@@ -187,7 +187,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
       writer.stmt(String.format(
         "_json.put(\"%s\", %s)",
         name,
-        GeneratorUtils.generateEncodeDataObject(name, (DataObjectTypeInfo) t)
+        GeneratorUtils.generateSerializeDataObject(name, (DataObjectTypeInfo) t)
       ));
     } else
       writer.stmt("_json.put(\"" + name + "\", " + name + ")");
@@ -213,7 +213,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
         DataObjectTypeInfo doType = ((DataObjectTypeInfo)((ParameterizedTypeInfo) t).getArg(0));
         writer.code(name + ".handle(Future.succeededFuture(res.result().body().stream()\n")
           .indent()
-          .codeln(".map(v -> " + GeneratorUtils.generateDecodeDataObject("v", doType) + ")")
+          .codeln(".map(v -> " + GeneratorUtils.generateDeserializeDataObject("v", doType) + ")")
           .codeln(".collect(Collectors.toList())));")
           .unindent();
       } else {
@@ -226,7 +226,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
         DataObjectTypeInfo doType = ((DataObjectTypeInfo)((ParameterizedTypeInfo) t).getArg(0));
         writer.code(name + ".handle(Future.succeededFuture(res.result().body().stream()\n")
           .indent()
-          .codeln(".map(v -> " + GeneratorUtils.generateDecodeDataObject("v", doType) + ")")
+          .codeln(".map(v -> " + GeneratorUtils.generateDeserializeDataObject("v", doType) + ")")
           .codeln(".collect(Collectors.toSet())));")
           .unindent();
       } else {
@@ -239,7 +239,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
         DataObjectTypeInfo doTypeInfo = (DataObjectTypeInfo)((ParameterizedTypeInfo) t).getArg(1);
         writer.code(name + ".handle(Future.succeededFuture(res.result().body().stream()\n")
           .indent()
-          .codeln(".collect(Collectors.toMap(Map.Entry::getKey, e -> " + GeneratorUtils.generateDecodeDataObject("e.getValue()", doTypeInfo) + "))));")
+          .codeln(".collect(Collectors.toMap(Map.Entry::getKey, e -> " + GeneratorUtils.generateDeserializeDataObject("e.getValue()", doTypeInfo) + "))));")
           .unindent();
       } else {
         writer.stmt(name + ".handle(Future.succeededFuture(ProxyUtils.convertMap(res.result().body().getMap())))");
@@ -251,7 +251,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
       writer.stmt(String.format(
         "%s.handle(Future.succeededFuture(%s))",
         name,
-        GeneratorUtils.generateDecodeDataObject("res.result().body()", (DataObjectTypeInfo) t)
+        GeneratorUtils.generateDeserializeDataObject("res.result().body()", (DataObjectTypeInfo) t)
       ));
     else if (t.getKind() == ClassKind.ENUM)
       writer.stmt(name + ".handle(Future.succeededFuture(res.result().body() == null ? null : " + t.getSimpleName() + ".valueOf(res.result().body())))");
