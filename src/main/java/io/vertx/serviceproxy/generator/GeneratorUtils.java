@@ -4,6 +4,7 @@ import io.vertx.codegen.ParamInfo;
 import io.vertx.codegen.type.ClassKind;
 import io.vertx.codegen.type.ClassTypeInfo;
 import io.vertx.codegen.type.DataObjectTypeInfo;
+import io.vertx.codegen.type.MapperInfo;
 import io.vertx.codegen.type.ParameterizedTypeInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
 
@@ -40,8 +41,8 @@ public class GeneratorUtils {
         model.getImportedTypes().stream(),
         model.getReferencedDataObjectTypes()
           .stream()
-          .filter(t -> t.getTargetJsonType() instanceof ClassTypeInfo)
-          .map(t -> (ClassTypeInfo) t.getTargetJsonType())
+          .filter(t -> t.getTargetType() instanceof ClassTypeInfo)
+          .map(t -> (ClassTypeInfo) t.getTargetType())
       )
       .filter(c -> !c.getPackageName().equals("java.lang") && !c.getPackageName().equals("io.vertx.core.json"))
       .map(ClassTypeInfo::toString)
@@ -86,16 +87,40 @@ public class GeneratorUtils {
   }
 
   public static String generateDeserializeDataObject(String stmt, DataObjectTypeInfo doTypeInfo) {
-    return String.format("%s != null ? %s : null", stmt, doTypeInfo.match(
-      jc -> String.format("%s.INSTANCE.deserialize((%s)%s)", jc.getJsonDeserializerFQCN(), doTypeInfo.getTargetJsonType().getSimpleName(), stmt),
-      doa -> String.format("new %s((%s)%s)", doTypeInfo.getName(), doTypeInfo.getTargetJsonType().getSimpleName(), stmt)
-    ));
+    MapperInfo deserializer = doTypeInfo.getDeserializer();
+    String s;
+    switch (deserializer.getKind()) {
+      case SELF:
+        s = String.format("new %s((%s)%s)", doTypeInfo.getName(), doTypeInfo.getTargetType().getSimpleName(), stmt);
+        break;
+      case FUNCTION:
+        s =  String.format("%s.%s.apply((%s)%s)", deserializer.getQualifiedName(), deserializer.getName(), deserializer.getTargetType().getSimpleName(), stmt);
+        break;
+      case STATIC_METHOD:
+        s =  String.format("%s.%s((%s)%s)", deserializer.getQualifiedName(), deserializer.getName(), deserializer.getTargetType().getSimpleName(), stmt);
+        break;
+      default:
+        throw new AssertionError();
+    }
+    return String.format("%s != null ? %s : null", stmt, s);
   }
 
   public static String generateSerializeDataObject(String stmt, DataObjectTypeInfo doTypeInfo) {
-    return String.format("%s != null ? %s : null", stmt, doTypeInfo.match(
-      jc -> String.format("%s.INSTANCE.serialize(%s)", jc.getJsonSerializerFQCN(), stmt),
-      doa -> String.format("%s.toJson()", stmt)
-    ));
+    MapperInfo serializer = doTypeInfo.getSerializer();
+    String s;
+    switch (serializer.getKind()) {
+      case SELF:
+        s = String.format("%s.toJson()", stmt);
+        break;
+      case FUNCTION:
+        s = String.format("%s.%s.apply(%s)", serializer.getQualifiedName(), serializer.getName(), stmt);
+        break;
+      case STATIC_METHOD:
+        s = String.format("%s.%s(%s)", serializer.getQualifiedName(), serializer.getName(), stmt);
+        break;
+      default:
+        throw new AssertionError();
+    }
+    return String.format("%s != null ? %s : null", stmt, s);
   }
 }

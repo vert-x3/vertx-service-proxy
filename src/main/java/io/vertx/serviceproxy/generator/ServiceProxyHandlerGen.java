@@ -244,9 +244,9 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
   }
 
   private String resolveDataObjectJsonExtractorMethod(DataObjectTypeInfo info) {
-    if (info.getTargetJsonType().getKind() == ClassKind.JSON_ARRAY)
+    if (info.getTargetType().getKind() == ClassKind.JSON_ARRAY)
       return "getJsonArray";
-    if (info.getTargetJsonType().getKind() == ClassKind.JSON_OBJECT)
+    if (info.getTargetType().getKind() == ClassKind.JSON_OBJECT)
       return "getJsonObject";
     return "getValue";
   }

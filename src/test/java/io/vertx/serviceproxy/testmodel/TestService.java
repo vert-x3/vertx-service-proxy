@@ -16,6 +16,7 @@
 
 package io.vertx.serviceproxy.testmodel;
 
+import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,7 @@ import io.vertx.serviceproxy.testmodel.impl.TestServiceImpl;
 @VertxGen
 public interface TestService {
 
-  static TestService create(Vertx vertx) {
+  static TestService create(Vertx vertx) throws Exception {
     return new TestServiceImpl(vertx);
   }
 
@@ -101,7 +102,15 @@ public interface TestService {
   void setDateTimeType(Set<ZonedDateTime> set);
 
   void mapDateTimeType(Map<String, ZonedDateTime> map);
-  
+
+  void uriType(URI uri);
+
+  void listUriType(List<URI> list);
+
+  void setUriType(Set<URI> set);
+
+  void mapUriType(Map<String, URI> map);
+
   void listdataObjectTypeHavingNullValues(List<TestDataObject> list);
 
   void setdataObjectTypeHavingNullValues(Set<TestDataObject> set);
@@ -263,6 +272,14 @@ public interface TestService {
   void setZonedDateTimeHandler(Handler<AsyncResult<Set<ZonedDateTime>>> resultHandler);
 
   void mapZonedDateTimeHandler(Handler<AsyncResult<Map<String, ZonedDateTime>>> resultHandler);
+
+  void uriHandler(Handler<AsyncResult<URI>> resultHandler);
+
+  void listUriHandler(Handler<AsyncResult<List<URI>>> resultHandler);
+
+  void setUriHandler(Handler<AsyncResult<Set<URI>>> resultHandler);
+
+  void mapUriHandler(Handler<AsyncResult<Map<String, URI>>> resultHandler);
 
   @ProxyIgnore
   void ignoredMethod();

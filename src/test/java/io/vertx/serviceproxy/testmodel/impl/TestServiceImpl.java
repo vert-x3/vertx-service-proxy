@@ -19,7 +19,10 @@ package io.vertx.serviceproxy.testmodel.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -48,9 +51,13 @@ import org.assertj.core.api.ZonedDateTimeAssert;
 public class TestServiceImpl implements TestService {
 
   private final Vertx vertx;
+  private final URI uri1;
+  private final URI uri2;
 
-  public TestServiceImpl(Vertx vertx) {
+  public TestServiceImpl(Vertx vertx) throws Exception {
     this.vertx = vertx;
+    this.uri1 = new URI("http://foo.com");
+    this.uri2 = new URI("http://bar.com");
   }
 
   @Override
@@ -194,6 +201,37 @@ public class TestServiceImpl implements TestService {
     Map<String, ZonedDateTime> expected = new HashMap<>();
     expected.put("date1", ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"));
     expected.put("date2", ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1));
+    assertEquals(expected, map);
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
+  public void uriType(URI uri) {
+    assertEquals(uri1, uri);
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
+  public void listUriType(List<URI> list) {
+    assertEquals(2, list.size());
+    assertEquals(uri1, list.get(0));
+    assertEquals(uri2, list.get(1));
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
+  public void setUriType(Set<URI> set) {
+    assertEquals(2, set.size());
+    assertTrue(set.contains(uri1));
+    assertTrue(set.contains(uri2));
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
+  public void mapUriType(Map<String, URI> map) {
+    Map<String, URI> expected = new HashMap<>();
+    expected.put("uri1", uri1);
+    expected.put("uri2", uri2);
     assertEquals(expected, map);
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
@@ -778,6 +816,35 @@ public class TestServiceImpl implements TestService {
     Map<String, ZonedDateTime> zonedDateTimeMap = new HashMap<>();
     zonedDateTimeMap.put("date1", ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"));
     zonedDateTimeMap.put("date2", ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1));
+    resultHandler.handle(Future.succeededFuture(zonedDateTimeMap));
+  }
+
+  @Override
+  public void uriHandler(Handler<AsyncResult<URI>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(uri1));
+  }
+
+  @Override
+  public void listUriHandler(Handler<AsyncResult<List<URI>>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(Arrays.asList(
+      uri1,
+      uri2
+    )));
+  }
+
+  @Override
+  public void setUriHandler(Handler<AsyncResult<Set<URI>>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(new HashSet<>(Arrays.asList(
+      uri1,
+      uri2
+    ))));
+  }
+
+  @Override
+  public void mapUriHandler(Handler<AsyncResult<Map<String, URI>>> resultHandler) {
+    Map<String, URI> zonedDateTimeMap = new HashMap<>();
+    zonedDateTimeMap.put("uri1", uri1);
+    zonedDateTimeMap.put("uri2", uri2);
     resultHandler.handle(Future.succeededFuture(zonedDateTimeMap));
   }
 

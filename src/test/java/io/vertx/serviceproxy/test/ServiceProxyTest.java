@@ -18,6 +18,7 @@ package io.vertx.serviceproxy.test;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -55,10 +56,13 @@ public class ServiceProxyTest extends VertxTestBase {
   MessageConsumer<JsonObject> consumer, localConsumer, consumerWithDebugEnabled;
   TestService service, localService;
   TestService proxy, localProxy, proxyWithDebug;
+  URI uri1, uri2;
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
+    uri1 = new URI("http://foo.com");
+    uri2 = new URI("http://bar.com");
     service = TestService.create(vertx);
     localService = TestService.create(vertx);
     
@@ -272,6 +276,32 @@ public class ServiceProxyTest extends VertxTestBase {
     await();
   }
 
+  @Test
+  public void testUriType() {
+    proxy.uriType(uri1);
+    await();
+  }
+
+  @Test
+  public void testListUriType() {
+    proxy.listUriType(Arrays.asList(uri1, uri2));
+    await();
+  }
+
+  @Test
+  public void testSetUriType() {
+    proxy.setUriType(new HashSet<>(Arrays.asList(uri1, uri2)));
+    await();
+  }
+
+  @Test
+  public void testMapUriType() {
+    Map<String, URI> expected = new HashMap<>();
+    expected.put("uri1", uri1);
+    expected.put("uri2", uri2);
+    proxy.mapUriType(expected);
+    await();
+  }
   @Test
   public void testDataObjectTypeNull() {
     proxy.dataObjectTypeNull(null);
@@ -1131,6 +1161,45 @@ public class ServiceProxyTest extends VertxTestBase {
     expected.put("date1", ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"));
     expected.put("date2", ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1));
     proxy.mapZonedDateTimeHandler(onSuccess(map -> {
+      assertEquals(expected, map);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testUriHandler() {
+    proxy.uriHandler(onSuccess(uri -> {
+      assertEquals(uri1, uri);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testListUriHandler() {
+    proxy.listUriHandler(onSuccess(list -> {
+      assertEquals(Arrays.asList(uri1, uri2), list);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testSetUriHandler() {
+    proxy.setUriHandler(onSuccess(set -> {
+      assertEquals(new HashSet<>(Arrays.asList(uri1, uri2)), set);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testMapUriHandler() {
+    Map<String, URI> expected = new HashMap<>();
+    expected.put("uri1", uri1);
+    expected.put("uri2", uri2);
+    proxy.mapUriHandler(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));

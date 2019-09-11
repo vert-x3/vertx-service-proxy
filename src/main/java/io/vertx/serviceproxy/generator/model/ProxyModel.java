@@ -40,8 +40,8 @@ import java.util.Set;
  */
 public class ProxyModel extends ClassModel {
 
-  public ProxyModel(ProcessingEnvironment env, TypeElement modelElt) {
-    super(env, modelElt);
+  public ProxyModel(ProcessingEnvironment env, TypeMirrorFactory typeFactory, TypeElement modelElt) {
+    super(env, typeFactory, modelElt);
   }
 
   @Override

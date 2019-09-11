@@ -269,7 +269,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
   private String sendTypeParameter(TypeInfo t) {
     if (t.getKind() == ClassKind.LIST || t.getKind() == ClassKind.SET) return "JsonArray";
     if (t.getKind() == ClassKind.MAP) return "JsonObject";
-    if (t.getKind() == ClassKind.DATA_OBJECT) return ((DataObjectTypeInfo)t).getTargetJsonType().getSimpleName();
+    if (t.getKind() == ClassKind.DATA_OBJECT) return ((DataObjectTypeInfo)t).getTargetType().getSimpleName();
     if (t.getKind() == ClassKind.ENUM) return "String";
     return t.getSimpleName();
   }

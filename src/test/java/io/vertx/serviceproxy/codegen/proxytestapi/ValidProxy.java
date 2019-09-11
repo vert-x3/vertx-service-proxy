@@ -1,5 +1,6 @@
 package io.vertx.serviceproxy.codegen.proxytestapi;
 
+import io.vertx.codegen.annotations.Mapper;
 import io.vertx.codegen.annotations.ProxyClose;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.ProxyIgnore;
@@ -8,16 +9,40 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 @ProxyGen
 public interface ValidProxy {
+
+  @Mapper
+  static String serialize(ZonedDateTime value) throws IllegalArgumentException {
+    return (value != null) ? value.toString() : null;
+  }
+
+  @Mapper
+  static ZonedDateTime deserialize(String value) throws IllegalArgumentException {
+    return (value != null) ? ZonedDateTime.parse(value) : null;
+  }
+
+  @Mapper
+  Function<URI, String> SERIALIZER = value -> (value != null) ? value.toString() : null;
+
+  @Mapper
+  Function<String, URI> DESERIALIZER = value -> {
+    try {
+      return (value != null) ? new URI(value) : null;
+    } catch (Exception e) {
+      throw new IllegalArgumentException(e);
+    }
+  };
 
   void basicTypes(String str, byte b, short s, int i, long l, float f, double d, char c, boolean bool);
 
@@ -35,7 +60,7 @@ public interface ValidProxy {
   void enumType(SomeEnum someEnum);
 
   void dataObjectType(ProxyDataObject dataObject);
-  void jsonCodec(ZonedDateTime dateTime);
+  void methodMapper(ZonedDateTime dateTime);
 
   void dataObjectWithParentType(ProxyDataObjectWithParent dataObject);
   void dataObjectWithParentAndOverride(ProxyDataObjectWithParentOverride dataObject);
@@ -80,6 +105,10 @@ public interface ValidProxy {
   void handler35(Handler<AsyncResult<ZonedDateTime>> zonedDateTime);
   void handler36(Handler<AsyncResult<List<ZonedDateTime>>> zonedDateTimeListHandler);
   void handler37(Handler<AsyncResult<Set<ZonedDateTime>>> zonedDateTimeSetHandler);
+
+  void handler38(Handler<AsyncResult<URI>> zonedDateTime);
+  void handler39(Handler<AsyncResult<List<URI>>> zonedDateTimeListHandler);
+  void handler40(Handler<AsyncResult<Set<URI>>> zonedDateTimeSetHandler);
 
   @ProxyIgnore
   void ignored();
