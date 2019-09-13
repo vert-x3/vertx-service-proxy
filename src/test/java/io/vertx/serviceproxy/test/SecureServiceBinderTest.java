@@ -20,7 +20,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.SecretOptions;
+import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.serviceproxy.ServiceJWTInterceptor;
@@ -48,16 +48,12 @@ public class SecureServiceBinderTest extends VertxTestBase {
     ServiceBinder serviceBinder = new ServiceBinder(vertx)
       .setAddress(SERVICE_ADDRESS)
       .addInterceptor(new ServiceJWTInterceptor().setJwtAuth(JWTAuth.create(vertx, new JWTAuthOptions()
-        .addSecret(new SecretOptions()
-          .setType("HS256")
-          .setSecret("notasecret")))));
+        .addPubSecKey(new PubSecKeyOptions().setSecretKey("notasecret").setPublicKey("noasecret").setAlgorithm("HS256")))));
 
     ServiceBinder localServiceBinder = new ServiceBinder(vertx)
       .setAddress(SERVICE_LOCAL_ADDRESS)
       .addInterceptor(new ServiceJWTInterceptor().setJwtAuth(JWTAuth.create(vertx, new JWTAuthOptions()
-        .addSecret(new SecretOptions()
-          .setType("HS256")
-          .setSecret("notasecret")))));
+        .addPubSecKey(new PubSecKeyOptions().setSecretKey("notasecret").setPublicKey("noasecret").setAlgorithm("HS256")))));
 
     consumer = serviceBinder.register(OKService.class, service);
     localConsumer = localServiceBinder.registerLocal(OKService.class, service);
