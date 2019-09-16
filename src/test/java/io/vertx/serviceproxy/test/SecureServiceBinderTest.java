@@ -48,12 +48,12 @@ public class SecureServiceBinderTest extends VertxTestBase {
     ServiceBinder serviceBinder = new ServiceBinder(vertx)
       .setAddress(SERVICE_ADDRESS)
       .addInterceptor(new ServiceJWTInterceptor().setJwtAuth(JWTAuth.create(vertx, new JWTAuthOptions()
-        .addPubSecKey(new PubSecKeyOptions().setSecretKey("notasecret").setPublicKey("noasecret").setAlgorithm("HS256")))));
+        .addPubSecKey(new PubSecKeyOptions().setSecretKey("notasecret").setAlgorithm("HS256")))));
 
     ServiceBinder localServiceBinder = new ServiceBinder(vertx)
       .setAddress(SERVICE_LOCAL_ADDRESS)
       .addInterceptor(new ServiceJWTInterceptor().setJwtAuth(JWTAuth.create(vertx, new JWTAuthOptions()
-        .addPubSecKey(new PubSecKeyOptions().setSecretKey("notasecret").setPublicKey("noasecret").setAlgorithm("HS256")))));
+        .addPubSecKey(new PubSecKeyOptions().setSecretKey("notasecret").setAlgorithm("HS256")))));
 
     consumer = serviceBinder.register(OKService.class, service);
     localConsumer = localServiceBinder.registerLocal(OKService.class, service);
