@@ -123,7 +123,7 @@ public class ServiceJWTInterceptor implements Function<Message<JsonObject>, Futu
         };
         for (String authority : authorities) {
           if (!sentFailure.get()) {
-            user.isAuthorised(authority, authHandler);
+            user.isAuthorized(authority, authHandler);
           }
         }
       } else {
