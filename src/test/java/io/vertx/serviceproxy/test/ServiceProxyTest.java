@@ -23,8 +23,13 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.serviceproxy.testmodel.*;
 import org.junit.Test;
 
 import io.vertx.core.eventbus.DeliveryOptions;
@@ -35,11 +40,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ServiceBinder;
 import io.vertx.serviceproxy.ServiceException;
-import io.vertx.serviceproxy.testmodel.MyServiceException;
-import io.vertx.serviceproxy.testmodel.MyServiceExceptionMessageCodec;
-import io.vertx.serviceproxy.testmodel.SomeEnum;
-import io.vertx.serviceproxy.testmodel.TestDataObject;
-import io.vertx.serviceproxy.testmodel.TestService;
 import io.vertx.test.core.VertxTestBase;
 
 /**
@@ -51,11 +51,16 @@ public class ServiceProxyTest extends VertxTestBase {
   public final static String SERVICE_ADDRESS = "someaddress";
   public final static String SERVICE_WITH_DEBUG_ADDRESS = "someaddressdebug";
   public final static String SERVICE_LOCAL_ADDRESS = "someaddress.local";
+  public final static String FUTURE_SERVICE_ADDRESS = "someaddress.future";
+  public final static String FUTURE_SERVICE_LOCAL_ADDRESS = "someaddress.future.local";
   public final static String TEST_ADDRESS = "testaddress";
 
   MessageConsumer<JsonObject> consumer, localConsumer, consumerWithDebugEnabled;
+  MessageConsumer<JsonObject> futureConsumer, localFutureConsumer;
   TestService service, localService;
+  TestFutureService futureService, localFutureService;
   TestService proxy, localProxy, proxyWithDebug;
+  TestFutureService futureProxy, localFutureProxy;
   URI uri1, uri2;
 
   @Override
@@ -65,6 +70,8 @@ public class ServiceProxyTest extends VertxTestBase {
     uri2 = new URI("http://bar.com");
     service = TestService.create(vertx);
     localService = TestService.create(vertx);
+    futureService = TestFutureService.create(vertx, service);
+    localFutureService = TestFutureService.create(vertx, localService);
     
     consumer = new ServiceBinder(vertx).setAddress(SERVICE_ADDRESS)
       .register(TestService.class, service);
@@ -74,10 +81,16 @@ public class ServiceProxyTest extends VertxTestBase {
       .register(TestService.class, service);
     localConsumer = new ServiceBinder(vertx).setAddress(SERVICE_LOCAL_ADDRESS)
       .registerLocal(TestService.class, localService);
+    futureConsumer = new ServiceBinder(vertx).setAddress(FUTURE_SERVICE_ADDRESS)
+      .register(TestFutureService.class, futureService);
+    localFutureConsumer = new ServiceBinder(vertx).setAddress(FUTURE_SERVICE_LOCAL_ADDRESS)
+      .registerLocal(TestFutureService.class, localFutureService);
 
     proxy = TestService.createProxy(vertx, SERVICE_ADDRESS);
     localProxy = TestService.createProxy(vertx, SERVICE_LOCAL_ADDRESS);
     proxyWithDebug = TestService.createProxy(vertx, SERVICE_WITH_DEBUG_ADDRESS);
+    futureProxy = TestFutureService.createProxy(vertx, FUTURE_SERVICE_ADDRESS);
+    localFutureProxy = TestFutureService.createProxy(vertx, FUTURE_SERVICE_LOCAL_ADDRESS);
     vertx.eventBus().<String>consumer(TEST_ADDRESS).handler(msg -> {
       assertEquals("ok", msg.body());
       testComplete();
@@ -93,7 +106,10 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testErrorHandling() {
-    proxy.failingCall("Fail", handler -> {
+    failingCallHandler(proxy::failingCall);
+  }
+  private void failingCallHandler(BiConsumer<String, Handler<AsyncResult<JsonObject>>> consumer) {
+    consumer.accept("Fail", handler -> {
       assertTrue(handler.cause() instanceof ServiceException);
       assertEquals("Call has failed", handler.cause().getMessage());
       assertEquals(25, ((ServiceException)handler.cause()).failureCode());
@@ -101,6 +117,10 @@ public class ServiceProxyTest extends VertxTestBase {
       testComplete();
     });
     await();
+  }
+  @Test
+  public void testFailingCall() {
+    failingCallHandler((str, h) -> futureProxy.failingCall(str).setHandler(h));
   }
 
   @Test
@@ -182,7 +202,10 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testEnumTypeAsResult() {
-    proxy.enumTypeAsResult(ar -> {
+    enumTypeHandler(h -> proxy.enumTypeAsResult(h));
+  }
+  private void enumTypeHandler(Consumer<Handler<AsyncResult<SomeEnum>>> consumer) {
+    consumer.accept(ar -> {
       if (ar.failed()) {
         fail("Failure not expected");
       } else {
@@ -192,10 +215,18 @@ public class ServiceProxyTest extends VertxTestBase {
     });
     await();
   }
+  @Test
+  public void testEnumTypeAsFuture() {
+    enumTypeHandler(futureProxy.enumTypeAsResult()::setHandler);
+  }
 
   @Test
   public void testEnumTypeAsResultWithNull() {
-    proxy.enumTypeAsResultNull(ar -> {
+    enumTypeWithNullHandler(h -> proxy.enumTypeAsResultNull(h));
+  }
+
+  private void enumTypeWithNullHandler(Consumer<Handler<AsyncResult<SomeEnum>>> consumer) {
+    consumer.accept(ar -> {
       if (ar.failed()) {
         fail("Failure not expected");
       } else {
@@ -204,6 +235,10 @@ public class ServiceProxyTest extends VertxTestBase {
       testComplete();
     });
     await();
+  }
+  @Test
+  public void testEnumTypeAsFutureWithNull() {
+    enumTypeWithNullHandler(futureProxy.enumTypeAsResultNull()::setHandler);
   }
 
   @Test
@@ -394,178 +429,314 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testStringHandler() {
-    proxy.stringHandler(onSuccess(res -> {
+    stringHandler(proxy::stringHandler);
+  }
+  private void stringHandler(Consumer<Handler<AsyncResult<String>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertEquals("foobar", res);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testStringFuture() {
+    stringHandler(futureProxy.stringFuture()::setHandler);
+  }
 
   @Test
   public void testStringNullHandler() {
-    proxy.stringNullHandler(onSuccess(res -> {
+    stringNullHandler(proxy::stringNullHandler);
+  }
+  private void stringNullHandler(Consumer<Handler<AsyncResult<String>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testStringNullFuture() {
+    stringNullHandler(futureProxy.stringNullFuture()::setHandler);
+  }
 
   @Test
   public void testByteHandler() {
-    proxy.byteHandler(onSuccess(res -> {
+    byteHandler(proxy::byteHandler);
+  }
+  private void byteHandler(Consumer<Handler<AsyncResult<Byte>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertEquals(Byte.valueOf((byte) 123), res);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testByteFuture() {
+    byteHandler(futureProxy.byteFuture()::setHandler);
+  }
 
   @Test
   public void testByteNullHandler() {
-    proxy.byteNullHandler(onSuccess(res -> {
+    byteNullHandler(proxy::byteNullHandler);
+  }
+  private void byteNullHandler(Consumer<Handler<AsyncResult<Byte>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testByteNullFuture() {
+    byteNullHandler(futureProxy.byteNullFuture()::setHandler);
+  }
 
   @Test
   public void testShortHandler() {
-    proxy.shortHandler(onSuccess(res -> {
+    shortHandler(proxy::shortHandler);
+  }
+  private void shortHandler(Consumer<Handler<AsyncResult<Short>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertEquals(Short.valueOf((short) 1234), res);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testShortFuture() {
+    shortHandler(futureProxy.shortFuture()::setHandler);
+  }
 
   @Test
   public void testShortNullHandler() {
-    proxy.shortNullHandler(onSuccess(res -> {
+    shortNullHandler(proxy::shortNullHandler);
+  }
+  private void shortNullHandler(Consumer<Handler<AsyncResult<Short>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testShortNullFuture() {
+    shortNullHandler(futureProxy.shortNullFuture()::setHandler);
+  }
 
   @Test
   public void testIntHandler() {
-    proxy.intHandler(onSuccess(res -> {
+    intHandler(proxy::intHandler);
+  }
+  private void intHandler(Consumer<Handler<AsyncResult<Integer>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertEquals(Integer.valueOf(12345), res);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testIntFuture() {
+    intHandler(futureProxy.intFuture()::setHandler);
+  }
 
   @Test
   public void testIntNullHandler() {
-    proxy.intNullHandler(onSuccess(res -> {
+    intNullHandler(proxy::intNullHandler);
+  }
+  private void intNullHandler(Consumer<Handler<AsyncResult<Integer>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testIntNullFuture() {
+    intNullHandler(futureProxy.intNullFuture()::setHandler);
+  }
 
   @Test
   public void testLongHandler() {
-    proxy.longHandler(onSuccess(res -> {
+    longHandler(proxy::longHandler);
+  }
+  private void longHandler(Consumer<Handler<AsyncResult<Long>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertEquals(Long.valueOf(123456l), res);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testLongFuture() {
+    longHandler(futureProxy.longFuture()::setHandler);
+  }
 
   @Test
   public void testLongNullHandler() {
-    proxy.longNullHandler(onSuccess(res -> {
+    longNullHandler(proxy::longNullHandler);
+  }
+  private void longNullHandler(Consumer<Handler<AsyncResult<Long>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testLongNullFuture() {
+    longNullHandler(futureProxy.longNullFuture()::setHandler);
+  }
 
   @Test
   public void testFloatHandler() {
-    proxy.floatHandler(onSuccess(res -> {
+    floatHandler(proxy::floatHandler);
+  }
+  private void floatHandler(Consumer<Handler<AsyncResult<Float>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertEquals(Float.valueOf(12.34f), res);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testFloatFuture() {
+    floatHandler(futureProxy.floatFuture()::setHandler);
+  }
 
   @Test
   public void testFloatNullHandler() {
-    proxy.floatNullHandler(onSuccess(res -> {
+    floatNullHandler(proxy::floatNullHandler);
+  }
+  private void floatNullHandler(Consumer<Handler<AsyncResult<Float>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testFloatNullFuture() {
+    floatNullHandler(futureProxy.floatNullFuture()::setHandler);
+  }
 
   @Test
   public void testDoubleHandler() {
-    proxy.doubleHandler(onSuccess(res -> {
+    doubleHandler(proxy::doubleHandler);
+  }
+  private void doubleHandler(Consumer<Handler<AsyncResult<Double>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertEquals(Double.valueOf(12.3456d), res);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testDoubleFuture() {
+    doubleHandler(futureProxy.doubleFuture()::setHandler);
+  }
 
   @Test
   public void testDoubleNullHandler() {
-    proxy.doubleNullHandler(onSuccess(res -> {
+    doubleNullHandler(proxy::doubleNullHandler);
+  }
+  private void doubleNullHandler(Consumer<Handler<AsyncResult<Double>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testDoubleNullFuture() {
+    doubleNullHandler(futureProxy.doubleNullFuture()::setHandler);
+  }
 
   @Test
   public void testCharHandler() {
-    proxy.charHandler(onSuccess(res -> {
+    charHandler(proxy::charHandler);
+  }
+  private void charHandler(Consumer<Handler<AsyncResult<Character>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertEquals(Character.valueOf('X'), res);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testCharFuture() {
+    charHandler(futureProxy.charFuture()::setHandler);
+  }
 
   @Test
   public void testCharNullHandler() {
-    proxy.charNullHandler(onSuccess(res -> {
+    charNullHandler(proxy::charNullHandler);
+  }
+  private void charNullHandler(Consumer<Handler<AsyncResult<Character>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testCharNullFuture() {
+    charNullHandler(futureProxy.charNullFuture()::setHandler);
+  }
 
   @Test
   public void testBooleanHandler() {
-    proxy.booleanHandler(onSuccess(res -> {
+    booleanHandler(proxy::booleanHandler);
+  }
+  private void booleanHandler(Consumer<Handler<AsyncResult<Boolean>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertEquals(true, res);
       testComplete();
     }));
     await();
   }
-
+  @Test
+  public void testBooleanFuture() {
+    booleanHandler(futureProxy.booleanFuture()::setHandler);
+  }
   @Test
   public void testBooleanNullHandler() {
-    proxy.booleanNullHandler(onSuccess(res -> {
+    booleanNullHandler(proxy::booleanNullHandler);
+  }
+  private void booleanNullHandler(Consumer<Handler<AsyncResult<Boolean>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testBooleanNullFuture() {
+    booleanNullHandler(futureProxy.booleanNullFuture()::setHandler);
+  }
 
   @Test
   public void testJsonObjectHandler() {
-    proxy.jsonObjectHandler(onSuccess(res -> {
+    jsonObjectHandler(proxy::jsonObjectHandler);
+  }
+  private void jsonObjectHandler(Consumer<Handler<AsyncResult<JsonObject>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertEquals("wibble", res.getString("blah"));
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testJsonObjectFuture() {
+    jsonObjectHandler(futureProxy.jsonObjectFuture()::setHandler);
+  }
 
   @Test
   public void testJsonObjectNullHandler() {
-    proxy.jsonObjectNullHandler(onSuccess(res -> {
+    jsonObjectNullHandler(proxy::jsonObjectNullHandler);
+  }
+
+  private void jsonObjectNullHandler(Consumer<Handler<AsyncResult<JsonObject>>> consumer){
+    consumer.accept(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
@@ -573,48 +744,88 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
+  public void testJsonObjectNullFuture() {
+    jsonObjectNullHandler(futureProxy.jsonObjectNullFuture()::setHandler);
+  }
+
+  @Test
   public void testJsonArrayHandler() {
-    proxy.jsonArrayHandler(onSuccess(res -> {
+    jsonArrayHandler(proxy::jsonArrayHandler);
+  }
+  private void jsonArrayHandler(Consumer<Handler<AsyncResult<JsonArray>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertEquals("blurrg", res.getString(0));
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testJsonArrayFuture() {
+    jsonArrayHandler(futureProxy.jsonArrayFuture()::setHandler);
+  }
 
   @Test
   public void testJsonArrayNullHandler() {
-    proxy.jsonArrayNullHandler(onSuccess(res -> {
+    jsonArrayNullHandler(proxy::jsonArrayNullHandler);
+  }
+  private void jsonArrayNullHandler(Consumer<Handler<AsyncResult<JsonArray>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testJsonArrayNullFuture() {
+    jsonArrayNullHandler(futureProxy.jsonArrayNullFuture()::setHandler);
+  }
 
   @Test
   public void testDataObjectHandler() {
-    proxy.dataObjectHandler(onSuccess(res -> {
+    dataObjectHandler(proxy::dataObjectHandler);
+  }
+  private void dataObjectHandler(Consumer<Handler<AsyncResult<TestDataObject>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertEquals(new TestDataObject().setString("foo").setNumber(123).setBool(true), res);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testDataObjectFuture() {
+    dataObjectHandler(futureProxy.dataObjectFuture()::setHandler);
+  }
 
   @Test
   public void testDataObjectNullHandler() {
-    proxy.dataObjectNullHandler(onSuccess(res -> {
+    dataObjectNullHandler(proxy::dataObjectNullHandler);
+  }
+  private void dataObjectNullHandler(Consumer<Handler<AsyncResult<TestDataObject>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testDataObjectNullFuture() {
+    dataObjectNullHandler(futureProxy.dataObjectNullFuture()::setHandler);
+  }
 
   @Test
   public void testVoidHandler() {
-    proxy.voidHandler(onSuccess(res -> {
+    voidHandler(proxy::voidHandler);
+  }
+  private void voidHandler(Consumer<Handler<AsyncResult<Void>>> consumer) {
+    consumer.accept(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
     await();
+  }
+  @Test
+  public void testVoidFuture() {
+    voidHandler(futureProxy.voidFuture()::setHandler);
   }
 
   @Test
@@ -637,7 +848,10 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testFailingMethod() {
-    proxy.failingMethod(onFailure(t -> {
+    failingMethodHandler(proxy::failingMethod);
+  }
+  private void failingMethodHandler(Consumer<Handler<AsyncResult<JsonObject>>> consumer) {
+    consumer.accept(onFailure(t -> {
       assertTrue(t instanceof ReplyException);
       ServiceException se = (ServiceException) t;
       assertEquals(ReplyFailure.RECIPIENT_FAILURE, se.failureType());
@@ -646,6 +860,10 @@ public class ServiceProxyTest extends VertxTestBase {
       testComplete();
     }));
     await();
+  }
+  @Test
+  public void testFailingFuture() {
+    failingMethodHandler(futureProxy.failingFuture()::setHandler);
   }
 
   @Test
@@ -702,7 +920,10 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testListStringHandler() {
-    proxy.listStringHandler(onSuccess(list -> {
+    listStringHandler(proxy::listStringHandler);
+  }
+  private void listStringHandler(Consumer<Handler<AsyncResult<List<String>>>> consumer) {
+    consumer.accept(onSuccess(list -> {
       assertEquals("foo", list.get(0));
       assertEquals("bar", list.get(1));
       assertEquals("wibble", list.get(2));
@@ -710,10 +931,17 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testListStringFuture() {
+    listStringHandler(futureProxy.listStringFuture()::setHandler);
+  }
 
   @Test
   public void testListByteHandler() {
-    proxy.listByteHandler(onSuccess(list -> {
+    listByteHandler(proxy::listByteHandler);
+  }
+  private void listByteHandler(Consumer<Handler<AsyncResult<List<Byte>>>> consumer) {
+    consumer.accept(onSuccess(list -> {
       assertEquals(Byte.valueOf((byte) 1), list.get(0));
       assertEquals(Byte.valueOf((byte) 2), list.get(1));
       assertEquals(Byte.valueOf((byte) 3), list.get(2));
@@ -721,10 +949,17 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testListByteFuture() {
+    listByteHandler(futureProxy.listByteFuture()::setHandler);
+  }
 
   @Test
   public void testListShortHandler() {
-    proxy.listShortHandler(onSuccess(list -> {
+    listShortHandler(proxy::listShortHandler);
+  }
+  private void listShortHandler(Consumer<Handler<AsyncResult<List<Short>>>> consumer) {
+    consumer.accept(onSuccess(list -> {
       assertEquals(Short.valueOf((short) 11), list.get(0));
       assertEquals(Short.valueOf((short) 12), list.get(1));
       assertEquals(Short.valueOf((short) 13), list.get(2));
@@ -732,10 +967,17 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testListShortFuture() {
+    listShortHandler(futureProxy.listShortFuture()::setHandler);
+  }
 
   @Test
   public void testListIntHandler() {
-    proxy.listIntHandler(onSuccess(list -> {
+    listIntHandler(proxy::listIntHandler);
+  }
+  private void listIntHandler(Consumer<Handler<AsyncResult<List<Integer>>>> consumer) {
+    consumer.accept(onSuccess(list -> {
       assertEquals(100, list.get(0).intValue());
       assertEquals(101, list.get(1).intValue());
       assertEquals(102, list.get(2).intValue());
@@ -743,21 +985,35 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testListIntFuture() {
+    listIntHandler(futureProxy.listIntFuture()::setHandler);
+  }
 
   @Test
   public void testListLongHandler() {
-    proxy.listLongHandler(onSuccess(list -> {
-      assertEquals(1000l, list.get(0).longValue());
-      assertEquals(1001l, list.get(1).longValue());
-      assertEquals(1002l, list.get(2).longValue());
+    listLongHandler(proxy::listLongHandler);
+  }
+  private void listLongHandler(Consumer<Handler<AsyncResult<List<Long>>>> consumer) {
+    consumer.accept(onSuccess(list -> {
+      assertEquals(1000L, list.get(0).longValue());
+      assertEquals(1001L, list.get(1).longValue());
+      assertEquals(1002L, list.get(2).longValue());
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testListLongFuture() {
+    listLongHandler(futureProxy.listLongFuture()::setHandler);
+  }
 
   @Test
   public void testListFloatHandler() {
-    proxy.listFloatHandler(onSuccess(list -> {
+    listFloatHandler(proxy::listFloatHandler);
+  }
+  private void listFloatHandler(Consumer<Handler<AsyncResult<List<Float>>>> consumer) {
+    consumer.accept(onSuccess(list -> {
       assertEquals(1.1f, list.get(0), 0);
       assertEquals(1.2f, list.get(1), 0);
       assertEquals(1.3f, list.get(2), 0);
@@ -765,10 +1021,17 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testListFloatFuture() {
+    listFloatHandler(futureProxy.listFloatFuture()::setHandler);
+  }
 
   @Test
   public void testListDoubleHandler() {
-    proxy.listDoubleHandler(onSuccess(list -> {
+    listDoubleHandler(proxy::listDoubleHandler);
+  }
+  private void listDoubleHandler(Consumer<Handler<AsyncResult<List<Double>>>> consumer) {
+    consumer.accept(onSuccess(list -> {
       assertEquals(1.11d, list.get(0), 0);
       assertEquals(1.12d, list.get(1), 0);
       assertEquals(1.13d, list.get(2), 0);
@@ -776,10 +1039,17 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testListDoubleFuture() {
+    listDoubleHandler(futureProxy.listDoubleFuture()::setHandler);
+  }
 
   @Test
   public void testListCharHandler() {
-    proxy.listCharHandler(onSuccess(list -> {
+    listCharHandler(proxy::listCharHandler);
+  }
+  private void listCharHandler(Consumer<Handler<AsyncResult<List<Character>>>> consumer) {
+    consumer.accept(onSuccess(list -> {
       assertEquals('X', list.get(0).charValue());
       assertEquals('Y', list.get(1).charValue());
       assertEquals('Z', list.get(2).charValue());
@@ -787,10 +1057,17 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testListCharFuture() {
+    listCharHandler(futureProxy.listCharFuture()::setHandler);
+  }
 
   @Test
   public void testListBoolHandler() {
-    proxy.listBoolHandler(onSuccess(list -> {
+    listBoolHandler(proxy::listBoolHandler);
+  }
+  private void listBoolHandler(Consumer<Handler<AsyncResult<List<Boolean>>>> consumer) {
+    consumer.accept(onSuccess(list -> {
       assertEquals(true, list.get(0));
       assertEquals(false, list.get(1));
       assertEquals(true, list.get(2));
@@ -800,8 +1077,16 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
+  public void testListBoolFuture() {
+    listBoolHandler(futureProxy.listBoolFuture()::setHandler);
+  }
+
+  @Test
   public void testListJsonObjectHandler() {
-    proxy.listJsonObjectHandler(onSuccess(list -> {
+    listJsonObjectHandler(proxy::listJsonObjectHandler);
+  }
+  private void listJsonObjectHandler(Consumer<Handler<AsyncResult<List<JsonObject>>>> consumer) {
+    consumer.accept(onSuccess(list -> {
       assertEquals("foo", list.get(0).getString("a"));
       assertEquals("bar", list.get(1).getString("b"));
       assertEquals("wibble", list.get(2).getString("c"));
@@ -811,8 +1096,17 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
+  public void testListJsonObjectFuture() {
+    listJsonObjectHandler(futureProxy.listJsonObjectFuture()::setHandler);
+  }
+
+  @Test
   public void testListJsonArrayHandler() {
-    proxy.listJsonArrayHandler(onSuccess(list -> {
+    listJsonArrayHandler(proxy::listJsonArrayHandler);
+  }
+
+  private void listJsonArrayHandler(Consumer<Handler<AsyncResult<List<JsonArray>>>> consumer) {
+    consumer.accept(onSuccess(list -> {
       assertEquals("foo", list.get(0).getString(0));
       assertEquals("bar", list.get(1).getString(0));
       assertEquals("wibble", list.get(2).getString(0));
@@ -820,10 +1114,17 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testListJsonArrayFuture() {
+    listJsonArrayHandler(futureProxy.listJsonArrayFuture()::setHandler);
+  }
 
   @Test
   public void testSetStringHandler() {
-    proxy.setStringHandler(onSuccess(set -> {
+    setStringHandler(proxy::setStringHandler);
+  }
+  private void setStringHandler(Consumer<Handler<AsyncResult<Set<String>>>> consumer) {
+    consumer.accept(onSuccess(set -> {
       assertTrue(set.contains("foo"));
       assertTrue(set.contains("bar"));
       assertTrue(set.contains("wibble"));
@@ -831,10 +1132,17 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testSetStringFuture() {
+    setStringHandler(futureProxy.setStringFuture()::setHandler);
+  }
 
   @Test
   public void testSetByteHandler() {
-    proxy.setByteHandler(onSuccess(set -> {
+    setByteHandler(proxy::setByteHandler);
+  }
+  private void setByteHandler(Consumer<Handler<AsyncResult<Set<Byte>>>> consumer) {
+    consumer.accept(onSuccess(set -> {
       assertTrue(set.contains((byte) 1));
       assertTrue(set.contains((byte) 2));
       assertTrue(set.contains((byte) 3));
@@ -842,10 +1150,18 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testSetByteFuture() {
+    setByteHandler(futureProxy.setByteFuture()::setHandler);
+  }
 
   @Test
   public void testSetShortHandler() {
-    proxy.setShortHandler(onSuccess(set -> {
+    setShortHandler(proxy::setShortHandler);
+
+  }
+  private void setShortHandler(Consumer<Handler<AsyncResult<Set<Short>>>> consumer) {
+    consumer.accept(onSuccess(set -> {
       assertTrue(set.contains((short) 11));
       assertTrue(set.contains((short) 12));
       assertTrue(set.contains((short) 13));
@@ -853,10 +1169,17 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testSetShortFuture() {
+    setShortHandler(futureProxy.setShortFuture()::setHandler);
+  }
 
   @Test
   public void testSetIntHandler() {
-    proxy.setIntHandler(onSuccess(set -> {
+    setIntHandler(proxy::setIntHandler);
+  }
+  private void setIntHandler(Consumer<Handler<AsyncResult<Set<Integer>>>> consumer) {
+    consumer.accept(onSuccess(set -> {
       assertTrue(set.contains(100));
       assertTrue(set.contains(101));
       assertTrue(set.contains(102));
@@ -864,10 +1187,17 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testSetIntFuture() {
+    setIntHandler(futureProxy.setIntFuture()::setHandler);
+  }
 
   @Test
   public void testSetLongHandler() {
-    proxy.setLongHandler(onSuccess(set -> {
+    setLongHandler(proxy::setLongHandler);
+  }
+  private void setLongHandler(Consumer<Handler<AsyncResult<Set<Long>>>> consumer) {
+    consumer.accept(onSuccess(set -> {
       assertTrue(set.contains(1000l));
       assertTrue(set.contains(1001l));
       assertTrue(set.contains(1002l));
@@ -875,10 +1205,17 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testSetLongFuture() {
+    setLongHandler(futureProxy.setLongFuture()::setHandler);
+  }
 
   @Test
   public void testSetFloatHandler() {
-    proxy.setFloatHandler(onSuccess(set -> {
+    setFloatHandler(proxy::setFloatHandler);
+  }
+  private void setFloatHandler(Consumer<Handler<AsyncResult<Set<Float>>>> consumer) {
+    consumer.accept(onSuccess(set -> {
       assertTrue(set.contains(1.1f));
       assertTrue(set.contains(1.2f));
       assertTrue(set.contains(1.3f));
@@ -886,10 +1223,17 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testSetFloatFuture() {
+    setFloatHandler(futureProxy.setFloatFuture()::setHandler);
+  }
 
   @Test
   public void testSetDoubleHandler() {
-    proxy.setDoubleHandler(onSuccess(set -> {
+    setDoubleHandler(proxy::setDoubleHandler);
+  }
+  private void setDoubleHandler(Consumer<Handler<AsyncResult<Set<Double>>>> consumer) {
+    consumer.accept(onSuccess(set -> {
       assertTrue(set.contains(1.11d));
       assertTrue(set.contains(1.12d));
       assertTrue(set.contains(1.13d));
@@ -897,10 +1241,17 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testSetDoubleFuture() {
+    setDoubleHandler(futureProxy.setDoubleFuture()::setHandler);
+  }
 
   @Test
   public void testSetCharHandler() {
-    proxy.setCharHandler(onSuccess(set -> {
+    setCharHandler(proxy::setCharHandler);
+  }
+  private void setCharHandler(Consumer<Handler<AsyncResult<Set<Character>>>> consumer) {
+    consumer.accept(onSuccess(set -> {
       assertTrue(set.contains('X'));
       assertTrue(set.contains('Y'));
       assertTrue(set.contains('Z'));
@@ -908,137 +1259,214 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testSetCharFuture() {
+    setCharHandler(futureProxy.setCharFuture()::setHandler);
+  }
 
   @Test
   public void testSetBoolHandler() {
-    proxy.setBoolHandler(onSuccess(set -> {
+    setBoolHandler(proxy::setBoolHandler);
+  }
+  private void setBoolHandler(Consumer<Handler<AsyncResult<Set<Boolean>>>> consumer) {
+    consumer.accept(onSuccess(set -> {
       assertTrue(set.contains(true));
       assertTrue(set.contains(false));
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testSetBoolFuture() {
+    setBoolHandler(futureProxy.setBoolFuture()::setHandler);
+  }
 
   @Test
   public void testMapStringHandler() {
+    mapStringHandler(proxy::mapStringHandler);
+  }
+  private void mapStringHandler(Consumer<Handler<AsyncResult<Map<String, String>>>> consumer) {
     Map<String, String> expected = new HashMap<>();
     expected.put("1", "foo");
     expected.put("2", "bar");
     expected.put("3", "wibble");
-    proxy.mapStringHandler(onSuccess(map -> {
+    consumer.accept(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
     await();
+  }
+  @Test
+  public void testMapStringFuture() {
+    mapStringHandler(futureProxy.mapStringFuture()::setHandler);
   }
 
   @Test
   public void testMapByteHandler() {
+    mapByteHandler(proxy::mapByteHandler);
+  }
+  private void mapByteHandler(Consumer<Handler<AsyncResult<Map<String, Byte>>>> consumer) {
     Map<String, Byte> expected = new HashMap<>();
     expected.put("1", (byte)1);
     expected.put("2", (byte)2);
     expected.put("3", (byte)3);
-    proxy.mapByteHandler(onSuccess(map -> {
+    consumer.accept(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
     await();
+  }
+  @Test
+  public void testMapByteFuture() {
+    mapByteHandler(futureProxy.mapByteFuture()::setHandler);
   }
 
   @Test
   public void testMapShortHandler() {
+    mapShortHandler(proxy::mapShortHandler);
+  }
+  private void mapShortHandler(Consumer<Handler<AsyncResult<Map<String, Short>>>> consumer) {
     Map<String, Short> expected = new HashMap<>();
     expected.put("1", (short)11);
     expected.put("2", (short)12);
     expected.put("3", (short)13);
-    proxy.mapShortHandler(onSuccess(map -> {
+    consumer.accept(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
     await();
+  }
+  @Test
+  public void testMapShortFuture() {
+    mapShortHandler(futureProxy.mapShortFuture()::setHandler);
   }
 
   @Test
   public void testMapIntHandler() {
+    mapIntHandler(proxy::mapIntHandler);
+  }
+  private void mapIntHandler(Consumer<Handler<AsyncResult<Map<String, Integer>>>> consumer) {
     Map<String, Integer> expected = new HashMap<>();
     expected.put("1", 100);
     expected.put("2", 101);
     expected.put("3", 102);
-    proxy.mapIntHandler(onSuccess(map -> {
+    consumer.accept(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
     await();
+  }
+  @Test
+  public void testMapIntegerFuture() {
+    mapIntHandler(futureProxy.mapIntFuture()::setHandler);
   }
 
   @Test
   public void testMapLongHandler() {
+    mapLongHandler(proxy::mapLongHandler);
+  }
+  private void mapLongHandler(Consumer<Handler<AsyncResult<Map<String, Long>>>> consumer) {
     Map<String, Long> expected = new HashMap<>();
-    expected.put("1", 1000l);
-    expected.put("2", 1001l);
-    expected.put("3", 1002l);
-    proxy.mapLongHandler(onSuccess(map -> {
+    expected.put("1", 1000L);
+    expected.put("2", 1001L);
+    expected.put("3", 1002L);
+    consumer.accept(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
     await();
+  }
+  @Test
+  public void testMapLongFuture() {
+    mapLongHandler(futureProxy.mapLongFuture()::setHandler);
   }
 
   @Test
   public void testMapFloatHandler() {
+    mapFloatHandler(proxy::mapFloatHandler);
+  }
+  private void mapFloatHandler(Consumer<Handler<AsyncResult<Map<String, Float>>>> consumer) {
     Map<String, Float> expected = new HashMap<>();
     expected.put("1", 1.1f);
     expected.put("2", 1.2f);
     expected.put("3", 1.3f);
-    proxy.mapFloatHandler(onSuccess(map -> {
+    consumer.accept(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
     await();
+  }
+  @Test
+  public void testMapFloatFuture() {
+    mapFloatHandler(futureProxy.mapFloatFuture()::setHandler);
   }
 
   @Test
   public void testMapDoubleHandler() {
+    mapDoubleHandler(proxy::mapDoubleHandler);
+  }
+  private void mapDoubleHandler(Consumer<Handler<AsyncResult<Map<String, Double>>>> consumer) {
     Map<String, Double> expected = new HashMap<>();
     expected.put("1", 1.11d);
     expected.put("2", 1.12d);
     expected.put("3", 1.13d);
-    proxy.mapDoubleHandler(onSuccess(map -> {
+    consumer.accept(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
     await();
+  }
+  @Test
+  public void testMapDoubleFuture() {
+    mapDoubleHandler(futureProxy.mapDoubleFuture()::setHandler);
   }
 
   @Test
   public void testMapCharHandler() {
+    mapCharHandler(proxy::mapCharHandler);
+  }
+  private void mapCharHandler(Consumer<Handler<AsyncResult<Map<String, Character>>>> consumer) {
     Map<String, Character> expected = new HashMap<>();
     expected.put("1", 'X');
     expected.put("2", 'Y');
     expected.put("3", 'Z');
-    proxy.mapCharHandler(onSuccess(map -> {
+    consumer.accept(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
     await();
+  }
+  @Test
+  public void testMapCharacterFuture() {
+    mapCharHandler(futureProxy.mapCharFuture()::setHandler);
   }
 
   @Test
   public void testMapBoolHandler() {
+    mapBooleanHandler(proxy::mapBoolHandler);
+  }
+  private void mapBooleanHandler(Consumer<Handler<AsyncResult<Map<String, Boolean>>>> consumer) {
     Map<String, Boolean> expected = new HashMap<>();
     expected.put("1", true);
     expected.put("2", false);
     expected.put("3", true);
-    proxy.mapBoolHandler(onSuccess(map -> {
+    consumer.accept(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testMapBooleanFuture() {
+    mapBooleanHandler(futureProxy.mapBoolFuture()::setHandler);
+  }
 
   @Test
   public void testSetJsonObjectHandler() {
-    proxy.setJsonObjectHandler(onSuccess(set -> {
+    setJsonObjectHandler(proxy::setJsonObjectHandler);
+  }
+  private void setJsonObjectHandler(Consumer<Handler<AsyncResult<Set<JsonObject>>>> consumer) {
+    consumer.accept(onSuccess(set -> {
       assertTrue(set.contains(new JsonObject().put("a", "foo")));
       assertTrue(set.contains(new JsonObject().put("b", "bar")));
       assertTrue(set.contains(new JsonObject().put("c", "wibble")));
@@ -1046,23 +1474,37 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testSetJsonObjectFuture() {
+    setJsonObjectHandler(futureProxy.setJsonObjectFuture()::setHandler);
+  }
 
   @Test
   public void testMapJsonObjectHandler() {
+    mapJsonObjectHandler(proxy::mapJsonObjectHandler);
+  }
+  private void mapJsonObjectHandler(Consumer<Handler<AsyncResult<Map<String, JsonObject>>>> consumer) {
     Map<String, JsonObject> expected = new HashMap<>();
     expected.put("1", new JsonObject().put("a", "foo"));
     expected.put("2", new JsonObject().put("b", "bar"));
     expected.put("3", new JsonObject().put("c", "wibble"));
-    proxy.mapJsonObjectHandler(onSuccess(map -> {
+    consumer.accept(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testMapJsonObjectFuture() {
+    mapJsonObjectHandler(futureProxy.mapJsonObjectFuture()::setHandler);
+  }
 
   @Test
   public void setSetJsonArrayHandler() {
-    proxy.setJsonArrayHandler(onSuccess(set -> {
+    setJsonArrayHandler(proxy::setJsonArrayHandler);
+  }
+  private void setJsonArrayHandler(Consumer<Handler<AsyncResult<Set<JsonArray>>>> consumer) {
+    consumer.accept(onSuccess(set -> {
       assertTrue(set.contains(new JsonArray().add("foo")));
       assertTrue(set.contains(new JsonArray().add("bar")));
       assertTrue(set.contains(new JsonArray().add("wibble")));
@@ -1070,23 +1512,37 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testSetJsonArrayFuture() {
+    setJsonArrayHandler(futureProxy.setJsonArrayFuture()::setHandler);
+  }
 
   @Test
   public void testMapJsonArrayHandler() {
+    mapJsonArrayHandler(proxy::mapJsonArrayHandler);
+  }
+  private void mapJsonArrayHandler(Consumer<Handler<AsyncResult<Map<String, JsonArray>>>> consumer) {
     Map<String, JsonArray> expected = new HashMap<>();
     expected.put("1", new JsonArray().add("foo"));
     expected.put("2", new JsonArray().add("bar"));
     expected.put("3", new JsonArray().add("wibble"));
-    proxy.mapJsonArrayHandler(onSuccess(map -> {
+    consumer.accept(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testMapJsonArrayFuture() {
+    mapJsonArrayHandler(futureProxy.mapJsonArrayFuture()::setHandler);
+  }
 
   @Test
   public void testListDataObjectHandler() {
-    proxy.listDataObjectHandler(onSuccess(list -> {
+    listDataObjectHandler(proxy::listDataObjectHandler);
+  }
+  private void listDataObjectHandler(Consumer<Handler<AsyncResult<List<TestDataObject>>>> consumer) {
+    consumer.accept(onSuccess(list -> {
       assertEquals(1, list.get(0).getNumber());
       assertEquals("String 1", list.get(0).getString());
       assertEquals(false, list.get(0).isBool());
@@ -1097,10 +1553,17 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testListDataObjectFuture() {
+    listDataObjectHandler(futureProxy.listDataObjectFuture()::setHandler);
+  }
 
   @Test
   public void testSetDataObjectHandler() {
-    proxy.setDataObjectHandler(onSuccess(set -> {
+    setDataObjectHandler(proxy::setDataObjectHandler);
+  }
+  private void setDataObjectHandler(Consumer<Handler<AsyncResult<Set<TestDataObject>>>> consumer) {
+    consumer.accept(onSuccess(set -> {
       Set<JsonObject> setJson = set.stream().map(d -> d.toJson()).collect(Collectors.toSet());
       assertEquals(2, setJson.size());
       assertTrue(setJson.contains(new JsonObject().put("number", 1).put("string", "String 1").put("bool", false)));
@@ -1109,31 +1572,52 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testSetDataObjectFuture() {
+    setDataObjectHandler(futureProxy.setDataObjectFuture()::setHandler);
+  }
 
   @Test
   public void testMapDataObjectHandler() {
+    mapDataObjectHandler(proxy::mapDataObject);
+  }
+  private void mapDataObjectHandler(Consumer<Handler<AsyncResult<Map<String, TestDataObject>>>> consumer) {
     Map<String, TestDataObject> expected = new HashMap<>();
     expected.put("do1", new TestDataObject().setNumber(1).setString("String 1").setBool(false));
     expected.put("do2", new TestDataObject().setNumber(2).setString("String 2").setBool(true));
-    proxy.mapDataObject(onSuccess(map -> {
+    consumer.accept(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testMapDataObjectFuture() {
+    mapDataObjectHandler(futureProxy.mapDataObjectFuture()::setHandler);
+  }
 
   @Test
   public void testDateTimeHandler() {
-    proxy.zonedDateTimeHandler(onSuccess(dateTime -> {
+    zonedDateTimeHandler(proxy::zonedDateTimeHandler);
+  }
+  private void zonedDateTimeHandler(Consumer<Handler<AsyncResult<ZonedDateTime>>> consumer) {
+    consumer.accept(onSuccess(dateTime -> {
       assertEquals(ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"), dateTime);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testDateTimeFuture() {
+    zonedDateTimeHandler(futureProxy.zonedDateTimeFuture()::setHandler);
+  }
 
   @Test
   public void testListDateTimeHandler() {
-    proxy.listZonedDateTimeHandler(onSuccess(list -> {
+      listZonedDateTimeHandler(proxy::listZonedDateTimeHandler);
+  }
+  private void listZonedDateTimeHandler(Consumer<Handler<AsyncResult<List<ZonedDateTime>>>> consumer) {
+    consumer.accept(onSuccess(list -> {
       assertEquals(Arrays.asList(
         ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"),
         ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1)
@@ -1142,10 +1626,17 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testListDateTimeFuture() {
+    listZonedDateTimeHandler(futureProxy.listZonedDateTimeFuture()::setHandler);
+  }
 
   @Test
   public void testSetDateTimeHandler() {
-    proxy.setZonedDateTimeHandler(onSuccess(set -> {
+    setZonedDateTimeHandler(proxy::setZonedDateTimeHandler);
+  }
+  private void setZonedDateTimeHandler(Consumer<Handler<AsyncResult<Set<ZonedDateTime>>>> consumer) {
+    consumer.accept(onSuccess(set -> {
       assertEquals(new HashSet<>(Arrays.asList(
         ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"),
         ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1)
@@ -1154,56 +1645,98 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testSetDateTimeFuture() {
+    setZonedDateTimeHandler(futureProxy.setZonedDateTimeFuture()::setHandler);
+  }
 
   @Test
   public void testMapDateTimeHandler() {
+    mapZonedDateTimeHandler(proxy::mapZonedDateTimeHandler);
+  }
+  private void mapZonedDateTimeHandler(Consumer<Handler<AsyncResult<Map<String, ZonedDateTime>>>> consumer) {
     Map<String, ZonedDateTime> expected = new HashMap<>();
     expected.put("date1", ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"));
     expected.put("date2", ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1));
-    proxy.mapZonedDateTimeHandler(onSuccess(map -> {
+    consumer.accept(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testMapDateTimeFuture() {
+    mapZonedDateTimeHandler(futureProxy.mapZonedDateTimeFuture()::setHandler);
+  }
 
   @Test
   public void testUriHandler() {
-    proxy.uriHandler(onSuccess(uri -> {
+    uriHandler(proxy::uriHandler);
+  }
+
+  private void uriHandler(Consumer<Handler<AsyncResult<URI>>> consumer) {
+    consumer.accept(onSuccess(uri -> {
       assertEquals(uri1, uri);
       testComplete();
     }));
     await();
   }
+  @Test
+  public void testUriFuture() {
+    uriHandler(futureProxy.uriFuture()::setHandler);
+  }
 
   @Test
   public void testListUriHandler() {
-    proxy.listUriHandler(onSuccess(list -> {
+    listUriHandler(proxy::listUriHandler);
+  }
+  private void listUriHandler(Consumer<Handler<AsyncResult<List<URI>>>> consumer) {
+    consumer.accept(onSuccess(list -> {
       assertEquals(Arrays.asList(uri1, uri2), list);
       testComplete();
     }));
     await();
+
+  }
+  @Test
+  public void testListUriFuture() {
+    listUriHandler(futureProxy.listUriFuture()::setHandler);
   }
 
   @Test
   public void testSetUriHandler() {
-    proxy.setUriHandler(onSuccess(set -> {
+    setUriHandler(proxy::setUriHandler);
+  }
+
+  private void setUriHandler(Consumer<Handler<AsyncResult<Set<URI>>>> consumer) {
+    consumer.accept(onSuccess(set -> {
       assertEquals(new HashSet<>(Arrays.asList(uri1, uri2)), set);
       testComplete();
     }));
     await();
-  }
 
+  }
+  @Test
+  public void testSetUriFuture() {
+    setUriHandler(futureProxy.setUriFuture()::setHandler);
+  }
   @Test
   public void testMapUriHandler() {
+    mapUriHandler(proxy::mapUriHandler);
+  }
+  private void mapUriHandler(Consumer<Handler<AsyncResult<Map<String, URI>>>> consumer) {
     Map<String, URI> expected = new HashMap<>();
     expected.put("uri1", uri1);
     expected.put("uri2", uri2);
-    proxy.mapUriHandler(onSuccess(map -> {
+    consumer.accept(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
     await();
+  }
+  @Test
+  public void testMapUriFuture() {
+    mapUriHandler(futureProxy.mapUriFuture()::setHandler);
   }
 
   @Test
@@ -1215,7 +1748,11 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testConnection() {
-    proxy.createConnection("foo", onSuccess(conn -> {
+    connectionHandler((str, h) -> proxy.createConnection(str, h));
+  }
+
+  private void connectionHandler(BiConsumer<String, Handler<AsyncResult<TestConnection>>> consumer) {
+    consumer.accept("foo", onSuccess(conn -> {
       conn.startTransaction(onSuccess(res -> {
         assertEquals("foo", res);
       }));
@@ -1236,8 +1773,11 @@ public class ServiceProxyTest extends VertxTestBase {
         assertTrue(cause instanceof IllegalStateException);
       }));
     }));
-
     await();
+  }
+  @Test
+  public void testConnectionReturnFuture() {
+    connectionHandler((str, h) -> futureProxy.createConnection(str).setHandler(h));
   }
 
   @Test
@@ -1264,6 +1804,18 @@ public class ServiceProxyTest extends VertxTestBase {
       .register(TestService.class, service);
 
     checkConnectionWithCloseFuture(proxy, System.currentTimeMillis(), 2L);
+
+    await();
+  }
+  @Test
+  public void testFutureServiceConnectionWithCloseFutureTimeout() {
+    futureConsumer.unregister();
+    futureConsumer = new ServiceBinder(vertx)
+      .setAddress(FUTURE_SERVICE_ADDRESS)
+      .setTimeoutSeconds(2)
+      .register(TestFutureService.class, futureService);
+
+    checkConnectionWithCloseFuture2(futureProxy, System.currentTimeMillis(), 2L);
 
     await();
   }
@@ -1295,11 +1847,27 @@ public class ServiceProxyTest extends VertxTestBase {
 
     await();
   }
+  @Test
+  public void testLocalFutureServiceConnectionWithCloseFutureTimeout() {
+
+    localFutureConsumer.unregister();
+    localFutureConsumer = new ServiceBinder(vertx)
+      .setAddress(FUTURE_SERVICE_LOCAL_ADDRESS)
+      .setTimeoutSeconds(2)
+      .register(TestFutureService.class, localFutureService);
+
+    checkConnectionWithCloseFuture2(localFutureProxy, System.currentTimeMillis(), 2L);
+
+    await();
+  }
 
   @Test
   public void testLongDelivery1() {
     TestService proxyLong = TestService.createProxyLongDelivery(vertx, SERVICE_ADDRESS);
-    proxyLong.longDeliverySuccess(onSuccess(str -> {
+    longDeliveryHandler1(proxyLong::longDeliverySuccess);
+  }
+  private void longDeliveryHandler1(Consumer<Handler<AsyncResult<String>>> consumer) {
+    consumer.accept(onSuccess(str -> {
       assertEquals("blah", str);
       testComplete();
     }));
@@ -1307,9 +1875,18 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
+  public void testLongDeliveryReturnFuture1() {
+    TestFutureService proxyLong = TestFutureService.createProxyLongDelivery(vertx, FUTURE_SERVICE_ADDRESS);
+    longDeliveryHandler1(proxyLong.longDeliverySuccess()::setHandler);
+  }
+
+  @Test
   public void testLongDelivery2() {
     TestService proxyLong = TestService.createProxyLongDelivery(vertx, SERVICE_ADDRESS);
-    proxyLong.longDeliveryFailed(onFailure(t -> {
+    longDeliveryHandler2(proxyLong::longDeliveryFailed);
+  }
+  private void longDeliveryHandler2(Consumer<Handler<AsyncResult<String>>> consumer) {
+    consumer.accept(onFailure(t -> {
       assertNotNull(t);
       assertTrue(t instanceof ReplyException);
       assertFalse(t instanceof ServiceException);
@@ -1318,6 +1895,11 @@ public class ServiceProxyTest extends VertxTestBase {
       testComplete();
     }));
     await();
+  }
+  @Test
+  public void testLongDeliveryReturnFuture2() {
+    TestFutureService proxyLong = TestFutureService.createProxyLongDelivery(vertx, FUTURE_SERVICE_ADDRESS);
+    longDeliveryHandler2(proxyLong.longDeliveryFailed()::setHandler);
   }
 
   @Test
@@ -1339,7 +1921,10 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testAListContainingNullValues() {
-    proxy.listDataObjectContainingNullHandler(onSuccess(list -> {
+    listDataObjectContainingNullHandler(proxy::listDataObjectContainingNullHandler);
+  }
+  private void listDataObjectContainingNullHandler(Consumer<Handler<AsyncResult<List<TestDataObject>>>> consumer) {
+    consumer.accept(onSuccess(list -> {
       // Entry 1
       assertEquals(1, list.get(0).getNumber());
       assertEquals("String 1", list.get(0).getString());
@@ -1357,10 +1942,17 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
     await();
   }
+  @Test
+  public void testListDataObjectContainingNullFuture() {
+    listDataObjectContainingNullHandler(futureProxy.listDataObjectContainingNullFuture()::setHandler);
+  }
 
   @Test
   public void testASetContainingNullValues() {
-    proxy.setDataObjectContainingNullHandler(onSuccess(set -> {
+    setDataObjectContainingNullHandler(proxy::setDataObjectContainingNullHandler);
+  }
+  private void setDataObjectContainingNullHandler(Consumer<Handler<AsyncResult<Set<TestDataObject>>>> consumer) {
+    consumer.accept(onSuccess(set -> {
       AtomicInteger countNull = new AtomicInteger();
       AtomicInteger countNotNull = new AtomicInteger();
       set.forEach(t -> {
@@ -1377,6 +1969,11 @@ public class ServiceProxyTest extends VertxTestBase {
       testComplete();
     }));
     await();
+  }
+
+  @Test
+  public void testSetDataObjectContainingNullFuture() {
+    setDataObjectContainingNullHandler(futureProxy.setDataObjectContainingNullFuture()::setHandler);
   }
 
   @Test
@@ -1407,18 +2004,24 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   private void checkConnectionWithCloseFuture(TestService proxy, long start, long timeoutSeconds) {
-    proxy.createConnectionWithCloseFuture(onSuccess(conn -> {
+    checkConnectionWithCloseFuture(start, timeoutSeconds, proxy::createConnectionWithCloseFuture);
+  }
+  private void checkConnectionWithCloseFuture(long start, long timeoutSeconds, Consumer<Handler<AsyncResult<TestConnectionWithCloseFuture>>> consumer) {
+    consumer.accept(onSuccess(conn -> {
 
       vertx.eventBus().consumer("closeCalled").handler(msg -> {
         assertEquals("blah", msg.body());
 
         long now = System.currentTimeMillis();
-        assertTrue(now - start > timeoutSeconds * 1000);
+        assertTrue(now - start >= timeoutSeconds * 1000);
 
         // Should be closed now
         conn.someMethod(onFailure(this::checkCause));
       });
     }));
+  }
+  private void checkConnectionWithCloseFuture2(TestFutureService proxy, long start, long timeoutSeconds) {
+    checkConnectionWithCloseFuture(start, timeoutSeconds, proxy.createConnectionWithCloseFuture()::setHandler);
   }
 
   private void checkCause(Throwable cause) {

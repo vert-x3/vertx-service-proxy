@@ -1,6 +1,8 @@
 package io.vertx.serviceproxy;
 
+import io.vertx.codegen.type.TypeInfo;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
@@ -141,4 +143,7 @@ public class HelperUtils {
       .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
   }
 
+  public static boolean isFuture(TypeInfo type) {
+    return type.isParameterized() && Future.class.getName().equals(type.getRaw().getName());
+  }
 }

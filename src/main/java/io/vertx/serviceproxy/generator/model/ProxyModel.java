@@ -22,6 +22,7 @@ import io.vertx.codegen.annotations.ProxyIgnore;
 import io.vertx.codegen.doc.Doc;
 import io.vertx.codegen.doc.Text;
 import io.vertx.codegen.type.*;
+import io.vertx.serviceproxy.HelperUtils;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -93,6 +94,14 @@ public class ProxyModel extends ClassModel {
     if (type.isVoid()) {
       return;
     }
+    if (HelperUtils.isFuture(type)) {
+      ParameterizedTypeInfo parameterizedTypeInfo = (ParameterizedTypeInfo) type;
+      TypeInfo arg = parameterizedTypeInfo.getArg(0);
+      if (isLegalAsyncResultType(arg)) {
+        return;
+      }
+      throw new GenException(elem, "type " + arg + " is not legal for use for a result in proxy");
+    }
 
     throw new GenException(elem, "Proxy methods must have void or Fluent returns");
   }
@@ -131,23 +140,27 @@ public class ProxyModel extends ClassModel {
     }
     return proxyMeth;
   }
+  private boolean isLegalAsyncResultType(TypeInfo resultType) {
+    if (resultType.getKind().json || resultType.getKind().basic ||
+      isLegalContainerParam(resultType) || resultType.getKind() == ClassKind.VOID ||
+      resultType.getKind() == ClassKind.ENUM || resultType.getKind() == ClassKind.DATA_OBJECT) {
+      return true;
+    }
+    if (resultType.getKind() == ClassKind.API) {
+      ApiTypeInfo cla = (ApiTypeInfo)resultType;
+      if (cla.isProxyGen()) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   private boolean isLegalHandlerAsyncResultType(TypeInfo type) {
     if (type.getErased().getKind() == ClassKind.HANDLER) {
       TypeInfo eventType = ((ParameterizedTypeInfo) type).getArgs().get(0);
       if (eventType.getErased().getKind() == ClassKind.ASYNC_RESULT) {
         TypeInfo resultType = ((ParameterizedTypeInfo) eventType).getArgs().get(0);
-        if (resultType.getKind().json || resultType.getKind().basic ||
-          isLegalContainerParam(resultType) || resultType.getKind() == ClassKind.VOID ||
-          resultType.getKind() == ClassKind.ENUM || resultType.getKind() == ClassKind.DATA_OBJECT) {
-          return true;
-        }
-        if (resultType.getKind() == ClassKind.API) {
-          ApiTypeInfo cla = (ApiTypeInfo)resultType;
-          if (cla.isProxyGen()) {
-            return true;
-          }
-        }
+        return isLegalAsyncResultType(resultType);
       }
     }
     return false;

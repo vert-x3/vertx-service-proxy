@@ -5,12 +5,15 @@ import io.vertx.codegen.annotations.ModuleGen;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.type.*;
 import io.vertx.codegen.writer.CodeWriter;
+import io.vertx.core.Promise;
+import io.vertx.serviceproxy.HelperUtils;
 import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
 
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="http://slinkydeveloper.github.io">Francesco Guardiani @slinkydeveloper</a>
@@ -47,6 +50,10 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
     writer.code("\n");
     utils.proxyGenImports(writer);
     utils.additionalImports(model).forEach(i -> utils.writeImport(writer, i));
+    boolean importPromise = model.getMethods().stream().anyMatch(m -> !m.isStaticMethod() && HelperUtils.isFuture(m.getReturnType()));
+    if (importPromise) {
+      utils.writeImport(writer, Promise.class.getName());
+    }
     utils.roger(writer);
     writer
       .code("@SuppressWarnings({\"unchecked\", \"rawtypes\"})\n")
@@ -68,11 +75,11 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
           .stmt("this._vertx = vertx")
           .stmt("this._address = address")
           .stmt("this._options = options")
-          .code("try{")
+          .code("try {")
           .indent()
             .stmt("this._vertx.eventBus().registerDefaultCodec(ServiceException.class, new ServiceExceptionMessageCodec())")
           .unindent()
-          .code("} catch (IllegalStateException ex) {}")
+          .code("} catch (IllegalStateException ex) {\n}")
         .unindent()
         .code("}\n")
         .newLine();
@@ -87,9 +94,9 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
     for (MethodInfo m : model.getMethods()) {
       if (!m.isStaticMethod()) {
         writer.code("@Override\n");
-        writer.code("public ");
+        writer.code("public");
         if (!m.getTypeParams().isEmpty()) {
-          writer.write("<");
+          writer.write(" <");
           writer.writeSeq(m.getTypeParams().stream().map(TypeParamInfo::getName), ", ");
           writer.write(">");
         }
@@ -108,14 +115,21 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
   private void generateMethodBody(ProxyMethodInfo method, CodeWriter writer) {
     ParamInfo lastParam = !method.getParams().isEmpty() ? method.getParam(method.getParams().size() - 1) : null;
     boolean hasResultHandler = utils.isResultHandler(lastParam);
-    if (hasResultHandler) {
+    TypeInfo returnType = method.getReturnType();
+    boolean returnFuture = HelperUtils.isFuture(returnType);
+    if (hasResultHandler || returnFuture) {
       writer.code("if (closed) {\n");
       writer.indent();
-      writer.stmt(lastParam.getName() + ".handle(Future.failedFuture(new IllegalStateException(\"Proxy is closed\")))");
-      if (method.isFluent())
+      if (hasResultHandler) {
+        writer.stmt(lastParam.getName() + ".handle(Future.failedFuture(new IllegalStateException(\"Proxy is closed\")))");
+      }
+      if (method.isFluent()) {
         writer.stmt("return this");
-      else
+      } else if (returnFuture){
+        writer.println("return Future.failedFuture(new IllegalStateException(\"Proxy is closed\"));");
+      } else {
         writer.stmt("return");
+      }
       writer.unindent();
       writer.code("}\n");
     } else {
@@ -133,6 +147,8 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
     writer.stmt("_deliveryOptions.addHeader(\"action\", \"" + method.getName() + "\")");
     if (hasResultHandler) {
       generateSendCallWithResultHandler(lastParam, writer);
+    } else if (returnFuture){
+      generateSendCallWithFutureReturn(returnType, writer);
     } else {
       writer.stmt("_vertx.eventBus().send(_address, _json, _deliveryOptions)");
     }
@@ -193,75 +209,105 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
       writer.stmt("_json.put(\"" + name + "\", " + name + ")");
   }
 
+  private void generateSendCallWithFutureReturn(TypeInfo returnType, CodeWriter writer) {
+    ParameterizedTypeInfo parameterizedTypeInfo = ((ParameterizedTypeInfo)returnType);
+    TypeInfo t = parameterizedTypeInfo.getArg(0);
+//    String typeParams = parameterizedTypeInfo.getArgs().stream().map(TypeInfo::getSimpleName).collect(Collectors.joining(","));
+//    writer.format("Promise<%s> promise = Promise.promise();", typeParams).println();
+    wrapResult(t, "promise", true, writer);
+//    writer.println("return promise.future();");
+  }
   private void generateSendCallWithResultHandler(ParamInfo lastParam, CodeWriter writer) {
     String name = lastParam.getName();
     TypeInfo t = ((ParameterizedTypeInfo)((ParameterizedTypeInfo)lastParam.getType()).getArg(0)).getArg(0);
+
+    wrapResult(t, name, false, writer);
+  }
+
+  private void wrapResult(TypeInfo t, String name, boolean promise, CodeWriter writer) {
+    if (promise) {
+      writer.print("return ");
+    }
     writer
-      .code("_vertx.eventBus().<" + sendTypeParameter(t) + ">request(_address, _json, _deliveryOptions, res -> {\n")
-      .indent()
+      .print("_vertx.eventBus().<" + sendTypeParameter(t) + ">request(_address, _json, _deliveryOptions");
+    if (promise) {
+      writer.println(").map(msg -> {");
+      writer.indent();
+      writer.print("return ");
+    } else {
+      writer.println(", res -> {");
+      writer.indent()
         .code("if (res.failed()) {\n")
-        .indent()
-          .stmt(name + ".handle(Future.failedFuture(res.cause()))")
-        .unindent()
+        .indent();
+      writer.stmt(name + ".handle(Future.failedFuture(res.cause()))");
+      writer.unindent()
         .code("} else {\n")
         .indent();
 
+      writer.print(name + ".handle(Future.succeededFuture(");
+    }
+    String resultStr = promise ? "msg" : "res.result()";
+
     if (t.getKind() == ClassKind.LIST) {
       if ("java.lang.Character".equals(((ParameterizedTypeInfo) t).getArg(0).getName()))
-        writer.stmt(name + ".handle(Future.succeededFuture(ProxyUtils.convertToListChar(res.result().body())))");
+        writer.print("ProxyUtils.convertToListChar(" + resultStr + ".body())");
       else if (((ParameterizedTypeInfo) t).getArg(0).getKind() == ClassKind.DATA_OBJECT) {
         DataObjectTypeInfo doType = ((DataObjectTypeInfo)((ParameterizedTypeInfo) t).getArg(0));
-        writer.code(name + ".handle(Future.succeededFuture(res.result().body().stream()\n")
-          .indent()
+        writer.print(resultStr + ".body().stream()\n");
+        writer.indent()
           .codeln(".map(v -> " + GeneratorUtils.generateDeserializeDataObject("v", doType) + ")")
-          .codeln(".collect(Collectors.toList())));")
+          .code(".collect(Collectors.toList())")
           .unindent();
       } else {
-        writer.stmt(name + ".handle(Future.succeededFuture(ProxyUtils.convertList(res.result().body().getList())))");
+        writer.print("ProxyUtils.convertList(" + resultStr + ".body().getList())");
       }
     } else if (t.getKind() == ClassKind.SET) {
       if ("java.lang.Character".equals(((ParameterizedTypeInfo)t).getArg(0).getName()))
-        writer.stmt(name + ".handle(Future.succeededFuture(ProxyUtils.convertToSetChar(res.result().body())))");
+        writer.print("ProxyUtils.convertToSetChar(" + resultStr + ".body())");
       else if (((ParameterizedTypeInfo)t).getArg(0).getKind() == ClassKind.DATA_OBJECT) {
         DataObjectTypeInfo doType = ((DataObjectTypeInfo)((ParameterizedTypeInfo) t).getArg(0));
-        writer.code(name + ".handle(Future.succeededFuture(res.result().body().stream()\n")
-          .indent()
+        writer.print(resultStr + ".body().stream()\n");
+        writer.indent()
           .codeln(".map(v -> " + GeneratorUtils.generateDeserializeDataObject("v", doType) + ")")
-          .codeln(".collect(Collectors.toSet())));")
+          .code(".collect(Collectors.toSet())")
           .unindent();
       } else {
-        writer.stmt(name + ".handle(Future.succeededFuture(ProxyUtils.convertSet(res.result().body().getList())))");
+        writer.print("ProxyUtils.convertSet(" + resultStr + ".body().getList())");
       }
     } else if (t.getKind() == ClassKind.MAP) {
       if ("java.lang.Character".equals(((ParameterizedTypeInfo)t).getArg(1).getName()))
-        writer.stmt(name + ".handle(Future.succeededFuture(ProxyUtils.convertToMapChar(res.result().body())))");
+        writer.print("ProxyUtils.convertToMapChar(" + resultStr + ".body())");
       else if (((ParameterizedTypeInfo)t).getArg(1).getKind() == ClassKind.DATA_OBJECT) {
         DataObjectTypeInfo doTypeInfo = (DataObjectTypeInfo)((ParameterizedTypeInfo) t).getArg(1);
-        writer.code(name + ".handle(Future.succeededFuture(res.result().body().stream()\n")
-          .indent()
-          .codeln(".collect(Collectors.toMap(Map.Entry::getKey, e -> " + GeneratorUtils.generateDeserializeDataObject("e.getValue()", doTypeInfo) + "))));")
+        writer.print(resultStr + ".body().stream()\n");
+        writer.indent()
+          .code(".collect(Collectors.toMap(Map.Entry::getKey, e -> " + GeneratorUtils.generateDeserializeDataObject("e.getValue()", doTypeInfo) + "))")
           .unindent();
       } else {
-        writer.stmt(name + ".handle(Future.succeededFuture(ProxyUtils.convertMap(res.result().body().getMap())))");
+        writer.print("ProxyUtils.convertMap(" + resultStr + ".body().getMap())");
       }
     } else if (t.getKind() == ClassKind.API && t instanceof ApiTypeInfo && ((ApiTypeInfo)t).isProxyGen()) {
-      writer.stmt("String addr = res.result().headers().get(\"proxyaddr\")");
-      writer.stmt(name + ".handle(Future.succeededFuture(new " + t.getSimpleName() + "VertxEBProxy(_vertx, addr)))");
+      writer.print("new " + t.getSimpleName() + "VertxEBProxy(_vertx, " + resultStr + ".headers().get(\"proxyaddr\"))");
     } else if (t.getKind() == ClassKind.DATA_OBJECT)
-      writer.stmt(String.format(
-        "%s.handle(Future.succeededFuture(%s))",
-        name,
-        GeneratorUtils.generateDeserializeDataObject("res.result().body()", (DataObjectTypeInfo) t)
-      ));
+      writer.print(GeneratorUtils.generateDeserializeDataObject(resultStr + ".body()", (DataObjectTypeInfo) t));
     else if (t.getKind() == ClassKind.ENUM)
-      writer.stmt(name + ".handle(Future.succeededFuture(res.result().body() == null ? null : " + t.getSimpleName() + ".valueOf(res.result().body())))");
+      writer.print(resultStr + ".body() == null ? null : " + t.getSimpleName() + ".valueOf(" + resultStr + ".body())");
     else
-      writer.stmt(name + ".handle(Future.succeededFuture(res.result().body()))");
+      writer.print(resultStr + ".body()");
 
-    writer
+    if (promise) {
+      writer.println(";");
+    } else {
+      writer.println("));");
+    }
+
+    if (!promise) {
+      writer
         .unindent()
-        .code("}\n")
-      .unindent()
+        .code("}\n");
+    }
+
+      writer.unindent()
       .code("});\n");
 
   }
