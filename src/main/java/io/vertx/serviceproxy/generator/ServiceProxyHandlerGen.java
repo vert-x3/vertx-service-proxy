@@ -6,7 +6,6 @@ import io.vertx.codegen.annotations.ModuleGen;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.type.*;
 import io.vertx.codegen.writer.CodeWriter;
-import io.vertx.serviceproxy.HelperUtils;
 import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
 
@@ -161,7 +160,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
     ParamInfo lastParam = !m.getParams().isEmpty() ? m.getParam(m.getParams().size() - 1) : null;
     boolean hasResultHandler = utils.isResultHandler(lastParam);
     TypeInfo returnType = m.getReturnType();
-    boolean returnFuture = HelperUtils.isFuture(returnType);
+    boolean returnFuture = ProxyModel.isFuture(returnType);
     writer
       .code("case \"" + m.getName() + "\": {\n")
       .indent()

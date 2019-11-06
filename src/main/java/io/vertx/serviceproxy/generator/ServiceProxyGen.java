@@ -6,14 +6,12 @@ import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.type.*;
 import io.vertx.codegen.writer.CodeWriter;
 import io.vertx.core.Promise;
-import io.vertx.serviceproxy.HelperUtils;
 import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
 
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="http://slinkydeveloper.github.io">Francesco Guardiani @slinkydeveloper</a>
@@ -50,7 +48,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
     writer.code("\n");
     utils.proxyGenImports(writer);
     utils.additionalImports(model).forEach(i -> utils.writeImport(writer, i));
-    boolean importPromise = model.getMethods().stream().anyMatch(m -> !m.isStaticMethod() && HelperUtils.isFuture(m.getReturnType()));
+    boolean importPromise = model.getMethods().stream().anyMatch(m -> !m.isStaticMethod() && ProxyModel.isFuture(m.getReturnType()));
     if (importPromise) {
       utils.writeImport(writer, Promise.class.getName());
     }
@@ -116,7 +114,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
     ParamInfo lastParam = !method.getParams().isEmpty() ? method.getParam(method.getParams().size() - 1) : null;
     boolean hasResultHandler = utils.isResultHandler(lastParam);
     TypeInfo returnType = method.getReturnType();
-    boolean returnFuture = HelperUtils.isFuture(returnType);
+    boolean returnFuture = ProxyModel.isFuture(returnType);
     if (hasResultHandler || returnFuture) {
       writer.code("if (closed) {\n");
       writer.indent();

@@ -1,15 +1,12 @@
 package io.vertx.serviceproxy;
 
-import io.vertx.codegen.type.TypeInfo;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="http://slinkydeveloper.github.io">Francesco Guardiani @slinkydeveloper</a>
@@ -143,7 +140,4 @@ public class HelperUtils {
       .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
   }
 
-  public static boolean isFuture(TypeInfo type) {
-    return type.isParameterized() && Future.class.getName().equals(type.getRaw().getName());
-  }
 }

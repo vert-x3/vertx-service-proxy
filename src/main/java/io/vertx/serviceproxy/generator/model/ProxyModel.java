@@ -22,7 +22,7 @@ import io.vertx.codegen.annotations.ProxyIgnore;
 import io.vertx.codegen.doc.Doc;
 import io.vertx.codegen.doc.Text;
 import io.vertx.codegen.type.*;
-import io.vertx.serviceproxy.HelperUtils;
+import io.vertx.core.Future;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -94,7 +94,7 @@ public class ProxyModel extends ClassModel {
     if (type.isVoid()) {
       return;
     }
-    if (HelperUtils.isFuture(type)) {
+    if (isFuture(type)) {
       ParameterizedTypeInfo parameterizedTypeInfo = (ParameterizedTypeInfo) type;
       TypeInfo arg = parameterizedTypeInfo.getArg(0);
       if (isLegalAsyncResultType(arg)) {
@@ -188,5 +188,9 @@ public class ProxyModel extends ClassModel {
 
   protected boolean isValidDataObject(TypeInfo typeInfo) {
     return typeInfo.getKind() == ClassKind.DATA_OBJECT && ((DataObjectTypeInfo)typeInfo).isSerializable() && ((DataObjectTypeInfo)typeInfo).isDeserializable();
+  }
+
+  public static boolean isFuture(TypeInfo type) {
+    return type.isParameterized() && Future.class.getName().equals(type.getRaw().getName());
   }
 }
