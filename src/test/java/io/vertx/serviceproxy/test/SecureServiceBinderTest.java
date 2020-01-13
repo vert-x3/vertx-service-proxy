@@ -20,6 +20,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
@@ -34,11 +35,20 @@ public class SecureServiceBinderTest extends VertxTestBase {
 
   private final static String SERVICE_ADDRESS = "someaddress";
   private final static String SERVICE_LOCAL_ADDRESS = "someaddress.local";
-  private static final String TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MDE3ODUyMDZ9.08K_rROcCmKTF1cKfPCli2GQFYIOP8dePxeS1SE4dc8";
+  // {"sub":"Paulo","exp":1747055313,"iat":1431695313,"permissions":["read","write","execute"],"roles":["admin","developer","user"]}
+  private static final String JWT_VALID_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJQYXVsbyIsImV4cCI6MTc0NzA1NTMxMywiaWF0IjoxNDMxNjk1MzEzLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiLCJleGVjdXRlIl0sInJvbGVzIjpbImFkbWluIiwiZGV2ZWxvcGVyIiwidXNlciJdfQ.UdA6oYDn9s_k7uogFFg8jvKmq9RgITBnlq4xV6JGsCY";
 
   private ServiceProxyBuilder serviceProxyBuilder, localServiceProxyBuilder;
   private MessageConsumer<JsonObject> consumer, localConsumer;
   private OKService proxy, localProxy;
+
+  private JWTAuthOptions getJWTConfig() {
+    return new JWTAuthOptions()
+      .setKeyStore(new KeyStoreOptions()
+        .setPath("keystore.jceks")
+        .setType("jceks")
+        .setPassword("secret"));
+  }
 
   @Override
   public void setUp() throws Exception {
@@ -47,13 +57,17 @@ public class SecureServiceBinderTest extends VertxTestBase {
 
     ServiceBinder serviceBinder = new ServiceBinder(vertx)
       .setAddress(SERVICE_ADDRESS)
-      .addInterceptor(new ServiceJWTInterceptor().setJwtAuth(JWTAuth.create(vertx, new JWTAuthOptions()
-        .addPubSecKey(new PubSecKeyOptions().setSecretKey("notasecret").setAlgorithm("HS256")))));
+      .addInterceptor(new ServiceJWTInterceptor().setJwtAuth(
+        JWTAuth
+          .create(vertx, getJWTConfig())
+      ));
 
     ServiceBinder localServiceBinder = new ServiceBinder(vertx)
       .setAddress(SERVICE_LOCAL_ADDRESS)
-      .addInterceptor(new ServiceJWTInterceptor().setJwtAuth(JWTAuth.create(vertx, new JWTAuthOptions()
-        .addPubSecKey(new PubSecKeyOptions().setSecretKey("notasecret").setAlgorithm("HS256")))));
+      .addInterceptor(new ServiceJWTInterceptor().setJwtAuth(
+        JWTAuth
+          .create(vertx, getJWTConfig())
+      ));
 
     consumer = serviceBinder.register(OKService.class, service);
     localConsumer = localServiceBinder.registerLocal(OKService.class, service);
@@ -75,7 +89,7 @@ public class SecureServiceBinderTest extends VertxTestBase {
   @Test
   public void testWithToken() {
 
-    serviceProxyBuilder.setToken(TOKEN);
+    serviceProxyBuilder.setToken(JWT_VALID_TOKEN);
 
     proxy = serviceProxyBuilder.build(OKService.class);
 
@@ -100,7 +114,7 @@ public class SecureServiceBinderTest extends VertxTestBase {
   @Test
   public void testLocalWithToken() {
 
-    localServiceProxyBuilder.setToken(TOKEN);
+    localServiceProxyBuilder.setToken(JWT_VALID_TOKEN);
 
     localProxy = localServiceProxyBuilder.build(OKService.class);
 
