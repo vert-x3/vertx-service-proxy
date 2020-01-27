@@ -162,8 +162,8 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
     else if (t.getKind() == ClassKind.ENUM)
       writer.stmt("_json.put(\"" + name + "\", " + name + " == null ? null : " + name + ".name())");
     else if (t.getKind() == ClassKind.LIST) {
-      if (((ParameterizedTypeInfo)t).getArg(0).getKind() == ClassKind.DATA_OBJECT) {
-        DataObjectTypeInfo doType = ((DataObjectTypeInfo) ((ParameterizedTypeInfo) t).getArg(0));
+      if (((ParameterizedTypeInfo)t).getArg(0).isDataObjectHolder()) {
+        ClassTypeInfo doType = (ClassTypeInfo) ((ParameterizedTypeInfo) t).getArg(0);
         writer.stmt(String.format(
           "_json.put(\"%s\", new JsonArray(%s == null ? java.util.Collections.emptyList() : %s.stream().map(v -> %s).collect(Collectors.toList())))",
           name,
@@ -174,8 +174,8 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
       } else
         writer.stmt("_json.put(\"" + name + "\", new JsonArray(" + name + "))");
     } else if (t.getKind() == ClassKind.SET) {
-      if (((ParameterizedTypeInfo)t).getArg(0).getKind() == ClassKind.DATA_OBJECT) {
-        DataObjectTypeInfo doType = ((DataObjectTypeInfo) ((ParameterizedTypeInfo) t).getArg(0));
+      if (((ParameterizedTypeInfo)t).getArg(0).isDataObjectHolder()) {
+        ClassTypeInfo doType = (ClassTypeInfo) ((ParameterizedTypeInfo) t).getArg(0);
         writer.stmt(String.format(
           "_json.put(\"%s\", new JsonArray(%s == null ? java.util.Collections.emptyList() : %s.stream().map(v -> %s).collect(Collectors.toList())))",
           name,
@@ -186,22 +186,22 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
       } else
         writer.stmt("_json.put(\"" + name + "\", new JsonArray(new ArrayList<>(" + name + ")))");
     } else if (t.getKind() == ClassKind.MAP)
-      if (((ParameterizedTypeInfo)t).getArg(1).getKind() == ClassKind.DATA_OBJECT) {
-        DataObjectTypeInfo doTypeInfo = (DataObjectTypeInfo) ((ParameterizedTypeInfo)t).getArg(1);
+      if (((ParameterizedTypeInfo)t).getArg(1).isDataObjectHolder()) {
+        ClassTypeInfo doType = (ClassTypeInfo) ((ParameterizedTypeInfo) t).getArg(1);
         writer.stmt(String.format(
           "_json.put(\"%s\", new JsonObject(%s == null ? java.util.Collections.emptyMap() : %s.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> %s))))",
           name,
           name,
           name,
-          GeneratorUtils.generateSerializeDataObject("e.getValue()", doTypeInfo)
+          GeneratorUtils.generateSerializeDataObject("e.getValue()", doType)
         ));
       } else
         writer.stmt("_json.put(\"" + name + "\", new JsonObject(ProxyUtils.convertMap(" + name + ")))");
-    else if (t.getKind() == ClassKind.DATA_OBJECT) {
+    else if (t.isDataObjectHolder()) {
       writer.stmt(String.format(
         "_json.put(\"%s\", %s)",
         name,
-        GeneratorUtils.generateSerializeDataObject(name, (DataObjectTypeInfo) t)
+        GeneratorUtils.generateSerializeDataObject(name, (ClassTypeInfo) t)
       ));
     } else
       writer.stmt("_json.put(\"" + name + "\", " + name + ")");
@@ -249,8 +249,8 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
     if (t.getKind() == ClassKind.LIST) {
       if ("java.lang.Character".equals(((ParameterizedTypeInfo) t).getArg(0).getName()))
         writer.print("ProxyUtils.convertToListChar(" + resultStr + ".body())");
-      else if (((ParameterizedTypeInfo) t).getArg(0).getKind() == ClassKind.DATA_OBJECT) {
-        DataObjectTypeInfo doType = ((DataObjectTypeInfo)((ParameterizedTypeInfo) t).getArg(0));
+      else if (((ParameterizedTypeInfo) t).getArg(0).isDataObjectHolder()) {
+        ClassTypeInfo doType = (ClassTypeInfo) ((ParameterizedTypeInfo) t).getArg(0);
         writer.print(resultStr + ".body().stream()\n");
         writer.indent()
           .codeln(".map(v -> " + GeneratorUtils.generateDeserializeDataObject("v", doType) + ")")
@@ -262,8 +262,8 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
     } else if (t.getKind() == ClassKind.SET) {
       if ("java.lang.Character".equals(((ParameterizedTypeInfo)t).getArg(0).getName()))
         writer.print("ProxyUtils.convertToSetChar(" + resultStr + ".body())");
-      else if (((ParameterizedTypeInfo)t).getArg(0).getKind() == ClassKind.DATA_OBJECT) {
-        DataObjectTypeInfo doType = ((DataObjectTypeInfo)((ParameterizedTypeInfo) t).getArg(0));
+      else if (((ParameterizedTypeInfo)t).getArg(0).isDataObjectHolder()) {
+        ClassTypeInfo doType = (ClassTypeInfo) ((ParameterizedTypeInfo) t).getArg(0);
         writer.print(resultStr + ".body().stream()\n");
         writer.indent()
           .codeln(".map(v -> " + GeneratorUtils.generateDeserializeDataObject("v", doType) + ")")
@@ -275,19 +275,19 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
     } else if (t.getKind() == ClassKind.MAP) {
       if ("java.lang.Character".equals(((ParameterizedTypeInfo)t).getArg(1).getName()))
         writer.print("ProxyUtils.convertToMapChar(" + resultStr + ".body())");
-      else if (((ParameterizedTypeInfo)t).getArg(1).getKind() == ClassKind.DATA_OBJECT) {
-        DataObjectTypeInfo doTypeInfo = (DataObjectTypeInfo)((ParameterizedTypeInfo) t).getArg(1);
+      else if (((ParameterizedTypeInfo)t).getArg(1).isDataObjectHolder()) {
+        ClassTypeInfo doType = (ClassTypeInfo) ((ParameterizedTypeInfo) t).getArg(1);
         writer.print(resultStr + ".body().stream()\n");
         writer.indent()
-          .code(".collect(Collectors.toMap(Map.Entry::getKey, e -> " + GeneratorUtils.generateDeserializeDataObject("e.getValue()", doTypeInfo) + "))")
+          .code(".collect(Collectors.toMap(Map.Entry::getKey, e -> " + GeneratorUtils.generateDeserializeDataObject("e.getValue()", doType) + "))")
           .unindent();
       } else {
         writer.print("ProxyUtils.convertMap(" + resultStr + ".body().getMap())");
       }
     } else if (t.getKind() == ClassKind.API && t instanceof ApiTypeInfo && ((ApiTypeInfo)t).isProxyGen()) {
       writer.print("new " + t.getSimpleName() + "VertxEBProxy(_vertx, " + resultStr + ".headers().get(\"proxyaddr\"))");
-    } else if (t.getKind() == ClassKind.DATA_OBJECT)
-      writer.print(GeneratorUtils.generateDeserializeDataObject(resultStr + ".body()", (DataObjectTypeInfo) t));
+    } else if (t.isDataObjectHolder())
+      writer.print(GeneratorUtils.generateDeserializeDataObject(resultStr + ".body()", (ClassTypeInfo) t));
     else if (t.getKind() == ClassKind.ENUM)
       writer.print(resultStr + ".body() == null ? null : " + t.getSimpleName() + ".valueOf(" + resultStr + ".body())");
     else
@@ -313,7 +313,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
   private String sendTypeParameter(TypeInfo t) {
     if (t.getKind() == ClassKind.LIST || t.getKind() == ClassKind.SET) return "JsonArray";
     if (t.getKind() == ClassKind.MAP) return "JsonObject";
-    if (t.getKind() == ClassKind.DATA_OBJECT) return ((DataObjectTypeInfo)t).getTargetType().getSimpleName();
+    if (t.isDataObjectHolder()) return t.getDataObject().getJsonType().getSimpleName();
     if (t.getKind() == ClassKind.ENUM) return "String";
     return t.getSimpleName();
   }

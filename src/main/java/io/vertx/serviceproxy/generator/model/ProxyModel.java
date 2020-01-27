@@ -29,8 +29,6 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -65,8 +63,8 @@ public class ProxyModel extends ClassModel {
       return;
     }
     // We also allow data object as parameter types if they have a complete codec
-    if (typeInfo.getKind() == ClassKind.DATA_OBJECT) {
-      if (((DataObjectTypeInfo)typeInfo).isSerializable() && ((DataObjectTypeInfo)typeInfo).isDeserializable()){
+    if (typeInfo.isDataObjectHolder()) {
+      if (typeInfo.getDataObject().isSerializable() && typeInfo.getDataObject().isDeserializable()){
         return;
       }
       throw new GenException(elem, "Data Object " + typeInfo + " must have a valid serializer and deserializer");
@@ -143,7 +141,7 @@ public class ProxyModel extends ClassModel {
   private boolean isLegalAsyncResultType(TypeInfo resultType) {
     if (resultType.getKind().json || resultType.getKind().basic ||
       isLegalContainerParam(resultType) || resultType.getKind() == ClassKind.VOID ||
-      resultType.getKind() == ClassKind.ENUM || resultType.getKind() == ClassKind.DATA_OBJECT) {
+      resultType.getKind() == ClassKind.ENUM || resultType.isDataObjectHolder()) {
       return true;
     }
     if (resultType.getKind() == ClassKind.API) {
@@ -187,7 +185,7 @@ public class ProxyModel extends ClassModel {
   }
 
   protected boolean isValidDataObject(TypeInfo typeInfo) {
-    return typeInfo.getKind() == ClassKind.DATA_OBJECT && ((DataObjectTypeInfo)typeInfo).isSerializable() && ((DataObjectTypeInfo)typeInfo).isDeserializable();
+    return typeInfo.isDataObjectHolder() && typeInfo.getDataObject().isSerializable() && typeInfo.getDataObject().isDeserializable();
   }
 
   public static boolean isFuture(TypeInfo type) {

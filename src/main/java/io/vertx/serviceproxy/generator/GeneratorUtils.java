@@ -3,7 +3,6 @@ package io.vertx.serviceproxy.generator;
 import io.vertx.codegen.ParamInfo;
 import io.vertx.codegen.type.ClassKind;
 import io.vertx.codegen.type.ClassTypeInfo;
-import io.vertx.codegen.type.DataObjectTypeInfo;
 import io.vertx.codegen.type.MapperInfo;
 import io.vertx.codegen.type.ParameterizedTypeInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
@@ -41,8 +40,8 @@ public class GeneratorUtils {
         model.getImportedTypes().stream(),
         model.getReferencedDataObjectTypes()
           .stream()
-          .filter(t -> t.getTargetType() instanceof ClassTypeInfo)
-          .map(t -> (ClassTypeInfo) t.getTargetType())
+          .filter(t -> t.isDataObjectHolder() && t.getDataObject().getJsonType() instanceof ClassTypeInfo)
+          .map(t -> (ClassTypeInfo) t.getDataObject().getJsonType())
       )
       .filter(c -> !c.getPackageName().equals("java.lang") && !c.getPackageName().equals("io.vertx.core.json"))
       .map(ClassTypeInfo::toString)
@@ -86,19 +85,19 @@ public class GeneratorUtils {
       ((ParameterizedTypeInfo)param.getType()).getArg(0).getKind() == ClassKind.ASYNC_RESULT;
   }
 
-  public static String generateDeserializeDataObject(String stmt, DataObjectTypeInfo doTypeInfo) {
-    MapperInfo deserializer = doTypeInfo.getDeserializer();
+  public static String generateDeserializeDataObject(String stmt, ClassTypeInfo doTypeInfo) {
+    MapperInfo deserializer = doTypeInfo.getDataObject().getDeserializer();
     String s;
     switch (deserializer.getKind()) {
       case SELF:
-        s = String.format("new %s((%s)%s)", doTypeInfo.getName(), doTypeInfo.getTargetType().getSimpleName(), stmt);
+        s = String.format("new %s((%s)%s)", doTypeInfo.getName(), doTypeInfo.getDataObject().getJsonType().getSimpleName(), stmt);
         break;
       case STATIC_METHOD:
         StringBuilder sb = new StringBuilder(deserializer.getQualifiedName());
         deserializer.getSelectors().forEach(selector -> {
           sb.append('.').append(selector);
         });
-        sb.append("((").append(deserializer.getTargetType().getSimpleName()).append(')').append(stmt).append(')');
+        sb.append("((").append(deserializer.getJsonType().getSimpleName()).append(')').append(stmt).append(')');
         s =  sb.toString();
         break;
       default:
@@ -107,8 +106,8 @@ public class GeneratorUtils {
     return String.format("%s != null ? %s : null", stmt, s);
   }
 
-  public static String generateSerializeDataObject(String stmt, DataObjectTypeInfo doTypeInfo) {
-    MapperInfo serializer = doTypeInfo.getSerializer();
+  public static String generateSerializeDataObject(String stmt, ClassTypeInfo doTypeInfo) {
+    MapperInfo serializer = doTypeInfo.getDataObject().getSerializer();
     String s;
     switch (serializer.getKind()) {
       case SELF:
