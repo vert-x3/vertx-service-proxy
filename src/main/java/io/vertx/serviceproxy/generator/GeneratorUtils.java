@@ -93,11 +93,13 @@ public class GeneratorUtils {
       case SELF:
         s = String.format("new %s((%s)%s)", doTypeInfo.getName(), doTypeInfo.getTargetType().getSimpleName(), stmt);
         break;
-      case FUNCTION:
-        s =  String.format("%s.%s.apply((%s)%s)", deserializer.getQualifiedName(), deserializer.getName(), deserializer.getTargetType().getSimpleName(), stmt);
-        break;
       case STATIC_METHOD:
-        s =  String.format("%s.%s((%s)%s)", deserializer.getQualifiedName(), deserializer.getName(), deserializer.getTargetType().getSimpleName(), stmt);
+        StringBuilder sb = new StringBuilder(deserializer.getQualifiedName());
+        deserializer.getSelectors().forEach(selector -> {
+          sb.append('.').append(selector);
+        });
+        sb.append("((").append(deserializer.getTargetType().getSimpleName()).append(')').append(stmt).append(')');
+        s =  sb.toString();
         break;
       default:
         throw new AssertionError();
@@ -112,11 +114,13 @@ public class GeneratorUtils {
       case SELF:
         s = String.format("%s.toJson()", stmt);
         break;
-      case FUNCTION:
-        s = String.format("%s.%s.apply(%s)", serializer.getQualifiedName(), serializer.getName(), stmt);
-        break;
       case STATIC_METHOD:
-        s = String.format("%s.%s(%s)", serializer.getQualifiedName(), serializer.getName(), stmt);
+        StringBuilder sb = new StringBuilder(serializer.getQualifiedName());
+        serializer.getSelectors().forEach(selector -> {
+          sb.append('.').append(selector);
+        });
+        sb.append('(').append(stmt).append(')');
+        s = sb.toString();
         break;
       default:
         throw new AssertionError();
