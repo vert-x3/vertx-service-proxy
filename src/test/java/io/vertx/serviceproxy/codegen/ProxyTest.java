@@ -6,8 +6,12 @@ import io.vertx.codegen.type.ParameterizedTypeInfo;
 import io.vertx.serviceproxy.codegen.proxytestapi.*;
 import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
+import io.vertx.serviceproxy.testmodel.Mappers;
 import io.vertx.test.codegen.GeneratorHelper;
 import org.junit.Test;
+
+import java.net.URI;
+import java.time.ZonedDateTime;
 
 import static org.junit.Assert.*;
 
@@ -17,7 +21,12 @@ import static org.junit.Assert.*;
 public class ProxyTest {
 
   public ProxyModel generateProxyModel(Class c, Class... rest) throws Exception {
-    return new GeneratorHelper().generateClass(codegen -> (ProxyModel) codegen.getModel(c.getCanonicalName(), "proxy"), c, rest);
+    return new GeneratorHelper()
+      .registerConverter(ZonedDateTime.class, Mappers.class, "serializeZonedDateTime")
+      .registerConverter(ZonedDateTime.class, Mappers.class, "deserializeZonedDateTime")
+      .registerConverter(URI.class, Mappers.class, "URI_SERIALIZER")
+      .registerConverter(URI.class, Mappers.class, "URI_DESERIALIZER")
+      .generateClass(codegen -> (ProxyModel) codegen.getModel(c.getCanonicalName(), "proxy"), c, rest);
   }
 
 

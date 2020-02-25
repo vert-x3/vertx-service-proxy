@@ -1,6 +1,5 @@
 package io.vertx.serviceproxy.codegen.proxytestapi;
 
-import io.vertx.codegen.annotations.Mapper;
 import io.vertx.codegen.annotations.ProxyClose;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.ProxyIgnore;
@@ -14,35 +13,12 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 @ProxyGen
 public interface ValidProxy {
-
-  @Mapper
-  static String serialize(ZonedDateTime value) throws IllegalArgumentException {
-    return (value != null) ? value.toString() : null;
-  }
-
-  @Mapper
-  static ZonedDateTime deserialize(String value) throws IllegalArgumentException {
-    return (value != null) ? ZonedDateTime.parse(value) : null;
-  }
-
-  @Mapper
-  Function<URI, String> SERIALIZER = value -> (value != null) ? value.toString() : null;
-
-  @Mapper
-  Function<String, URI> DESERIALIZER = value -> {
-    try {
-      return (value != null) ? new URI(value) : null;
-    } catch (Exception e) {
-      throw new IllegalArgumentException(e);
-    }
-  };
 
   void basicTypes(String str, byte b, short s, int i, long l, float f, double d, char c, boolean bool);
 
