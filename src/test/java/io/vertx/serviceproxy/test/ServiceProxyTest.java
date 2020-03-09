@@ -72,7 +72,7 @@ public class ServiceProxyTest extends VertxTestBase {
     localService = TestService.create(vertx);
     futureService = TestFutureService.create(vertx, service);
     localFutureService = TestFutureService.create(vertx, localService);
-    
+
     consumer = new ServiceBinder(vertx).setAddress(SERVICE_ADDRESS)
       .register(TestService.class, service);
     consumerWithDebugEnabled = new ServiceBinder(vertx)
@@ -120,7 +120,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testFailingCall() {
-    failingCallHandler((str, h) -> futureProxy.failingCall(str).setHandler(h));
+    failingCallHandler((str, h) -> futureProxy.failingCall(str).onComplete(h));
   }
 
   @Test
@@ -217,7 +217,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testEnumTypeAsFuture() {
-    enumTypeHandler(futureProxy.enumTypeAsResult()::setHandler);
+    enumTypeHandler(futureProxy.enumTypeAsResult()::onComplete);
   }
 
   @Test
@@ -238,7 +238,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testEnumTypeAsFutureWithNull() {
-    enumTypeWithNullHandler(futureProxy.enumTypeAsResultNull()::setHandler);
+    enumTypeWithNullHandler(futureProxy.enumTypeAsResultNull()::onComplete);
   }
 
   @Test
@@ -246,7 +246,7 @@ public class ServiceProxyTest extends VertxTestBase {
     proxy.dataObjectType(new TestDataObject().setString("foo").setNumber(123).setBool(true));
     await();
   }
-  
+
   @Test
   public void testListdataObjectType() {
     List<TestDataObject> testDataList = Arrays.asList(
@@ -255,7 +255,7 @@ public class ServiceProxyTest extends VertxTestBase {
     proxy.listdataObjectType(testDataList);
     await();
   }
-  
+
   @Test
   public void testSetdataObjectType() {
     Set<TestDataObject> testDataSet = new HashSet<>(Arrays.asList(
@@ -342,7 +342,7 @@ public class ServiceProxyTest extends VertxTestBase {
     proxy.dataObjectTypeNull(null);
     await();
   }
-  
+
   @Test
   public void testlistdataObjectTypeHavingNullValues() {
     List<TestDataObject> testDataList = Arrays.asList(
@@ -352,13 +352,13 @@ public class ServiceProxyTest extends VertxTestBase {
     proxy.listdataObjectTypeHavingNullValues(testDataList);
     await();
   }
-  
+
   @Test
   public void testListDataObjectTypeNull() {
     proxy.listdataObjectTypeNull(null);
     await();
   }
-  
+
   @Test
   public void testSetdataObjectTypeHavingNullValues() {
     Set<TestDataObject> testDataSet = new HashSet<>(Arrays.asList(
@@ -368,7 +368,7 @@ public class ServiceProxyTest extends VertxTestBase {
     proxy.setdataObjectTypeHavingNullValues(testDataSet);
     await();
   }
-  
+
   @Test
   public void testSetDataObjectTypeNull() {
     proxy.setdataObjectTypeNull(null);
@@ -440,7 +440,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testStringFuture() {
-    stringHandler(futureProxy.stringFuture()::setHandler);
+    stringHandler(futureProxy.stringFuture()::onComplete);
   }
 
   @Test
@@ -456,7 +456,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testStringNullFuture() {
-    stringNullHandler(futureProxy.stringNullFuture()::setHandler);
+    stringNullHandler(futureProxy.stringNullFuture()::onComplete);
   }
 
   @Test
@@ -472,7 +472,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testByteFuture() {
-    byteHandler(futureProxy.byteFuture()::setHandler);
+    byteHandler(futureProxy.byteFuture()::onComplete);
   }
 
   @Test
@@ -488,7 +488,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testByteNullFuture() {
-    byteNullHandler(futureProxy.byteNullFuture()::setHandler);
+    byteNullHandler(futureProxy.byteNullFuture()::onComplete);
   }
 
   @Test
@@ -504,7 +504,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testShortFuture() {
-    shortHandler(futureProxy.shortFuture()::setHandler);
+    shortHandler(futureProxy.shortFuture()::onComplete);
   }
 
   @Test
@@ -520,7 +520,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testShortNullFuture() {
-    shortNullHandler(futureProxy.shortNullFuture()::setHandler);
+    shortNullHandler(futureProxy.shortNullFuture()::onComplete);
   }
 
   @Test
@@ -536,7 +536,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testIntFuture() {
-    intHandler(futureProxy.intFuture()::setHandler);
+    intHandler(futureProxy.intFuture()::onComplete);
   }
 
   @Test
@@ -552,7 +552,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testIntNullFuture() {
-    intNullHandler(futureProxy.intNullFuture()::setHandler);
+    intNullHandler(futureProxy.intNullFuture()::onComplete);
   }
 
   @Test
@@ -568,7 +568,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testLongFuture() {
-    longHandler(futureProxy.longFuture()::setHandler);
+    longHandler(futureProxy.longFuture()::onComplete);
   }
 
   @Test
@@ -584,7 +584,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testLongNullFuture() {
-    longNullHandler(futureProxy.longNullFuture()::setHandler);
+    longNullHandler(futureProxy.longNullFuture()::onComplete);
   }
 
   @Test
@@ -600,7 +600,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testFloatFuture() {
-    floatHandler(futureProxy.floatFuture()::setHandler);
+    floatHandler(futureProxy.floatFuture()::onComplete);
   }
 
   @Test
@@ -616,7 +616,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testFloatNullFuture() {
-    floatNullHandler(futureProxy.floatNullFuture()::setHandler);
+    floatNullHandler(futureProxy.floatNullFuture()::onComplete);
   }
 
   @Test
@@ -632,7 +632,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testDoubleFuture() {
-    doubleHandler(futureProxy.doubleFuture()::setHandler);
+    doubleHandler(futureProxy.doubleFuture()::onComplete);
   }
 
   @Test
@@ -648,7 +648,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testDoubleNullFuture() {
-    doubleNullHandler(futureProxy.doubleNullFuture()::setHandler);
+    doubleNullHandler(futureProxy.doubleNullFuture()::onComplete);
   }
 
   @Test
@@ -664,7 +664,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testCharFuture() {
-    charHandler(futureProxy.charFuture()::setHandler);
+    charHandler(futureProxy.charFuture()::onComplete);
   }
 
   @Test
@@ -680,7 +680,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testCharNullFuture() {
-    charNullHandler(futureProxy.charNullFuture()::setHandler);
+    charNullHandler(futureProxy.charNullFuture()::onComplete);
   }
 
   @Test
@@ -696,7 +696,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testBooleanFuture() {
-    booleanHandler(futureProxy.booleanFuture()::setHandler);
+    booleanHandler(futureProxy.booleanFuture()::onComplete);
   }
   @Test
   public void testBooleanNullHandler() {
@@ -711,7 +711,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testBooleanNullFuture() {
-    booleanNullHandler(futureProxy.booleanNullFuture()::setHandler);
+    booleanNullHandler(futureProxy.booleanNullFuture()::onComplete);
   }
 
   @Test
@@ -727,7 +727,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testJsonObjectFuture() {
-    jsonObjectHandler(futureProxy.jsonObjectFuture()::setHandler);
+    jsonObjectHandler(futureProxy.jsonObjectFuture()::onComplete);
   }
 
   @Test
@@ -745,7 +745,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testJsonObjectNullFuture() {
-    jsonObjectNullHandler(futureProxy.jsonObjectNullFuture()::setHandler);
+    jsonObjectNullHandler(futureProxy.jsonObjectNullFuture()::onComplete);
   }
 
   @Test
@@ -761,7 +761,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testJsonArrayFuture() {
-    jsonArrayHandler(futureProxy.jsonArrayFuture()::setHandler);
+    jsonArrayHandler(futureProxy.jsonArrayFuture()::onComplete);
   }
 
   @Test
@@ -777,7 +777,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testJsonArrayNullFuture() {
-    jsonArrayNullHandler(futureProxy.jsonArrayNullFuture()::setHandler);
+    jsonArrayNullHandler(futureProxy.jsonArrayNullFuture()::onComplete);
   }
 
   @Test
@@ -793,7 +793,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testDataObjectFuture() {
-    dataObjectHandler(futureProxy.dataObjectFuture()::setHandler);
+    dataObjectHandler(futureProxy.dataObjectFuture()::onComplete);
   }
 
   @Test
@@ -809,7 +809,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testDataObjectNullFuture() {
-    dataObjectNullHandler(futureProxy.dataObjectNullFuture()::setHandler);
+    dataObjectNullHandler(futureProxy.dataObjectNullFuture()::onComplete);
   }
 
   @Test
@@ -825,7 +825,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testVoidFuture() {
-    voidHandler(futureProxy.voidFuture()::setHandler);
+    voidHandler(futureProxy.voidFuture()::onComplete);
   }
 
   @Test
@@ -863,7 +863,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testFailingFuture() {
-    failingMethodHandler(futureProxy.failingFuture()::setHandler);
+    failingMethodHandler(futureProxy.failingFuture()::onComplete);
   }
 
   @Test
@@ -933,7 +933,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testListStringFuture() {
-    listStringHandler(futureProxy.listStringFuture()::setHandler);
+    listStringHandler(futureProxy.listStringFuture()::onComplete);
   }
 
   @Test
@@ -951,7 +951,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testListByteFuture() {
-    listByteHandler(futureProxy.listByteFuture()::setHandler);
+    listByteHandler(futureProxy.listByteFuture()::onComplete);
   }
 
   @Test
@@ -969,7 +969,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testListShortFuture() {
-    listShortHandler(futureProxy.listShortFuture()::setHandler);
+    listShortHandler(futureProxy.listShortFuture()::onComplete);
   }
 
   @Test
@@ -987,7 +987,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testListIntFuture() {
-    listIntHandler(futureProxy.listIntFuture()::setHandler);
+    listIntHandler(futureProxy.listIntFuture()::onComplete);
   }
 
   @Test
@@ -1005,7 +1005,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testListLongFuture() {
-    listLongHandler(futureProxy.listLongFuture()::setHandler);
+    listLongHandler(futureProxy.listLongFuture()::onComplete);
   }
 
   @Test
@@ -1023,7 +1023,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testListFloatFuture() {
-    listFloatHandler(futureProxy.listFloatFuture()::setHandler);
+    listFloatHandler(futureProxy.listFloatFuture()::onComplete);
   }
 
   @Test
@@ -1041,7 +1041,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testListDoubleFuture() {
-    listDoubleHandler(futureProxy.listDoubleFuture()::setHandler);
+    listDoubleHandler(futureProxy.listDoubleFuture()::onComplete);
   }
 
   @Test
@@ -1059,7 +1059,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testListCharFuture() {
-    listCharHandler(futureProxy.listCharFuture()::setHandler);
+    listCharHandler(futureProxy.listCharFuture()::onComplete);
   }
 
   @Test
@@ -1078,7 +1078,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testListBoolFuture() {
-    listBoolHandler(futureProxy.listBoolFuture()::setHandler);
+    listBoolHandler(futureProxy.listBoolFuture()::onComplete);
   }
 
   @Test
@@ -1097,7 +1097,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testListJsonObjectFuture() {
-    listJsonObjectHandler(futureProxy.listJsonObjectFuture()::setHandler);
+    listJsonObjectHandler(futureProxy.listJsonObjectFuture()::onComplete);
   }
 
   @Test
@@ -1116,7 +1116,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testListJsonArrayFuture() {
-    listJsonArrayHandler(futureProxy.listJsonArrayFuture()::setHandler);
+    listJsonArrayHandler(futureProxy.listJsonArrayFuture()::onComplete);
   }
 
   @Test
@@ -1134,7 +1134,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testSetStringFuture() {
-    setStringHandler(futureProxy.setStringFuture()::setHandler);
+    setStringHandler(futureProxy.setStringFuture()::onComplete);
   }
 
   @Test
@@ -1152,7 +1152,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testSetByteFuture() {
-    setByteHandler(futureProxy.setByteFuture()::setHandler);
+    setByteHandler(futureProxy.setByteFuture()::onComplete);
   }
 
   @Test
@@ -1171,7 +1171,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testSetShortFuture() {
-    setShortHandler(futureProxy.setShortFuture()::setHandler);
+    setShortHandler(futureProxy.setShortFuture()::onComplete);
   }
 
   @Test
@@ -1189,7 +1189,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testSetIntFuture() {
-    setIntHandler(futureProxy.setIntFuture()::setHandler);
+    setIntHandler(futureProxy.setIntFuture()::onComplete);
   }
 
   @Test
@@ -1207,7 +1207,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testSetLongFuture() {
-    setLongHandler(futureProxy.setLongFuture()::setHandler);
+    setLongHandler(futureProxy.setLongFuture()::onComplete);
   }
 
   @Test
@@ -1225,7 +1225,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testSetFloatFuture() {
-    setFloatHandler(futureProxy.setFloatFuture()::setHandler);
+    setFloatHandler(futureProxy.setFloatFuture()::onComplete);
   }
 
   @Test
@@ -1243,7 +1243,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testSetDoubleFuture() {
-    setDoubleHandler(futureProxy.setDoubleFuture()::setHandler);
+    setDoubleHandler(futureProxy.setDoubleFuture()::onComplete);
   }
 
   @Test
@@ -1261,7 +1261,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testSetCharFuture() {
-    setCharHandler(futureProxy.setCharFuture()::setHandler);
+    setCharHandler(futureProxy.setCharFuture()::onComplete);
   }
 
   @Test
@@ -1278,7 +1278,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testSetBoolFuture() {
-    setBoolHandler(futureProxy.setBoolFuture()::setHandler);
+    setBoolHandler(futureProxy.setBoolFuture()::onComplete);
   }
 
   @Test
@@ -1298,7 +1298,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testMapStringFuture() {
-    mapStringHandler(futureProxy.mapStringFuture()::setHandler);
+    mapStringHandler(futureProxy.mapStringFuture()::onComplete);
   }
 
   @Test
@@ -1318,7 +1318,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testMapByteFuture() {
-    mapByteHandler(futureProxy.mapByteFuture()::setHandler);
+    mapByteHandler(futureProxy.mapByteFuture()::onComplete);
   }
 
   @Test
@@ -1338,7 +1338,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testMapShortFuture() {
-    mapShortHandler(futureProxy.mapShortFuture()::setHandler);
+    mapShortHandler(futureProxy.mapShortFuture()::onComplete);
   }
 
   @Test
@@ -1358,7 +1358,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testMapIntegerFuture() {
-    mapIntHandler(futureProxy.mapIntFuture()::setHandler);
+    mapIntHandler(futureProxy.mapIntFuture()::onComplete);
   }
 
   @Test
@@ -1378,7 +1378,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testMapLongFuture() {
-    mapLongHandler(futureProxy.mapLongFuture()::setHandler);
+    mapLongHandler(futureProxy.mapLongFuture()::onComplete);
   }
 
   @Test
@@ -1398,7 +1398,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testMapFloatFuture() {
-    mapFloatHandler(futureProxy.mapFloatFuture()::setHandler);
+    mapFloatHandler(futureProxy.mapFloatFuture()::onComplete);
   }
 
   @Test
@@ -1418,7 +1418,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testMapDoubleFuture() {
-    mapDoubleHandler(futureProxy.mapDoubleFuture()::setHandler);
+    mapDoubleHandler(futureProxy.mapDoubleFuture()::onComplete);
   }
 
   @Test
@@ -1438,7 +1438,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testMapCharacterFuture() {
-    mapCharHandler(futureProxy.mapCharFuture()::setHandler);
+    mapCharHandler(futureProxy.mapCharFuture()::onComplete);
   }
 
   @Test
@@ -1458,7 +1458,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testMapBooleanFuture() {
-    mapBooleanHandler(futureProxy.mapBoolFuture()::setHandler);
+    mapBooleanHandler(futureProxy.mapBoolFuture()::onComplete);
   }
 
   @Test
@@ -1476,7 +1476,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testSetJsonObjectFuture() {
-    setJsonObjectHandler(futureProxy.setJsonObjectFuture()::setHandler);
+    setJsonObjectHandler(futureProxy.setJsonObjectFuture()::onComplete);
   }
 
   @Test
@@ -1496,7 +1496,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testMapJsonObjectFuture() {
-    mapJsonObjectHandler(futureProxy.mapJsonObjectFuture()::setHandler);
+    mapJsonObjectHandler(futureProxy.mapJsonObjectFuture()::onComplete);
   }
 
   @Test
@@ -1514,7 +1514,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testSetJsonArrayFuture() {
-    setJsonArrayHandler(futureProxy.setJsonArrayFuture()::setHandler);
+    setJsonArrayHandler(futureProxy.setJsonArrayFuture()::onComplete);
   }
 
   @Test
@@ -1534,7 +1534,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testMapJsonArrayFuture() {
-    mapJsonArrayHandler(futureProxy.mapJsonArrayFuture()::setHandler);
+    mapJsonArrayHandler(futureProxy.mapJsonArrayFuture()::onComplete);
   }
 
   @Test
@@ -1555,7 +1555,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testListDataObjectFuture() {
-    listDataObjectHandler(futureProxy.listDataObjectFuture()::setHandler);
+    listDataObjectHandler(futureProxy.listDataObjectFuture()::onComplete);
   }
 
   @Test
@@ -1574,7 +1574,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testSetDataObjectFuture() {
-    setDataObjectHandler(futureProxy.setDataObjectFuture()::setHandler);
+    setDataObjectHandler(futureProxy.setDataObjectFuture()::onComplete);
   }
 
   @Test
@@ -1593,7 +1593,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testMapDataObjectFuture() {
-    mapDataObjectHandler(futureProxy.mapDataObjectFuture()::setHandler);
+    mapDataObjectHandler(futureProxy.mapDataObjectFuture()::onComplete);
   }
 
   @Test
@@ -1609,7 +1609,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testDateTimeFuture() {
-    zonedDateTimeHandler(futureProxy.zonedDateTimeFuture()::setHandler);
+    zonedDateTimeHandler(futureProxy.zonedDateTimeFuture()::onComplete);
   }
 
   @Test
@@ -1628,7 +1628,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testListDateTimeFuture() {
-    listZonedDateTimeHandler(futureProxy.listZonedDateTimeFuture()::setHandler);
+    listZonedDateTimeHandler(futureProxy.listZonedDateTimeFuture()::onComplete);
   }
 
   @Test
@@ -1647,7 +1647,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testSetDateTimeFuture() {
-    setZonedDateTimeHandler(futureProxy.setZonedDateTimeFuture()::setHandler);
+    setZonedDateTimeHandler(futureProxy.setZonedDateTimeFuture()::onComplete);
   }
 
   @Test
@@ -1666,7 +1666,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testMapDateTimeFuture() {
-    mapZonedDateTimeHandler(futureProxy.mapZonedDateTimeFuture()::setHandler);
+    mapZonedDateTimeHandler(futureProxy.mapZonedDateTimeFuture()::onComplete);
   }
 
   @Test
@@ -1683,7 +1683,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testUriFuture() {
-    uriHandler(futureProxy.uriFuture()::setHandler);
+    uriHandler(futureProxy.uriFuture()::onComplete);
   }
 
   @Test
@@ -1700,7 +1700,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testListUriFuture() {
-    listUriHandler(futureProxy.listUriFuture()::setHandler);
+    listUriHandler(futureProxy.listUriFuture()::onComplete);
   }
 
   @Test
@@ -1718,7 +1718,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testSetUriFuture() {
-    setUriHandler(futureProxy.setUriFuture()::setHandler);
+    setUriHandler(futureProxy.setUriFuture()::onComplete);
   }
   @Test
   public void testMapUriHandler() {
@@ -1736,7 +1736,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testMapUriFuture() {
-    mapUriHandler(futureProxy.mapUriFuture()::setHandler);
+    mapUriHandler(futureProxy.mapUriFuture()::onComplete);
   }
 
   @Test
@@ -1777,7 +1777,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testConnectionReturnFuture() {
-    connectionHandler((str, h) -> futureProxy.createConnection(str).setHandler(h));
+    connectionHandler((str, h) -> futureProxy.createConnection(str).onComplete(h));
   }
 
   @Test
@@ -1877,7 +1877,7 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testLongDeliveryReturnFuture1() {
     TestFutureService proxyLong = TestFutureService.createProxyLongDelivery(vertx, FUTURE_SERVICE_ADDRESS);
-    longDeliveryHandler1(proxyLong.longDeliverySuccess()::setHandler);
+    longDeliveryHandler1(proxyLong.longDeliverySuccess()::onComplete);
   }
 
   @Test
@@ -1899,7 +1899,7 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testLongDeliveryReturnFuture2() {
     TestFutureService proxyLong = TestFutureService.createProxyLongDelivery(vertx, FUTURE_SERVICE_ADDRESS);
-    longDeliveryHandler2(proxyLong.longDeliveryFailed()::setHandler);
+    longDeliveryHandler2(proxyLong.longDeliveryFailed()::onComplete);
   }
 
   @Test
@@ -1944,7 +1944,7 @@ public class ServiceProxyTest extends VertxTestBase {
   }
   @Test
   public void testListDataObjectContainingNullFuture() {
-    listDataObjectContainingNullHandler(futureProxy.listDataObjectContainingNullFuture()::setHandler);
+    listDataObjectContainingNullHandler(futureProxy.listDataObjectContainingNullFuture()::onComplete);
   }
 
   @Test
@@ -1973,7 +1973,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testSetDataObjectContainingNullFuture() {
-    setDataObjectContainingNullHandler(futureProxy.setDataObjectContainingNullFuture()::setHandler);
+    setDataObjectContainingNullHandler(futureProxy.setDataObjectContainingNullFuture()::onComplete);
   }
 
   @Test
@@ -2021,7 +2021,7 @@ public class ServiceProxyTest extends VertxTestBase {
     }));
   }
   private void checkConnectionWithCloseFuture2(TestFutureService proxy, long start, long timeoutSeconds) {
-    checkConnectionWithCloseFuture(start, timeoutSeconds, proxy.createConnectionWithCloseFuture()::setHandler);
+    checkConnectionWithCloseFuture(start, timeoutSeconds, proxy.createConnectionWithCloseFuture()::onComplete);
   }
 
   private void checkCause(Throwable cause) {

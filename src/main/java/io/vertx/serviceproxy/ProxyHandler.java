@@ -95,7 +95,7 @@ public abstract class ProxyHandler implements Handler<Message<JsonObject>> {
         Handler<Message<JsonObject>> prev = handler;
         handler = msg -> {
           Future<Message<JsonObject>> fut = interceptor.apply(msg);
-          fut.setHandler(ar -> {
+          fut.onComplete(ar -> {
             if (ar.succeeded()) {
               prev.handle(msg);
             } else {

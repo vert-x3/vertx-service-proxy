@@ -183,7 +183,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
     writer.unindent();
     if (returnFuture) {
       writer.print(")");
-      writer.println(".setHandler(" + generateFutureHandler((ParameterizedTypeInfo) returnType) + ");");
+      writer.println(".onComplete(" + generateFutureHandler((ParameterizedTypeInfo) returnType) + ");");
     } else {
       writer.write(");\n");
     }
