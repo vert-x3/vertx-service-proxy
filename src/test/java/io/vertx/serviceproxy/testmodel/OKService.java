@@ -19,7 +19,9 @@ package io.vertx.serviceproxy.testmodel;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 
 @ProxyGen
 @VertxGen
@@ -28,4 +30,13 @@ import io.vertx.core.Handler;
  */
 public interface OKService {
   void ok(Handler<AsyncResult<String>> resultHandler);
+
+  default Future<String> ok() {
+    Promise<String> prom = Promise.promise();
+    ok(prom);
+    return prom.future();
+  }
+
+  ;
+
 }
