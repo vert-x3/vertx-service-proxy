@@ -106,6 +106,17 @@ public interface SomeDatabaseService {
 }
 ----
 
+You will also need a `package-info.java` file somewhere in (or above) the package your interface is defined in.
+That package needs to be annotated with `@ModuleGen` so that Vert.x CodeGen can recognize your interfaces and generate
+the appropriate EventBus proxy code.
+
+.package-info.java
+[source,java]
+----
+@io.vertx.codegen.annotations.ModuleGen(groupPackage = "io.vertx.example", name = "services")
+package io.vertx.example;
+----
+
 Given the interface, Vert.x will generate all the boilerplate code required to access your service over the event
 bus, and it will also generate a *client side proxy* for your service, so your clients can use a rich idiomatic
 API for your service instead of having to manually craft event bus messages to send. The client side proxy will
