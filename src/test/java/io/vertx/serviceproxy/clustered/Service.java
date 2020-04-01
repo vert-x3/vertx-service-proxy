@@ -11,6 +11,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
 import io.vertx.serviceproxy.testmodel.SomeVertxEnum;
+import io.vertx.serviceproxy.testmodel.StringDataObject;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 
 import java.util.List;
@@ -57,14 +58,19 @@ public interface Service {
                                      Handler<AsyncResult<List<TestDataObject>>> result);
 
   @Fluent
+  Service methodWithStringDataObject(StringDataObject data,
+                                     Handler<AsyncResult<StringDataObject>> result);
+
+  @Fluent
+  Service methodWithListOfStringDataObject(List<StringDataObject> list,
+                                     Handler<AsyncResult<List<StringDataObject>>> result);
+
+
+  @Fluent
   Service methodWithListOfJsonObject(List<JsonObject> list,
                                      Handler<AsyncResult<List<JsonObject>>> result);
 
   @Fluent
   Service methodWthFailingResult(String input, Handler<AsyncResult<JsonObject>> result);
 
-  /*@Fluent
-  Service methodWithMapOfJsonObject(Map<String, JsonObject> map,
-                                    Handler<AsyncResult<Map<String, JsonObject>>> result);
-*/
 }

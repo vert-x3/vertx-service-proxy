@@ -95,7 +95,6 @@ public class ClusteredTest {
     Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> result.get() == SomeVertxEnum.BAR);
   }
 
-
   @Test
   public void testWithDataObject() {
     AtomicReference<TestDataObject> result = new AtomicReference<>();
@@ -133,6 +132,39 @@ public class ClusteredTest {
     assertThat(out.get(1).getNumber()).isEqualTo(26);
     assertThat(out.get(1).isBool()).isTrue();
     assertThat(out.get(1).getString()).isEqualTo("vert.x");
+  }
+
+  @Test
+  public void testWithStringDataObject() {
+    AtomicReference<StringDataObject> result = new AtomicReference<>();
+    Service service = Service.createProxy(consumerNode.get(), "my.service");
+    StringDataObject data = new StringDataObject().setValue("vert.x");
+    service.methodWithStringDataObject(data, ar -> {
+      result.set(ar.result());
+    });
+
+    Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> result.get() != null);
+    StringDataObject out = result.get();
+    assertThat(out.getValue()).isEqualTo("vert.x");
+  }
+
+  @Test
+  public void testWithListOfStringDataObject() {
+    AtomicReference<List<StringDataObject>> result = new AtomicReference<>();
+    Service service = Service.createProxy(consumerNode.get(), "my.service");
+    StringDataObject data = new StringDataObject().setValue("vert.x-1");
+    StringDataObject data2 = new StringDataObject().setValue("vert.x-2");
+    service.methodWithListOfStringDataObject(Arrays.asList(data, data2), ar -> {
+      if (ar.failed()) {
+        ar.cause().printStackTrace();
+      }
+      result.set(ar.result());
+    });
+
+    Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> result.get() != null);
+    List<StringDataObject> out = result.get();
+    assertThat(out.get(0).getValue()).isEqualTo("vert.x-1");
+    assertThat(out.get(1).getValue()).isEqualTo("vert.x-2");
   }
 
   @Test

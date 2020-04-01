@@ -108,18 +108,17 @@ public class GeneratorUtils {
 
   public static String generateSerializeDataObject(String stmt, ClassTypeInfo doTypeInfo) {
     MapperInfo serializer = doTypeInfo.getDataObject().getSerializer();
+    StringBuilder sb = new StringBuilder();
+    serializer.getSelectors().forEach(selector -> {
+      sb.append('.').append(selector);
+    });
     String s;
     switch (serializer.getKind()) {
       case SELF:
-        s = String.format("%s.toJson()", stmt);
+        s = stmt + sb + "()";
         break;
       case STATIC_METHOD:
-        StringBuilder sb = new StringBuilder(serializer.getQualifiedName());
-        serializer.getSelectors().forEach(selector -> {
-          sb.append('.').append(selector);
-        });
-        sb.append('(').append(stmt).append(')');
-        s = sb.toString();
+        s = serializer.getQualifiedName() + sb + "(" + stmt + ")";
         break;
       default:
         throw new AssertionError();

@@ -9,6 +9,7 @@ import io.vertx.serviceproxy.ServiceException;
 import io.vertx.serviceproxy.testmodel.MyServiceException;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
 import io.vertx.serviceproxy.testmodel.SomeVertxEnum;
+import io.vertx.serviceproxy.testmodel.StringDataObject;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
 
 import java.util.List;
@@ -71,6 +72,18 @@ public class ServiceProvider implements Service {
 
   @Override
   public Service methodWithListOfDataObject(List<TestDataObject> list, Handler<AsyncResult<List<TestDataObject>>> result) {
+    result.handle(Future.succeededFuture(list));
+    return this;
+  }
+
+  @Override
+  public Service methodWithStringDataObject(StringDataObject data, Handler<AsyncResult<StringDataObject>> result) {
+    result.handle(Future.succeededFuture(data));
+    return this;
+  }
+
+  @Override
+  public Service methodWithListOfStringDataObject(List<StringDataObject> list, Handler<AsyncResult<List<StringDataObject>>> result) {
     result.handle(Future.succeededFuture(list));
     return this;
   }
