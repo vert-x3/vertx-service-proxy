@@ -25,7 +25,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ServiceProxyBuilder;
 import io.vertx.serviceproxy.testmodel.impl.TestFutureServiceImpl;
 
-import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -201,13 +200,5 @@ public interface TestFutureService {
   Future<Set<ZonedDateTime>> setZonedDateTimeFuture();
 
   Future<Map<String, ZonedDateTime>> mapZonedDateTimeFuture();
-
-  Future<URI> uriFuture();
-
-  Future<List<URI>> listUriFuture();
-
-  Future<Set<URI>> setUriFuture();
-
-  Future<Map<String, URI>> mapUriFuture();
 
 }

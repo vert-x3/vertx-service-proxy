@@ -312,32 +312,6 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
-  public void testUriType() {
-    proxy.uriType(uri1);
-    await();
-  }
-
-  @Test
-  public void testListUriType() {
-    proxy.listUriType(Arrays.asList(uri1, uri2));
-    await();
-  }
-
-  @Test
-  public void testSetUriType() {
-    proxy.setUriType(new HashSet<>(Arrays.asList(uri1, uri2)));
-    await();
-  }
-
-  @Test
-  public void testMapUriType() {
-    Map<String, URI> expected = new HashMap<>();
-    expected.put("uri1", uri1);
-    expected.put("uri2", uri2);
-    proxy.mapUriType(expected);
-    await();
-  }
-  @Test
   public void testDataObjectTypeNull() {
     proxy.dataObjectTypeNull(null);
     await();
@@ -1667,76 +1641,6 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testMapDateTimeFuture() {
     mapZonedDateTimeHandler(futureProxy.mapZonedDateTimeFuture()::onComplete);
-  }
-
-  @Test
-  public void testUriHandler() {
-    uriHandler(proxy::uriHandler);
-  }
-
-  private void uriHandler(Consumer<Handler<AsyncResult<URI>>> consumer) {
-    consumer.accept(onSuccess(uri -> {
-      assertEquals(uri1, uri);
-      testComplete();
-    }));
-    await();
-  }
-  @Test
-  public void testUriFuture() {
-    uriHandler(futureProxy.uriFuture()::onComplete);
-  }
-
-  @Test
-  public void testListUriHandler() {
-    listUriHandler(proxy::listUriHandler);
-  }
-  private void listUriHandler(Consumer<Handler<AsyncResult<List<URI>>>> consumer) {
-    consumer.accept(onSuccess(list -> {
-      assertEquals(Arrays.asList(uri1, uri2), list);
-      testComplete();
-    }));
-    await();
-
-  }
-  @Test
-  public void testListUriFuture() {
-    listUriHandler(futureProxy.listUriFuture()::onComplete);
-  }
-
-  @Test
-  public void testSetUriHandler() {
-    setUriHandler(proxy::setUriHandler);
-  }
-
-  private void setUriHandler(Consumer<Handler<AsyncResult<Set<URI>>>> consumer) {
-    consumer.accept(onSuccess(set -> {
-      assertEquals(new HashSet<>(Arrays.asList(uri1, uri2)), set);
-      testComplete();
-    }));
-    await();
-
-  }
-  @Test
-  public void testSetUriFuture() {
-    setUriHandler(futureProxy.setUriFuture()::onComplete);
-  }
-  @Test
-  public void testMapUriHandler() {
-    mapUriHandler(proxy::mapUriHandler);
-  }
-  private void mapUriHandler(Consumer<Handler<AsyncResult<Map<String, URI>>>> consumer) {
-    Map<String, URI> expected = new HashMap<>();
-    expected.put("uri1", uri1);
-    expected.put("uri2", uri2);
-    consumer.accept(onSuccess(map -> {
-      assertEquals(expected, map);
-      testComplete();
-    }));
-    await();
-  }
-  @Test
-  public void testMapUriFuture() {
-    mapUriHandler(futureProxy.mapUriFuture()::onComplete);
   }
 
   @Test

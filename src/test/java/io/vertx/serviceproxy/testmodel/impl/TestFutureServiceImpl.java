@@ -21,7 +21,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.testmodel.*;
 
-import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.*;
 /**
@@ -560,34 +559,6 @@ public class TestFutureServiceImpl implements TestFutureService {
   public Future<Map<String, ZonedDateTime>> mapZonedDateTimeFuture() {
     Promise<Map<String, ZonedDateTime>> promise = Promise.promise();
     service.mapZonedDateTimeHandler(promise);
-    return promise.future();
-  }
-
-  @Override
-  public Future<URI> uriFuture() {
-    Promise<URI> promise = Promise.promise();
-    service.uriHandler(promise);
-    return promise.future();
-  }
-
-  @Override
-  public Future<List<URI>> listUriFuture() {
-    Promise<List<URI>> promise = Promise.promise();
-    service.listUriHandler(promise);
-    return promise.future();
-  }
-
-  @Override
-  public Future<Set<URI>> setUriFuture() {
-    Promise<Set<URI>> promise = Promise.promise();
-    service.setUriHandler(promise);
-    return promise.future();
-  }
-
-  @Override
-  public Future<Map<String, URI>> mapUriFuture() {
-    Promise<Map<String, URI>> promise = Promise.promise();
-    service.mapUriHandler(promise);
     return promise.future();
   }
 }

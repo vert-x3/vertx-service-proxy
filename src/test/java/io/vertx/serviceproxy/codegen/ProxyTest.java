@@ -10,7 +10,6 @@ import io.vertx.serviceproxy.testmodel.Mappers;
 import io.vertx.test.codegen.GeneratorHelper;
 import org.junit.Test;
 
-import java.net.URI;
 import java.time.ZonedDateTime;
 
 import static org.junit.Assert.*;
@@ -24,8 +23,6 @@ public class ProxyTest {
     return new GeneratorHelper()
       .registerConverter(ZonedDateTime.class, Mappers.class, "serializeZonedDateTime")
       .registerConverter(ZonedDateTime.class, Mappers.class, "deserializeZonedDateTime")
-      .registerConverter(URI.class, Mappers.class, "URI_SERIALIZER")
-      .registerConverter(URI.class, Mappers.class, "URI_DESERIALIZER")
       .generateClass(codegen -> (ProxyModel) codegen.getModel(c.getCanonicalName(), "proxy"), c, rest);
   }
 
@@ -131,7 +128,7 @@ public class ProxyTest {
     assertEquals(ValidProxy.class.getName(), model.getIfaceFQCN());
     assertEquals(ValidProxy.class.getSimpleName(), model.getIfaceSimpleName());
     assertTrue(model.getSuperTypes().isEmpty());
-    assertEquals(54, model.getMethods().size());
+    assertEquals(51, model.getMethods().size());
 
     // Not going to check all the types are correct as this is already tested in the VertxGen tests
     // but we do want to check the proxyIgnore flag is correctly set

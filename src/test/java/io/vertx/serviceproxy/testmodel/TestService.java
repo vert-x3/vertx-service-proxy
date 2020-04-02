@@ -16,7 +16,6 @@
 
 package io.vertx.serviceproxy.testmodel;
 
-import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -88,7 +87,7 @@ public interface TestService {
   void enumTypeAsResultNull(Handler<AsyncResult<SomeEnum>> someEnum);
 
   void dataObjectType(TestDataObject options);
-  
+
   void listdataObjectType(List<TestDataObject> list);
 
   void setdataObjectType(Set<TestDataObject> set);
@@ -103,18 +102,10 @@ public interface TestService {
 
   void mapDateTimeType(Map<String, ZonedDateTime> map);
 
-  void uriType(URI uri);
-
-  void listUriType(List<URI> list);
-
-  void setUriType(Set<URI> set);
-
-  void mapUriType(Map<String, URI> map);
-
   void listdataObjectTypeHavingNullValues(List<TestDataObject> list);
 
   void setdataObjectTypeHavingNullValues(Set<TestDataObject> set);
-  
+
   void listdataObjectTypeNull(List<TestDataObject> list);
 
   void setdataObjectTypeNull(Set<TestDataObject> set);
@@ -272,14 +263,6 @@ public interface TestService {
   void setZonedDateTimeHandler(Handler<AsyncResult<Set<ZonedDateTime>>> resultHandler);
 
   void mapZonedDateTimeHandler(Handler<AsyncResult<Map<String, ZonedDateTime>>> resultHandler);
-
-  void uriHandler(Handler<AsyncResult<URI>> resultHandler);
-
-  void listUriHandler(Handler<AsyncResult<List<URI>>> resultHandler);
-
-  void setUriHandler(Handler<AsyncResult<Set<URI>>> resultHandler);
-
-  void mapUriHandler(Handler<AsyncResult<Map<String, URI>>> resultHandler);
 
   @ProxyIgnore
   void ignoredMethod();

@@ -8,7 +8,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -81,10 +80,6 @@ public interface ValidProxy {
   void handler35(Handler<AsyncResult<ZonedDateTime>> zonedDateTime);
   void handler36(Handler<AsyncResult<List<ZonedDateTime>>> zonedDateTimeListHandler);
   void handler37(Handler<AsyncResult<Set<ZonedDateTime>>> zonedDateTimeSetHandler);
-
-  void handler38(Handler<AsyncResult<URI>> zonedDateTime);
-  void handler39(Handler<AsyncResult<List<URI>>> zonedDateTimeListHandler);
-  void handler40(Handler<AsyncResult<Set<URI>>> zonedDateTimeSetHandler);
 
   @ProxyIgnore
   void ignored();
