@@ -37,7 +37,7 @@ public class StringDataObject {
     this.value = value;
   }
 
-  public String toString() {
+  public String toJson() {
     return value;
   }
 
