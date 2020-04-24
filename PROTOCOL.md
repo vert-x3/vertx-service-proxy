@@ -54,3 +54,65 @@ The service can bind a new service and respond with this specific service addres
 
 * `proxyaddr` message header: the service address that was bound that the client can use for interacting with this new service
 * message body is the `null` value
+
+## Streaming protocol (WIP)
+
+Point to point bidirectional message channels on top of the event-bus.
+
+### Architecture
+
+* a service binds a channel handler at a service address
+* a client open a channel at a service address
+* the client and server uses ephemeral event-bus addresses
+* an opening handshake will setup the message channel between both parties
+* the message channel can be unidirectional or bidirectional
+
+### Terminology
+
+- `local address`
+- `remote address`
+- ...
+
+### Client to service channel
+
+The service processes messages sent by the client.
+
+#### Opening handshake
+
+- the service creates an event-bus handler at the service address
+- the client creates an ephemeral local address for processing server messages (metadata such as flow control)
+- the client sends an opening handshake message to the service address setting a reply handler to process the service response
+  - setting the `__vertx.stream.address` header to indicate the client local address
+  - with an unspecified body
+- upon reception of the message the service can accept the request or reject it by sending a failure response
+- when the service accepts the request it creates an ephemeral local address for processing client messages
+- and then replies to the opening handshake message
+  - settings the `__vertx.stream.address` header to indicate the server local address
+  - with a unspecified body
+
+#### Communication
+
+- the client setup an initial amount of credits to establish flow control
+- the client sends message to the service
+- when the client sends a message it decrements the credits
+- the service can at any time sends a message to the client to refund credits
+  - setting the `_______vertx.stream.credits` header to indicate the amount of credits
+  - with an unspecified body
+
+### Service to client channel
+
+Similar to the client to service
+
+The client setup a local address handler and sends the address to the service, that will bind a local address handler to
+process flow control messages.
+
+### Duplex channel
+
+A combination of the two above.
+
+### Todo
+
+- closing handshake
+- error handling
+- timeouts
+
