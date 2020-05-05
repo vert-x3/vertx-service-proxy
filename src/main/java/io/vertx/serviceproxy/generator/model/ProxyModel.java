@@ -138,6 +138,7 @@ public class ProxyModel extends ClassModel {
     }
     return proxyMeth;
   }
+
   private boolean isLegalAsyncResultType(TypeInfo resultType) {
     if (resultType.getKind().json || resultType.getKind().basic ||
       isLegalContainerParam(resultType) || resultType.getKind() == ClassKind.VOID ||
@@ -164,7 +165,7 @@ public class ProxyModel extends ClassModel {
     return false;
   }
 
-  protected boolean isLegalContainerParam(TypeInfo type) {
+  private boolean isLegalContainerParam(TypeInfo type) {
     TypeInfo raw = type.getRaw();
     if (raw.getName().equals(List.class.getName()) || raw.getName().equals(Set.class.getName())) {
       TypeInfo argument = ((ParameterizedTypeInfo) type).getArgs().get(0);
@@ -184,7 +185,7 @@ public class ProxyModel extends ClassModel {
     return false;
   }
 
-  protected boolean isValidDataObject(TypeInfo typeInfo) {
+  private boolean isValidDataObject(TypeInfo typeInfo) {
     return typeInfo.isDataObjectHolder() && typeInfo.getDataObject().isSerializable() && typeInfo.getDataObject().isDeserializable();
   }
 
