@@ -29,7 +29,9 @@ public class ClusteredTest {
 
   @Before
   public void setUp() {
-    Vertx.clusteredVertx(new VertxOptions().setClusterHost("127.0.0.1"), ar -> {
+    VertxOptions options = new VertxOptions();
+    options.getEventBusOptions().setHost("127.0.0.1");
+    Vertx.clusteredVertx(options, ar -> {
       Vertx vertx = ar.result();
       vertx.eventBus().registerDefaultCodec(MyServiceException.class,
           new MyServiceExceptionMessageCodec());
@@ -38,7 +40,7 @@ public class ClusteredTest {
       vertx.deployVerticle(LocalServiceProviderVerticle.class.getName());
     });
 
-    Vertx.clusteredVertx(new VertxOptions().setClusterHost("127.0.0.1"), ar -> {
+    Vertx.clusteredVertx(options, ar -> {
       Vertx vertx = ar.result();
       vertx.eventBus().registerDefaultCodec(MyServiceException.class,
           new MyServiceExceptionMessageCodec());
