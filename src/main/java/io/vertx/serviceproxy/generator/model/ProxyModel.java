@@ -22,7 +22,6 @@ import io.vertx.codegen.annotations.ProxyIgnore;
 import io.vertx.codegen.doc.Doc;
 import io.vertx.codegen.doc.Text;
 import io.vertx.codegen.type.*;
-import io.vertx.core.Future;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -91,14 +90,6 @@ public class ProxyModel extends ClassModel {
     }
     if (type.isVoid()) {
       return;
-    }
-    if (isFuture(type)) {
-      ParameterizedTypeInfo parameterizedTypeInfo = (ParameterizedTypeInfo) type;
-      TypeInfo arg = parameterizedTypeInfo.getArg(0);
-      if (isLegalAsyncResultType(arg)) {
-        return;
-      }
-      throw new GenException(elem, "type " + arg + " is not legal for use for a result in proxy");
     }
 
     throw new GenException(elem, "Proxy methods must have void or Fluent returns");
@@ -187,9 +178,5 @@ public class ProxyModel extends ClassModel {
 
   private boolean isValidDataObject(TypeInfo typeInfo) {
     return typeInfo.isDataObjectHolder() && typeInfo.getDataObject().isSerializable() && typeInfo.getDataObject().isDeserializable();
-  }
-
-  public static boolean isFuture(TypeInfo type) {
-    return type.isParameterized() && Future.class.getName().equals(type.getRaw().getName());
   }
 }
