@@ -159,8 +159,6 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
   public void generateActionSwitchEntry(ProxyMethodInfo m, CodeWriter writer) {
     ParamInfo lastParam = !m.getParams().isEmpty() ? m.getParam(m.getParams().size() - 1) : null;
     boolean hasResultHandler = utils.isResultHandler(lastParam);
-    TypeInfo returnType = m.getReturnType();
-    boolean returnFuture = ProxyModel.isFuture(returnType);
     writer
       .code("case \"" + m.getName() + "\": {\n")
       .indent()
@@ -181,12 +179,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
       );
     }
     writer.unindent();
-    if (returnFuture) {
-      writer.print(")");
-      writer.println(".onComplete(" + generateFutureHandler((ParameterizedTypeInfo) returnType) + ");");
-    } else {
-      writer.write(");\n");
-    }
+    writer.write(");\n");
     if (m.isProxyClose()) writer.stmt("close()");
     writer.stmt("break");
     writer.unindent();
@@ -259,9 +252,6 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
       default:
         return "getValue";
     }
-  }
-  public String generateFutureHandler(ParameterizedTypeInfo future) {
-    return generateHandler(future.getArg(0));
   }
   public String generateHandler(ParamInfo param) {
     TypeInfo typeArg = ((ParameterizedTypeInfo) ((ParameterizedTypeInfo) param.getType()).getArg(0)).getArg(0);

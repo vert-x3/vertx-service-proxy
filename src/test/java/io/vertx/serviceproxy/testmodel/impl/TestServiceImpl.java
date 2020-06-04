@@ -16,29 +16,18 @@
 
 package io.vertx.serviceproxy.testmodel.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import io.vertx.core.*;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.serviceproxy.ServiceException;
+import io.vertx.serviceproxy.test.ServiceProxyTest;
+import io.vertx.serviceproxy.testmodel.*;
 
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.VertxException;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.serviceproxy.ServiceException;
-import io.vertx.serviceproxy.test.ServiceProxyTest;
-import io.vertx.serviceproxy.testmodel.MyServiceException;
-import io.vertx.serviceproxy.testmodel.SomeEnum;
-import io.vertx.serviceproxy.testmodel.TestConnection;
-import io.vertx.serviceproxy.testmodel.TestConnectionWithCloseFuture;
-import io.vertx.serviceproxy.testmodel.TestDataObject;
-import io.vertx.serviceproxy.testmodel.TestService;
+import static org.junit.Assert.*;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -55,11 +44,6 @@ public class TestServiceImpl implements TestService {
   @Override
   public void createConnection(String str, Handler<AsyncResult<TestConnection>> resultHandler) {
     resultHandler.handle(Future.succeededFuture(new TestConnectionImpl(vertx, str)));
-  }
-
-  @Override
-  public void createConnectionWithCloseFuture(Handler<AsyncResult<TestConnectionWithCloseFuture>> resultHandler) {
-    resultHandler.handle(Future.succeededFuture(new TestConnectionWithCloseFutureImpl(vertx)));
   }
 
   @Override
