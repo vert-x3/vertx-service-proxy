@@ -107,21 +107,14 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
   private void generateMethodBody(ProxyMethodInfo method, CodeWriter writer) {
     ParamInfo lastParam = !method.getParams().isEmpty() ? method.getParam(method.getParams().size() - 1) : null;
     boolean hasResultHandler = utils.isResultHandler(lastParam);
-    TypeInfo returnType = method.getReturnType();
-    boolean returnFuture = ProxyModel.isFuture(returnType);
-    if (hasResultHandler || returnFuture) {
+    if (hasResultHandler) {
       writer.code("if (closed) {\n");
       writer.indent();
-      if (hasResultHandler) {
-        writer.stmt(lastParam.getName() + ".handle(Future.failedFuture(new IllegalStateException(\"Proxy is closed\")))");
-      }
-      if (method.isFluent()) {
+      writer.stmt(lastParam.getName() + ".handle(Future.failedFuture(new IllegalStateException(\"Proxy is closed\")))");
+      if (method.isFluent())
         writer.stmt("return this");
-      } else if (returnFuture){
-        writer.println("return Future.failedFuture(new IllegalStateException(\"Proxy is closed\"));");
-      } else {
+      else
         writer.stmt("return");
-      }
       writer.unindent();
       writer.code("}\n");
     } else {
@@ -139,8 +132,6 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
     writer.stmt("_deliveryOptions.addHeader(\"action\", \"" + method.getName() + "\")");
     if (hasResultHandler) {
       generateSendCallWithResultHandler(lastParam, writer);
-    } else if (returnFuture){
-      generateSendCallWithFutureReturn(returnType, writer);
     } else {
       writer.stmt("_vertx.eventBus().send(_address, _json, _deliveryOptions)");
     }
@@ -201,14 +192,6 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
       writer.stmt("_json.put(\"" + name + "\", " + name + ")");
   }
 
-  private void generateSendCallWithFutureReturn(TypeInfo returnType, CodeWriter writer) {
-    ParameterizedTypeInfo parameterizedTypeInfo = ((ParameterizedTypeInfo)returnType);
-    TypeInfo t = parameterizedTypeInfo.getArg(0);
-//    String typeParams = parameterizedTypeInfo.getArgs().stream().map(TypeInfo::getSimpleName).collect(Collectors.joining(","));
-//    writer.format("Promise<%s> promise = Promise.promise();", typeParams).println();
-    wrapResult(t, "promise", true, writer);
-//    writer.println("return promise.future();");
-  }
   private void generateSendCallWithResultHandler(ParamInfo lastParam, CodeWriter writer) {
     String name = lastParam.getName();
     TypeInfo t = ((ParameterizedTypeInfo)((ParameterizedTypeInfo)lastParam.getType()).getArg(0)).getArg(0);

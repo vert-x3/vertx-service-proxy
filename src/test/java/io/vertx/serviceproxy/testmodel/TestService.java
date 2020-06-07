@@ -16,11 +16,6 @@
 
 package io.vertx.serviceproxy.testmodel;
 
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.ProxyIgnore;
@@ -33,6 +28,11 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ServiceProxyBuilder;
 import io.vertx.serviceproxy.testmodel.impl.TestServiceImpl;
+
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -61,8 +61,6 @@ public interface TestService {
   void longDeliveryFailed(Handler<AsyncResult<String>> resultHandler);
 
   void createConnection(String str, Handler<AsyncResult<TestConnection>> resultHandler);
-
-  void createConnectionWithCloseFuture(Handler<AsyncResult<TestConnectionWithCloseFuture>> resultHandler);
 
   void noParams();
 

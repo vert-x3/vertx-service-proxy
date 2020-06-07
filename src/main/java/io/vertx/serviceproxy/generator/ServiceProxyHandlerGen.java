@@ -187,38 +187,30 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
     ParamInfo lastParam = !info.getParams().isEmpty() ? info.getParam(info.getParams().size() - 1) : null;
     boolean hasResultHandler = utils.isResultHandler(lastParam);
     TypeInfo returnType = info.getReturnType();
-    boolean returnFuture = ProxyModel.isFuture(returnType);
 
     if (hasResultHandler) {
-      return generateHandleMethodCaseParamsWithResultHandler(info, lastParam, returnType, returnFuture);
+      return generateHandleMethodCaseParamsWithResultHandler(info, lastParam);
     } else {
-      return generateHandleMethodCaseParamsWithoutResultHandler(info, returnType, returnFuture);
+      return generateHandleMethodCaseParamsWithoutResultHandler(info);
     }
   }
 
-  private String generateHandleMethodCaseParamsWithoutResultHandler(ProxyMethodInfo info, TypeInfo returnType, boolean returnFuture) {
+  private String generateHandleMethodCaseParamsWithoutResultHandler(ProxyMethodInfo info) {
     return info
       .getParams()
       .stream()
       .map(this::generateJsonParamExtract)
-      .collect(Collectors.joining(", \n"))
-      .concat(returnFuture ? appendOnComplete((ParameterizedTypeInfo) returnType) : "");
+      .collect(Collectors.joining(", \n"));
   }
 
-  private String generateHandleMethodCaseParamsWithResultHandler(ProxyMethodInfo info, ParamInfo lastParam, TypeInfo returnType,
-    boolean returnFuture) {
+  private String generateHandleMethodCaseParamsWithResultHandler(ProxyMethodInfo info, ParamInfo lastParam) {
     return Stream
       .concat(info.getParams()
           .subList(0, info.getParams().size() - 1)
           .stream()
           .map(this::generateJsonParamExtract),
         Stream.of(generateHandler(lastParam)))
-      .collect(Collectors.joining(", \n"))
-      .concat(returnFuture ? appendOnComplete((ParameterizedTypeInfo) returnType) : "");
-  }
-
-  private String appendOnComplete(ParameterizedTypeInfo returnType) {
-    return ").onComplete(" + generateFutureHandler(returnType);
+      .collect(Collectors.joining(", \n"));
   }
 
   public String generateJsonParamExtract(ParamInfo param) {
@@ -298,10 +290,6 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
 
   private boolean isApiType(TypeInfo typeArg) {
     return typeArg.getKind() == ClassKind.API && ((ApiTypeInfo) typeArg).isProxyGen();
-  }
-
-  public String generateFutureHandler(ParameterizedTypeInfo future) {
-    return generateHandler(future.getArg(0));
   }
 
   public String generateHandler(ParamInfo param) {
