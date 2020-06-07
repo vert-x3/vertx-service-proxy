@@ -1,4 +1,0 @@
-/*
-  Generated Proxy code - DO NOT EDIT
-  @author Roger the Robot
-*/

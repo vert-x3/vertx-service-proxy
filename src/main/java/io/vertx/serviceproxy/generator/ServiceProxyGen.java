@@ -1,17 +1,35 @@
 package io.vertx.serviceproxy.generator;
 
-import io.vertx.codegen.*;
+import static com.github.javaparser.StaticJavaParser.parse;
+import static com.github.javaparser.StaticJavaParser.parseType;
+
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.CallableDeclaration;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.type.Type;
+import io.vertx.codegen.Generator;
+import io.vertx.codegen.MethodInfo;
+import io.vertx.codegen.ParamInfo;
+import io.vertx.codegen.TypeParamInfo;
 import io.vertx.codegen.annotations.ModuleGen;
 import io.vertx.codegen.annotations.ProxyGen;
-import io.vertx.codegen.type.*;
+import io.vertx.codegen.type.ApiTypeInfo;
+import io.vertx.codegen.type.ClassKind;
+import io.vertx.codegen.type.ClassTypeInfo;
+import io.vertx.codegen.type.ParameterizedTypeInfo;
+import io.vertx.codegen.type.TypeInfo;
 import io.vertx.codegen.writer.CodeWriter;
-import io.vertx.core.Promise;
 import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
-
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="http://slinkydeveloper.github.io">Francesco Guardiani @slinkydeveloper</a>
@@ -38,54 +56,30 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
 
   @Override
   public String render(ProxyModel model, int index, int size, Map<String, Object> session) {
+    String className = model.getIfaceSimpleName() + "VertxEBProxy";
+    CompilationUnit template = parse(utils.proxyTemplate);
     StringWriter buffer = new StringWriter();
     CodeWriter writer = new CodeWriter(buffer);
+    ClassOrInterfaceDeclaration proxyHandlerClassTemplate = template
+      .findFirst(ClassOrInterfaceDeclaration.class)
+      .orElseThrow(() -> new IllegalStateException("Cannot find the class in a template."));
 
-    String className = model.getIfaceSimpleName() + "VertxEBProxy";
+    template.setPackageDeclaration(model.getIfacePackageName());
+    proxyHandlerClassTemplate.setName(className);
+    template.findAll(ConstructorDeclaration.class).forEach(c -> c.setName(className));
+    template.findAll(Type.class, type -> "$ServiceName$".equals(type.toString())).forEach(type -> type.replace(parseType(model.getIfaceSimpleName())));
 
-    utils.classHeader(writer);
-    writer.code("package " + model.getIfacePackageName() + ";\n");
-    writer.code("\n");
-    utils.proxyGenImports(writer);
-    utils.additionalImports(model).forEach(i -> utils.writeImport(writer, i));
-    boolean importPromise = model.getMethods().stream().anyMatch(m -> !m.isStaticMethod() && ProxyModel.isFuture(m.getReturnType()));
-    if (importPromise) {
-      utils.writeImport(writer, Promise.class.getName());
-    }
-    utils.roger(writer);
-    writer
-      .code("@SuppressWarnings({\"unchecked\", \"rawtypes\"})\n")
-      .code("public class " + className + " implements " + model.getIfaceSimpleName() + " {\n")
-      .indent()
-        .stmt("private Vertx _vertx")
-        .stmt("private String _address")
-        .stmt("private DeliveryOptions _options")
-        .stmt("private boolean closed")
-        .newLine()
-        .code("public " + className + "(Vertx vertx, String address) {\n")
-        .indent()
-          .stmt("this(vertx, address, null)")
-        .unindent()
-        .code("}\n")
-        .newLine()
-        .code("public " + className +  "(Vertx vertx, String address, DeliveryOptions options) {\n")
-        .indent()
-          .stmt("this._vertx = vertx")
-          .stmt("this._address = address")
-          .stmt("this._options = options")
-          .code("try {")
-          .indent()
-            .stmt("this._vertx.eventBus().registerDefaultCodec(ServiceException.class, new ServiceExceptionMessageCodec())")
-          .unindent()
-          .code("} catch (IllegalStateException ex) {\n}")
-        .unindent()
-        .code("}\n")
-        .newLine();
+    utils.additionalImports(model).forEach(template::addImport);
+    addGeneratedMethodsToTemplate(model, buffer, writer, proxyHandlerClassTemplate);
+
+    return template.toString();
+  }
+
+  private void addGeneratedMethodsToTemplate(ProxyModel model, StringWriter buffer,
+    CodeWriter writer, ClassOrInterfaceDeclaration proxyHandlerClassTemplate) {
     generateMethods(model, writer);
-    writer
-      .unindent()
-      .code("}\n");
-    return buffer.toString();
+    List<CallableDeclaration> temp = parse("class X {\n" + buffer.toString() + "\n}").findAll(CallableDeclaration.class);
+    temp.forEach(proxyHandlerClassTemplate::addMember);
   }
 
   private void generateMethods(ProxyModel model, CodeWriter writer) {
