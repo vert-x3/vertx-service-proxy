@@ -18,8 +18,6 @@ import java.util.stream.Stream;
  */
 public class GeneratorUtils {
 
-  final String classHeader;
-  final String proxyGenImports;
   final String proxyHandlerTemplate;
   final String proxyHandlerHandleMethodTemplate;
   final String proxyHandlerHandleMethodCaseTemplate;
@@ -30,16 +28,14 @@ public class GeneratorUtils {
   final String proxyTemplate;
 
   public GeneratorUtils() {
-    classHeader = loadResource("class_header.txt") + "\n";
-    proxyTemplate = loadResource("proxy_template.java");
+    proxyTemplate = loadResource("proxy_class_template.java");
     proxyHandlerTemplate = loadResource("proxy_handler_class_template.java");
-    proxyHandlerHandleMethodTemplate = loadResource("proxy_handler_handle_method_body_template.java");
-    proxyHandlerHandleMethodCaseTemplate = loadResource("proxy_handler_handle_method_case_statement_template.java");
-    proxyHandlerHandleMethodDataObjectTypeHandle = loadResource("proxy_handler_handle_method_data_object_type_handle.java", "vertx-service-proxy");
-    proxyHandlerHandleMethodMapTypeHandle = loadResource("proxy_handler_handle_method_map_type_handle.java", "vertx-service-proxy");
-    proxyHandlerHandleMethodListOrSetTypeHandle = loadResource("proxy_handler_handle_method_list_or_set_type_handle.java", "vertx-service-proxy");
-    proxyHandlerHandleMethodApiTypeHandle = loadResource("proxy_handler_handle_method_api_type_handle.java", "vertx-service-proxy");
-    proxyGenImports = loadResource("proxy_gen_import.txt") + "\n";
+    proxyHandlerHandleMethodTemplate = loadResource("part/proxy_handler_handle_method_body_template.java");
+    proxyHandlerHandleMethodCaseTemplate = loadResource("part/proxy_handler_handle_method_case_statement_template.java");
+    proxyHandlerHandleMethodDataObjectTypeHandle = loadResource("part/proxy_handler_handle_method_data_object_type_handle.java", "vertx-service-proxy");
+    proxyHandlerHandleMethodMapTypeHandle = loadResource("part/proxy_handler_handle_method_map_type_handle.java", "vertx-service-proxy");
+    proxyHandlerHandleMethodListOrSetTypeHandle = loadResource("part/proxy_handler_handle_method_list_or_set_type_handle.java", "vertx-service-proxy");
+    proxyHandlerHandleMethodApiTypeHandle = loadResource("part/proxy_handler_handle_method_api_type_handle.java", "vertx-service-proxy");
   }
 
   public Stream<String> additionalImports(ProxyModel model) {

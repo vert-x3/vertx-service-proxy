@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
 package $Package$;
 
 import examples.SomeDatabaseService;
@@ -30,22 +29,16 @@ import java.lang.Override;
   Generated Proxy code - DO NOT EDIT
   @author Roger the Robot
 */
-
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class $TypeName$ extends ProxyHandler {
 
   public static final long DEFAULT_CONNECTION_TIMEOUT = 300;
 
   private final Vertx vertx;
-
   private final $ServiceName$ service;
-
   private final long timerID;
-
   private long lastAccessed;
-
   private final long timeoutSeconds;
-
   private final boolean includeDebugInfo;
 
   public $TypeName$(Vertx vertx, $ServiceName$ service) {
@@ -71,9 +64,7 @@ public class $TypeName$ extends ProxyHandler {
 
     try {
       this.vertx.eventBus().registerDefaultCodec(ServiceException.class, new ServiceExceptionMessageCodec());
-    } catch(IllegalStateException ex) {
-
-    }
+    } catch(IllegalStateException ex) { }
 
     if(timeoutSeconds != -1 && !topLevel) {
       long period = timeoutSeconds * 1000 / 2;

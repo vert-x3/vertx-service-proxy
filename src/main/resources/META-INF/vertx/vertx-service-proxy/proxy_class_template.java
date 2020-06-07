@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
 package $package$;
 
 import io.vertx.core.eventbus.DeliveryOptions;
@@ -35,13 +34,14 @@ import io.vertx.serviceproxy.ProxyUtils;
 import io.vertx.core.Vertx;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+
 /*
   Generated Proxy code - DO NOT EDIT
   @author Roger the Robot
 */
-
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class $ProxyName$ implements $ServiceName$ {
+
   private Vertx _vertx;
   private String _address;
   private DeliveryOptions _options;
@@ -57,8 +57,7 @@ public class $ProxyName$ implements $ServiceName$ {
     this._options = options;
     try {
       this._vertx.eventBus().registerDefaultCodec(ServiceException.class, new ServiceExceptionMessageCodec());
-    } catch (IllegalStateException ex) {
-    }
+    } catch (IllegalStateException ex) { }
   }
 
 }
