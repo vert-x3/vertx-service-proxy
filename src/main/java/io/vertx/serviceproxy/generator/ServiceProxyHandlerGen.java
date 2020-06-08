@@ -11,7 +11,6 @@ import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.stmt.Statement;
-import com.squareup.javapoet.CodeBlock;
 import io.vertx.codegen.Generator;
 import io.vertx.codegen.ParamInfo;
 import io.vertx.codegen.annotations.ModuleGen;
@@ -156,11 +155,8 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
       .findAny()
       .flatMap(MethodDeclaration::getBody)
       .ifPresent(it -> it.getStatement(0)
-        .replace(parseBlock(CodeBlock.builder()
-          .add(utils.proxyHandlerHandleMethodTemplate,
-            generateHandleMethodCases(model), HelperUtils.class)
-          .build()
-          .toString())));
+        .replace(parseBlock(utils.generatedCodeBlock(utils.proxyHandlerHandleMethodTemplate,
+          generateHandleMethodCases(model), HelperUtils.class))));
   }
 
   private String generateHandleMethodCases(ProxyModel model) {
@@ -168,12 +164,8 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
       .stream()
       .filter(info -> !info.isStaticMethod())
       .map(it -> (ProxyMethodInfo) it)
-      .map(info -> CodeBlock
-        .builder()
-        .add(utils.proxyHandlerHandleMethodCaseTemplate,
-          info.getName(), info.getName(), generateHandleMethodCaseParams(info), closeProxy(info))
-        .build()
-        .toString())
+      .map(info -> utils.generatedCodeBlock(utils.proxyHandlerHandleMethodCaseTemplate,
+        info.getName(), info.getName(), generateHandleMethodCaseParams(info), closeProxy(info)))
       .collect(Collectors.joining(""));
   }
 
@@ -310,7 +302,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
     if (isApiType(typeArg)) {
       return apiTypeHandler(typeArg);
     }
-    return CodeBlock.builder().add("HelperUtils.createHandler(msg, includeDebugInfo)").build().toString();
+    return utils.generatedCodeBlock("HelperUtils.createHandler(msg, includeDebugInfo)");
   }
 
   private String mapParamExtract(String name, TypeInfo type) {
