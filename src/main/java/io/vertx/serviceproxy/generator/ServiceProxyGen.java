@@ -78,6 +78,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
   private void addGeneratedMethodsToTemplate(ProxyModel model, StringWriter buffer,
     CodeWriter writer, ClassOrInterfaceDeclaration proxyHandlerClassTemplate) {
     generateMethods(model, writer);
+    // temporary hack to add methods to a template
     List<CallableDeclaration> temp = parse("class X {\n" + buffer.toString() + "\n}").findAll(CallableDeclaration.class);
     temp.forEach(proxyHandlerClassTemplate::addMember);
   }
