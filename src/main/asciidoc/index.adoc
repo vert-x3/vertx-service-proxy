@@ -203,6 +203,17 @@ annotation. The proxy instance is disposed when this method is called.
 
 More constraints on the _service interfaces_ are described below.
 
+== Security
+
+Service proxies can perform basic security using a simple interceptor. A authentication provider must be provided,
+optionally `Authorization`s can be added and in this case an `AuthorizationProvider` must also be present. Note that
+the authentication works based on tokens, that are extracted from the `auth-token` header.
+
+[source, java]
+----
+{@link examples.Examples#secure(io.vertx.core.Vertx)}
+----
+
 == Code generation
 
 Service annotated with `@ProxyGen` annotation trigger the generation of the service helper classes:
