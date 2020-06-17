@@ -21,7 +21,10 @@ import java.util.function.Function;
  * Create an event bus service interceptor using a JWT auth that will verify all requests before the service is invoked
  * <p/>
  * Once a JWT is validated it will be queried for authorities. If authorities are missing a error 403 is returned.
+ *
+ * @deprecated Use {@link ServiceAuthInterceptor} instead
  */
+@Deprecated
 public class ServiceJWTInterceptor implements Function<Message<JsonObject>, Future<Message<JsonObject>>> {
 
   private JWTAuth jwtAuth;
