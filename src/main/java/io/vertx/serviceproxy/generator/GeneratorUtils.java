@@ -1,10 +1,18 @@
 package io.vertx.serviceproxy.generator;
 
+import static com.github.javaparser.StaticJavaParser.parseType;
+
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.type.Type;
+import com.squareup.javapoet.CodeBlock;
 import io.vertx.codegen.ParamInfo;
 import io.vertx.codegen.type.ClassKind;
 import io.vertx.codegen.type.ClassTypeInfo;
 import io.vertx.codegen.type.MapperInfo;
 import io.vertx.codegen.type.ParameterizedTypeInfo;
+import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
 
 import java.io.InputStream;
@@ -24,14 +32,18 @@ public class GeneratorUtils {
   final String roger;
   final String handlerConstructorBody;
   final String handlerCloseAccessed;
+  final String proxyHandlerTemplate;
+  final String proxyHandlerHandleMethodTemplate;
 
   public GeneratorUtils() {
-    classHeader = loadResource("class_header") + "\n";
-    proxyGenImports = loadResource("proxy_gen_import") + "\n";
-    handlerGenImports = loadResource("handler_gen_import") + "\n";
-    handlerConstructorBody = loadResource("handler_constructor_body") + "\n";
-    handlerCloseAccessed = loadResource("handler_close_accessed") + "\n";
-    roger = loadResource("roger") + "\n";
+    classHeader = loadResource("class_header.txt") + "\n";
+    proxyGenImports = loadResource("proxy_gen_import.txt") + "\n";
+    handlerGenImports = loadResource("handler_gen_import.txt") + "\n";
+    handlerConstructorBody = loadResource("handler_constructor_body.txt") + "\n";
+    handlerCloseAccessed = loadResource("handler_close_accessed.txt") + "\n";
+    roger = loadResource("roger.txt") + "\n";
+    proxyHandlerTemplate = loadResource("proxy_handler_class_template.java");
+    proxyHandlerHandleMethodTemplate = loadResource("part/proxy_handler_handle_method_body_template.java");
   }
 
   public Stream<String> additionalImports(ProxyModel model) {
@@ -73,7 +85,7 @@ public class GeneratorUtils {
   }
 
   public String loadResource(String resource, String moduleName) {
-    InputStream input = GeneratorUtils.class.getResourceAsStream("/META-INF/vertx/" + moduleName + "/" + resource + ".txt");
+    InputStream input = GeneratorUtils.class.getResourceAsStream("/META-INF/vertx/" + moduleName + "/" + resource);
     try (Scanner scanner = new Scanner(input, StandardCharsets.UTF_8.name())) {
       return scanner.useDelimiter("\\A").next();
     }
@@ -124,5 +136,35 @@ public class GeneratorUtils {
         throw new AssertionError();
     }
     return String.format("%s != null ? %s : null", stmt, s);
+  }
+
+  public String generatedCodeBlock(String format, Object... args) {
+    return CodeBlock
+      .builder()
+      .add(format, args)
+      .build()
+      .toString();
+  }
+
+  ClassOrInterfaceDeclaration getClassDeclaration(CompilationUnit template) {
+    return template
+      .findFirst(ClassOrInterfaceDeclaration.class)
+      .orElseThrow(() -> new IllegalStateException("Cannot find the class in a template."));
+  }
+
+  void setConstructorsNames(String className, CompilationUnit template) {
+    template
+      .findAll(ConstructorDeclaration.class)
+      .forEach(c -> c.setName(className));
+  }
+
+  void setServiceTypes(ProxyModel model, ClassOrInterfaceDeclaration template) {
+    template
+      .findAll(Type.class, type -> "$ServiceName$".equals(type.getElementType().asString()))
+      .forEach(type -> type.replace(parseType(model.getIfaceSimpleName())));
+  }
+
+  ParamInfo getLastParam(ProxyMethodInfo info) {
+    return !info.getParams().isEmpty() ? info.getParam(info.getParams().size() - 1) : null;
   }
 }
