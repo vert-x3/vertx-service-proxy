@@ -1,5 +1,6 @@
 package io.vertx.serviceproxy.generator;
 
+import com.squareup.javapoet.CodeBlock;
 import io.vertx.codegen.ParamInfo;
 import io.vertx.codegen.type.ClassKind;
 import io.vertx.codegen.type.ClassTypeInfo;
@@ -19,19 +20,19 @@ import java.util.stream.Stream;
 public class GeneratorUtils {
 
   final String classHeader;
-  final String proxyGenImports;
   final String handlerGenImports;
   final String roger;
   final String handlerConstructorBody;
   final String handlerCloseAccessed;
+  final String proxyTemplate;
 
   public GeneratorUtils() {
-    classHeader = loadResource("class_header") + "\n";
-    proxyGenImports = loadResource("proxy_gen_import") + "\n";
-    handlerGenImports = loadResource("handler_gen_import") + "\n";
-    handlerConstructorBody = loadResource("handler_constructor_body") + "\n";
-    handlerCloseAccessed = loadResource("handler_close_accessed") + "\n";
-    roger = loadResource("roger") + "\n";
+    classHeader = loadResource("class_header.txt") + "\n";
+    handlerGenImports = loadResource("handler_gen_import.txt") + "\n";
+    handlerConstructorBody = loadResource("handler_constructor_body.txt") + "\n";
+    handlerCloseAccessed = loadResource("handler_close_accessed.txt") + "\n";
+    roger = loadResource("roger.txt") + "\n";
+    proxyTemplate = loadResource("proxy_class_template.java");
   }
 
   public Stream<String> additionalImports(ProxyModel model) {
@@ -52,10 +53,6 @@ public class GeneratorUtils {
     w.print(classHeader);
   }
 
-  public void proxyGenImports(PrintWriter w) {
-    w.print(proxyGenImports);
-  }
-
   public void handlerGenImports(PrintWriter w) { w.print(handlerGenImports); }
 
   public void roger(PrintWriter w) { w.print(roger); }
@@ -73,7 +70,7 @@ public class GeneratorUtils {
   }
 
   public String loadResource(String resource, String moduleName) {
-    InputStream input = GeneratorUtils.class.getResourceAsStream("/META-INF/vertx/" + moduleName + "/" + resource + ".txt");
+    InputStream input = GeneratorUtils.class.getResourceAsStream("/META-INF/vertx/" + moduleName + "/" + resource);
     try (Scanner scanner = new Scanner(input, StandardCharsets.UTF_8.name())) {
       return scanner.useDelimiter("\\A").next();
     }
@@ -124,5 +121,13 @@ public class GeneratorUtils {
         throw new AssertionError();
     }
     return String.format("%s != null ? %s : null", stmt, s);
+  }
+
+  public String generatedCodeBlock(String format, Object... args) {
+    return CodeBlock
+      .builder()
+      .add(format, args)
+      .build()
+      .toString();
   }
 }
