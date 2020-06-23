@@ -1,17 +1,34 @@
 package io.vertx.serviceproxy.generator;
 
+import static com.github.javaparser.StaticJavaParser.parseParameter;
+import static com.github.javaparser.StaticJavaParser.parseType;
+
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.ast.type.TypeParameter;
 import com.squareup.javapoet.CodeBlock;
+import io.vertx.codegen.MethodInfo;
 import io.vertx.codegen.ParamInfo;
+import io.vertx.codegen.TypeParamInfo;
 import io.vertx.codegen.type.ClassKind;
 import io.vertx.codegen.type.ClassTypeInfo;
 import io.vertx.codegen.type.MapperInfo;
 import io.vertx.codegen.type.ParameterizedTypeInfo;
+import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -129,5 +146,51 @@ public class GeneratorUtils {
       .add(format, args)
       .build()
       .toString();
+  }
+
+  ClassOrInterfaceDeclaration getClassDeclaration(CompilationUnit template) {
+    return template
+      .findFirst(ClassOrInterfaceDeclaration.class)
+      .orElseThrow(() -> new IllegalStateException("Cannot find the class in a template."));
+  }
+
+  void setConstructorsNames(String className, CompilationUnit template) {
+    template
+      .findAll(ConstructorDeclaration.class)
+      .forEach(c -> c.setName(className));
+  }
+
+  void setServiceClassNames(ProxyModel model, CompilationUnit template) {
+    template
+      .findAll(Type.class, type -> "$ServiceName$".equals(type.toString()))
+      .forEach(type -> type.replace(parseType(model.getIfaceSimpleName())));
+  }
+
+  void setTypeParams(MethodInfo m, MethodDeclaration template) {
+    template.setTypeParameters(NodeList.nodeList(m.getTypeParams()
+        .stream()
+        .map(TypeParamInfo::getName)
+        .map(TypeParameter::new)
+        .collect(Collectors.toList())));
+  }
+
+  void setReturnType(MethodInfo m, MethodDeclaration template) {
+    template.setType(parseType(m.getReturnType().getName()));
+  }
+
+  void setMethodParams(MethodInfo m, MethodDeclaration template) {
+    template.setParameters(NodeList.nodeList());
+    List<Parameter> collect = m.getParams().stream()
+      .map(paramInfo -> parseParameter(paramInfo.getType().getSimpleName() + " " + paramInfo.getName()))
+      .collect(Collectors.toList());
+    template.setParameters(NodeList.nodeList(collect));
+  }
+
+  List<ParamInfo> paramsWithoutResultHandler(ProxyMethodInfo method) {
+    return method.getParams().isEmpty() ? new ArrayList<>() : method.getParams().subList(0, method.getParams().size() - 1);
+  }
+
+  ParamInfo getLastParam(ProxyMethodInfo method) {
+    return !method.getParams().isEmpty() ? method.getParam(method.getParams().size() - 1) : null;
   }
 }
