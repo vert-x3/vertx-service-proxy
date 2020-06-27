@@ -1,12 +1,12 @@
 package io.vertx.serviceproxy.generator;
 
+import static com.github.javaparser.StaticJavaParser.parseClassOrInterfaceType;
 import static com.github.javaparser.StaticJavaParser.parseType;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.type.Type;
-import com.squareup.javapoet.CodeBlock;
 import io.vertx.codegen.ParamInfo;
 import io.vertx.codegen.type.ClassKind;
 import io.vertx.codegen.type.ClassTypeInfo;
@@ -139,11 +139,53 @@ public class GeneratorUtils {
   }
 
   public String generatedCodeBlock(String format, Object... args) {
-    return CodeBlock
-      .builder()
-      .add(format, args)
-      .build()
-      .toString();
+    int i = format.indexOf("$");
+    int arg = 0;
+
+    while (i != -1) {
+      if (format.length() > i) {
+        PlaceholderType type = PlaceholderType.of(format.charAt(i + 1));
+
+        if (args.length < arg + 1) {
+          throw new IllegalArgumentException("Not enough arguments passed to generate code fragment");
+        }
+
+        switch (type) {
+          case TYPE:
+            format = format.replaceFirst("\\$T", parseClassOrInterfaceType(((Class) args[arg++]).getName()).asString());
+            break;
+          case LITERAL:
+            format = format.replaceFirst("\\$L", String.valueOf(args[arg++]));
+            break;
+          case STRING:
+            format = format.replaceFirst("\\$S", "\"" + args[arg++] + "\"");
+            break;
+          case UNKNOWN:
+            throw new IllegalArgumentException("$" + format.charAt(i + 1) + " is not a recognized placeholder");
+        }
+
+        i = format.indexOf("$", i + 1);
+      }
+    }
+
+    return format;
+  }
+
+  private enum PlaceholderType {
+    TYPE, LITERAL, STRING, UNKNOWN;
+
+    private static PlaceholderType of(char t) {
+      switch (t) {
+        case 'T':
+          return PlaceholderType.TYPE;
+        case 'L':
+          return PlaceholderType.LITERAL;
+        case 'S':
+          return PlaceholderType.STRING;
+      }
+
+      return PlaceholderType.UNKNOWN;
+    }
   }
 
   ClassOrInterfaceDeclaration getClassDeclaration(CompilationUnit template) {
