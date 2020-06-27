@@ -1,17 +1,37 @@
 package io.vertx.serviceproxy.generator;
 
+import static com.github.javaparser.StaticJavaParser.parse;
+import static com.github.javaparser.StaticJavaParser.parseBlock;
+import static com.github.javaparser.StaticJavaParser.parseStatement;
+
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.stmt.Statement;
 import io.vertx.codegen.Generator;
 import io.vertx.codegen.ParamInfo;
 import io.vertx.codegen.annotations.ModuleGen;
 import io.vertx.codegen.annotations.ProxyGen;
-import io.vertx.codegen.type.*;
-import io.vertx.codegen.writer.CodeWriter;
+import io.vertx.codegen.type.ApiTypeInfo;
+import io.vertx.codegen.type.ClassKind;
+import io.vertx.codegen.type.ClassTypeInfo;
+import io.vertx.codegen.type.DataObjectInfo;
+import io.vertx.codegen.type.ParameterizedTypeInfo;
+import io.vertx.codegen.type.TypeInfo;
+import io.vertx.core.eventbus.DeliveryOptions;
+import io.vertx.core.json.JsonArray;
+import io.vertx.serviceproxy.HelperUtils;
+import io.vertx.serviceproxy.ServiceBinder;
 import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
-
-import java.io.StringWriter;
 import java.lang.annotation.Annotation;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -58,189 +78,134 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
     return model.getIfaceSimpleName() + "VertxProxyHandler";
   }
 
-  public Stream<String> additionalImports() { return Stream.empty(); }
-
   @Override
   public String render(ProxyModel model, int index, int size, Map<String, Object> session) {
-    StringWriter buffer = new StringWriter();
-    CodeWriter writer = new CodeWriter(buffer);
     String className = className(model);
-    utils.classHeader(writer);
-    writer.stmt("package " + model.getIfacePackageName());
-    writer.newLine();
-    utils.writeImport(writer, model.getIfaceFQCN());
-    utils.handlerGenImports(writer);
-    Stream.concat(utils.additionalImports(model), additionalImports()).distinct().forEach(i -> utils.writeImport(writer, i));
-    utils.roger(writer);
-    writer
-      .code("@SuppressWarnings({\"unchecked\", \"rawtypes\"})\n")
-      .code("public class " + className + " extends ProxyHandler {\n")
-      .newLine()
-      .indent()
-      .code("public static final long DEFAULT_CONNECTION_TIMEOUT = 5 * 60; // 5 minutes \n")
-      .stmt("private final Vertx vertx")
-      .stmt("private final " + model.getIfaceSimpleName() + " service")
-      .stmt("private final long timerID")
-      .stmt("private long lastAccessed")
-      .stmt("private final long timeoutSeconds")
-      .stmt("private final boolean includeDebugInfo")
-      .newLine()
-      .code("public " + className + "(Vertx vertx, " + model.getIfaceSimpleName() + " service){\n")
-      .indent()
-      .stmt("this(vertx, service, DEFAULT_CONNECTION_TIMEOUT)")
-      .unindent()
-      .code("}\n")
-      .newLine()
-      .code("public "+ className + "(Vertx vertx, " + model.getIfaceSimpleName() + " service, long timeoutInSecond){\n")
-      .indent()
-      .stmt("this(vertx, service, true, timeoutInSecond)")
-      .unindent()
-      .code("}\n")
-      .newLine()
-      .code("public "+ className + "(Vertx vertx, " + model.getIfaceSimpleName() + " service, boolean topLevel, long timeoutInSecond){\n")
-      .indent()
-      .stmt("this(vertx, service, true, timeoutInSecond, false)")
-      .unindent()
-      .code("}\n")
-      .newLine()
-      .code("public " + className + "(Vertx vertx, " + model.getIfaceSimpleName() + " service, boolean topLevel, long timeoutSeconds, boolean includeDebugInfo) {\n");
-    utils.handlerConstructorBody(writer);
-    writer.code("private void checkTimedOut(long id) {\n")
-      .indent()
-      .stmt("long now = System.nanoTime()")
-      .code("if (now - lastAccessed > timeoutSeconds * 1000000000) {\n")
-      .indent();
-    model.getMethods().stream()
-      .filter(m -> ((ProxyMethodInfo)m).isProxyClose())
-      .forEach(m -> {
-        if (m.getParams().isEmpty()) writer.stmt("service." + m.getName() + "()");
-        else writer.stmt("service." + m.getName() + "(done -> {})");
-      });
-    writer
-      .stmt("close()")
-      .unindent()
-      .code("}\n")
-      .unindent()
-      .code("}\n")
-      .newLine();
-    utils.handleCloseAccessed(writer);
-    writer.code("public void handle(Message<JsonObject> msg) {\n")
-      .indent()
-      .code("try{\n")
-      .indent()
-      .stmt("JsonObject json = msg.body()")
-      .stmt("String action = msg.headers().get(\"action\")")
-      .stmt("if (action == null) throw new IllegalStateException(\"action not specified\")")
-      .stmt("accessed()")
-      .code("switch (action) {\n")
-      .indent();
-    model.getMethods().stream().filter(m -> !m.isStaticMethod()).forEach(m -> generateActionSwitchEntry((ProxyMethodInfo) m, writer));
-    writer
-      .code("default: throw new IllegalStateException(\"Invalid action: \" + action);\n")
-      .unindent()
-      .code("}\n")
-      .unindent()
-      .code("} catch (Throwable t) {\n")
-      .indent()
-      .stmt("if (includeDebugInfo) msg.reply(new ServiceException(500, t.getMessage(), HelperUtils.generateDebugInfo(t)))")
-      .stmt("else msg.reply(new ServiceException(500, t.getMessage()))")
-      .stmt("throw t")
-      .unindent()
-      .code("}\n")
-      .unindent()
-      .code("}\n");
-    generateAdditionalMethods(model, writer);
-    writer
-      .unindent()
-      .code("}");
-    return buffer.toString();
+    CompilationUnit template = parse(utils.proxyHandlerTemplate);
+    ClassOrInterfaceDeclaration proxyHandlerClassTemplate = utils.getClassDeclaration(template);
+
+    template.setPackageDeclaration(model.getIfacePackageName());
+    proxyHandlerClassTemplate.setName(className);
+    utils.setConstructorsNames(className, template);
+    utils.setServiceTypes(model, proxyHandlerClassTemplate);
+    generateCheckTimedOutMethodImplementation(model, proxyHandlerClassTemplate);
+    generateHandleMethodImplementation(model, proxyHandlerClassTemplate);
+
+    return template.toString();
   }
 
-  public void generateActionSwitchEntry(ProxyMethodInfo m, CodeWriter writer) {
-    ParamInfo lastParam = !m.getParams().isEmpty() ? m.getParam(m.getParams().size() - 1) : null;
+  private void generateCheckTimedOutMethodImplementation(ProxyModel model, ClassOrInterfaceDeclaration template) {
+    template.getMethodsByName("checkTimedOut")
+      .stream()
+      .findAny()
+      .flatMap(MethodDeclaration::getBody)
+      .ifPresent(blockStmt -> blockStmt.getStatements()
+        .stream()
+        .filter(Statement::isIfStmt)
+        .forEach(statement -> statement.getChildNodes()
+          .get(1)
+          .replace(parseStatement(generateCheckTimedOutMethodImplementation(model)))));
+  }
+
+  private String generateCheckTimedOutMethodImplementation(ProxyModel model) {
+    return model
+      .getMethods()
+      .stream()
+      .filter(m -> ((ProxyMethodInfo) m).isProxyClose())
+      .findFirst()
+      .map(info -> {
+        if (info.getParams().isEmpty()) {
+          return "{"
+            + "close();\n"
+            + "service." + info.getName() + "();\n"
+            + "}";
+        } else {
+          return "{\n"
+            + "close();\n"
+            + "service." + info.getName() + "(done -> {});\n"
+            + "}";
+        }
+      })
+      .orElse("{\n"
+        + "close();\n"
+        + "}");
+  }
+
+  private void generateHandleMethodImplementation(ProxyModel model, ClassOrInterfaceDeclaration template) {
+    template.getMethodsByName("handle")
+      .stream()
+      .findAny()
+      .flatMap(MethodDeclaration::getBody)
+      .ifPresent(it -> it.getStatement(0)
+        .replace(parseBlock(utils.generatedCodeBlock(utils.proxyHandlerHandleMethodTemplate,
+          generateHandleMethodCases(model), HelperUtils.class))));
+  }
+
+  private String generateHandleMethodCases(ProxyModel model) {
+    return model.getMethods()
+      .stream()
+      .filter(info -> !info.isStaticMethod())
+      .map(it -> (ProxyMethodInfo) it)
+      .map(info -> utils.generatedCodeBlock(
+        "case $S: {\n"
+          + "  service.$L($L);\n"
+          + "  $L\n"
+          + "}\n",
+        info.getName(), info.getName(), generateHandleMethodCaseParams(info), closeProxy(info)))
+      .collect(Collectors.joining(""));
+  }
+
+  private String closeProxy(ProxyMethodInfo info) {
+    return info.isProxyClose() ?
+      "\nclose();\n" + "break;" :
+      "\nbreak;";
+  }
+
+  public String generateHandleMethodCaseParams(ProxyMethodInfo info) {
+    ParamInfo lastParam = utils.getLastParam(info);
     boolean hasResultHandler = utils.isResultHandler(lastParam);
-    writer
-      .code("case \"" + m.getName() + "\": {\n")
-      .indent()
-      .code("service." + m.getName() + "(")
-      .indent();
     if (hasResultHandler) {
-      writer.writeSeq(
-        Stream.concat(
-          m.getParams().subList(0, m.getParams().size() - 1).stream().map(this::generateJsonParamExtract),
-          Stream.of(generateHandler(lastParam))
-        ),
-        ",\n" + writer.indentation()
-      );
+      return generateHandleMethodCaseParamsWithResultHandler(info, lastParam);
     } else {
-      writer.writeSeq(
-        m.getParams().stream().map(this::generateJsonParamExtract),
-        ",\n" + writer.indentation()
-      );
+      return generateHandleMethodCaseParamsWithoutResultHandler(info);
     }
-    writer.unindent();
-    writer.write(");\n");
-    if (m.isProxyClose()) writer.stmt("close()");
-    writer.stmt("break");
-    writer.unindent();
-    writer.code("}\n");
+  }
+
+  private String generateHandleMethodCaseParamsWithResultHandler(ProxyMethodInfo info, ParamInfo lastParam) {
+    return Stream
+      .concat(info.getParams()
+          .subList(0, info.getParams().size() - 1)
+          .stream()
+          .map(this::generateJsonParamExtract),
+        Stream.of(generateHandler(lastParam)))
+      .collect(Collectors.joining(", \n"));
+  }
+
+  private String generateHandleMethodCaseParamsWithoutResultHandler(ProxyMethodInfo info) {
+    return info
+      .getParams()
+      .stream()
+      .map(this::generateJsonParamExtract)
+      .collect(Collectors.joining(", \n"));
   }
 
   public String generateJsonParamExtract(ParamInfo param) {
     String name = param.getName();
     TypeInfo type = param.getType();
     String typeName = type.getName();
-    if (typeName.equals("char") || typeName.equals("java.lang.Character"))
-      return "json.getInteger(\"" + name + "\") == null ? null : (char)(int)(json.getInteger(\"" + name + "\"))";
-    if (typeName.equals("byte") || typeName.equals("java.lang.Byte") ||
-      typeName.equals("short") || typeName.equals("java.lang.Short") ||
-      typeName.equals("int") || typeName.equals("java.lang.Integer") ||
-      typeName.equals("long") || typeName.equals("java.lang.Long"))
-      return "json.getValue(\"" + name + "\") == null ? null : (json.getLong(\"" + name + "\")." + numericMapping.get(typeName) + "Value())";
-    if (typeName.equals("float") || typeName.equals("java.lang.Float") ||
-      typeName.equals("double") || typeName.equals("java.lang.Double"))
-      return "json.getValue(\"" + name + "\") == null ? null : (json.getDouble(\"" + name + "\")." + numericMapping.get(typeName) + "Value())";
-    if (type.getKind() == ClassKind.ENUM)
-      return "json.getString(\"" + name + "\") == null ? null : " + param.getType().getName() + ".valueOf(json.getString(\"" + name + "\"))";
-    if (type.getKind() == ClassKind.LIST || type.getKind() == ClassKind.SET) {
-      String coll = type.getKind() == ClassKind.LIST ? "List" : "Set";
-      TypeInfo typeArg = ((ParameterizedTypeInfo)type).getArg(0);
-      if (typeArg.isDataObjectHolder()) {
-        ClassTypeInfo doType = (ClassTypeInfo) typeArg;
-        return String.format(
-          "json.getJsonArray(\"%s\").stream().map(v -> %s).collect(Collectors.to%s())",
-          name,
-          GeneratorUtils.generateDeserializeDataObject("v", doType),
-          coll
-        );
-      }
-      if (typeArg.getName().equals("java.lang.Byte") || typeArg.getName().equals("java.lang.Short") ||
-        typeArg.getName().equals("java.lang.Integer") || typeArg.getName().equals("java.lang.Long"))
-        return "json.getJsonArray(\"" + name + "\").stream().map(o -> ((Number)o)." + numericMapping.get(typeArg.getName()) + "Value()).collect(Collectors.to" + coll + "())";
-      return "HelperUtils.convert" + coll + "(json.getJsonArray(\"" + name + "\").getList())";
-    }
-    if (type.getKind() == ClassKind.MAP) {
-      TypeInfo typeArg = ((ParameterizedTypeInfo)type).getArg(1);
-      if (typeArg.getName().equals("java.lang.Byte") || typeArg.getName().equals("java.lang.Short") ||
-        typeArg.getName().equals("java.lang.Integer") || typeArg.getName().equals("java.lang.Long") ||
-        typeArg.getName().equals("java.lang.Float") || typeArg.getName().equals("java.lang.Double"))
-        return "json.getJsonObject(\"" + name + "\").getMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> ((java.lang.Number)entry.getValue())." + numericMapping.get(typeArg.getName()) + "Value()))";
-      if (typeArg.isDataObjectHolder()) {
-        ClassTypeInfo doType = (ClassTypeInfo) typeArg;
-        return String.format(
-          "json.getJsonObject(\"%s\").stream().collect(Collectors.toMap(Map.Entry::getKey, e -> %s))",
-          name,
-          GeneratorUtils.generateDeserializeDataObject("e.getValue()", doType)
-        );
-      }
-      return "HelperUtils.convertMap(json.getJsonObject(\"" + name + "\").getMap())";
-    }
+
+    if (isCharacter(typeName)) return charParamExtract(name);
+    if (isIntegerNumberType(typeName)) return integerParamExtract(name, typeName);
+    if (isFloatingNumberType(typeName)) return floatingParamExtract(name, typeName);
+    if (type.getKind() == ClassKind.ENUM) return enumParamExtract(param, name);
+    if (type.getKind() == ClassKind.LIST || type.getKind() == ClassKind.SET) return listOrSetParamExtract(name, type);
+    if (type.getKind() == ClassKind.MAP) return mapParamExtract(name, type);
     if (type.isDataObjectHolder()) {
       ClassTypeInfo doType = (ClassTypeInfo) type;
-      String valueExtractionStmt = "json." + resolveDataObjectJsonExtractorMethod(doType.getDataObject()) + "(\"" + name + "\")";
+      String valueExtractionStmt = utils.generatedCodeBlock("json.$L($S)", resolveDataObjectJsonExtractorMethod(doType.getDataObject()), name);
       return GeneratorUtils.generateDeserializeDataObject(valueExtractionStmt, doType);
     }
-    return "(" + type.getName() + ")json.getValue(\"" + name + "\")";
+    return utils.generatedCodeBlock("($L)json.getValue($S)", type.getName(), name);
   }
 
   private String resolveDataObjectJsonExtractorMethod(DataObjectInfo info) {
@@ -253,65 +218,185 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
         return "getValue";
     }
   }
+
+  private boolean isCharacter(String typeName) {
+    return typeName.equals("char") ||
+      typeName.equals("java.lang.Character");
+  }
+
+  private boolean isFloatingNumberType(String typeName) {
+    return typeName.equals("float") ||
+      typeName.equals("java.lang.Float") ||
+      typeName.equals("double") ||
+      typeName.equals("java.lang.Double");
+  }
+
+  private boolean isIntegerNumberType(String typeName) {
+    return isBoxedIntegerType(typeName) ||
+      typeName.equals("byte") ||
+      typeName.equals("short") ||
+      typeName.equals("int") ||
+      typeName.equals("long");
+  }
+
+  private boolean isBoxedNumericType(String typeName) {
+    return isBoxedIntegerType(typeName) ||
+      typeName.equals("java.lang.Float") ||
+      typeName.equals("java.lang.Double");
+  }
+
+  private boolean isBoxedIntegerType(String typeName) {
+    return typeName.equals("java.lang.Byte") ||
+      typeName.equals("java.lang.Short") ||
+      typeName.equals("java.lang.Integer") ||
+      typeName.equals("java.lang.Long");
+  }
+
+  private boolean isApiType(TypeInfo typeArg) {
+    return typeArg.getKind() == ClassKind.API && ((ApiTypeInfo) typeArg).isProxyGen();
+  }
+
   public String generateHandler(ParamInfo param) {
     TypeInfo typeArg = ((ParameterizedTypeInfo) ((ParameterizedTypeInfo) param.getType()).getArg(0)).getArg(0);
     return generateHandler(typeArg);
   }
+
   public String generateHandler(TypeInfo typeArg) {
-    if (typeArg.getKind() == ClassKind.LIST || typeArg.getKind() == ClassKind.SET) {
-      String coll = typeArg.getKind() == ClassKind.LIST ? "List" : "Set";
-      TypeInfo innerTypeArg = ((ParameterizedTypeInfo)typeArg).getArg(0);
-      if (innerTypeArg.getName().equals("java.lang.Character"))
-        return "HelperUtils.create" + coll + "CharHandler(msg, includeDebugInfo)";
-      if (innerTypeArg.isDataObjectHolder())
-        return "res -> {\n" +
-          "            if (res.failed()) {\n" +
-          "              HelperUtils.manageFailure(msg, res.cause(), includeDebugInfo);\n" +
-          "            } else {\n" +
-          "              msg.reply(new JsonArray(res.result().stream().map(v -> " + GeneratorUtils.generateSerializeDataObject("v", (ClassTypeInfo) innerTypeArg) + ").collect(Collectors.toList())));\n" +
-          "            }\n" +
-          "         }";
-      return "HelperUtils.create" + coll + "Handler(msg, includeDebugInfo)";
-    }
-    if (typeArg.getKind() == ClassKind.MAP) {
-      TypeInfo innerTypeArg = ((ParameterizedTypeInfo)typeArg).getArg(1);
-      if (innerTypeArg.getName().equals("java.lang.Character"))
-        return "HelperUtils.createMapCharHandler(msg, includeDebugInfo)";
-      if (innerTypeArg.isDataObjectHolder())
-        return "res -> {\n" +
-          "            if (res.failed()) {\n" +
-          "              if (res.cause() instanceof ServiceException) {\n" +
-          "                msg.reply(res.cause());\n" +
-          "              } else {\n" +
-          "                msg.reply(new ServiceException(-1, res.cause().getMessage()));\n" +
-          "              }\n" +
-          "            } else {\n" +
-          "              msg.reply(new JsonObject(res.result().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> " + GeneratorUtils.generateSerializeDataObject("e.getValue()", (ClassTypeInfo) innerTypeArg) + "))));\n" +
-          "            }\n" +
-          "         }";
-      return "HelperUtils.createMapHandler(msg, includeDebugInfo)";
-    }
-    if (typeArg.isDataObjectHolder())
-      return "res -> {\n" +
-        "            if (res.failed()) {\n" +
-        "              HelperUtils.manageFailure(msg, res.cause(), includeDebugInfo);\n" +
-        "            } else {\n" +
-        "              msg.reply(" + GeneratorUtils.generateSerializeDataObject("res.result()", (ClassTypeInfo) typeArg) + ");\n" +
-        "            }\n" +
-        "         }";
-    if (typeArg.getKind() == ClassKind.API && ((ApiTypeInfo)typeArg).isProxyGen())
-      return "res -> {\n" +
-        "            if (res.failed()) {\n" +
-        "              HelperUtils.manageFailure(msg, res.cause(), includeDebugInfo);\n" +
-        "            } else {\n" +
-        "              String proxyAddress = UUID.randomUUID().toString();\n" +
-        "              new ServiceBinder(vertx).setAddress(proxyAddress).setTopLevel(false).setTimeoutSeconds(timeoutSeconds).register(" + typeArg.getSimpleName() + ".class, res.result());\n" +
-        "              msg.reply(null, new DeliveryOptions().addHeader(\"proxyaddr\", proxyAddress));\n" +
-        "            }\n" +
-        "          }";
-    return "HelperUtils.createHandler(msg, includeDebugInfo)";
+    if (typeArg.getKind() == ClassKind.LIST || typeArg.getKind() == ClassKind.SET) return listOrSetTypeHandler(typeArg);
+    if (typeArg.getKind() == ClassKind.MAP) return mapTypeHandler((ParameterizedTypeInfo) typeArg);
+    if (typeArg.isDataObjectHolder()) return dataObjectTypeHandler((ClassTypeInfo) typeArg);
+    if (isApiType(typeArg)) return apiTypeHandler(typeArg);
+    return utils.generatedCodeBlock("HelperUtils.createHandler(msg, includeDebugInfo)");
   }
 
-  public void generateAdditionalMethods(ProxyModel model, CodeWriter writer) {}
+  private String mapParamExtract(String name, TypeInfo type) {
+    TypeInfo typeArg = ((ParameterizedTypeInfo) type).getArg(1);
+    if (isBoxedNumericType(typeArg.getName())) {
+      return utils.generatedCodeBlock(
+        "json.getJsonObject($S).getMap().entrySet()"
+          + ".stream()"
+          + ".collect($T.toMap($T.Entry::getKey, entry -> ((java.lang.Number)entry.getValue()).$LValue()))",
+        name, Collectors.class, Map.class, numericMapping.get(typeArg.getName()));
+    }
+    if (typeArg.isDataObjectHolder()) {
+      ClassTypeInfo doType = (ClassTypeInfo) typeArg;
+      return utils.generatedCodeBlock(
+        "json.getJsonObject($S)"
+          + ".stream()"
+          + ".collect($T.toMap($T.Entry::getKey, e -> $L))",
+        name, Collectors.class, Map.class, GeneratorUtils.generateDeserializeDataObject("e.getValue()", doType));
+    }
+    return utils.generatedCodeBlock("HelperUtils.convertMap(json.getJsonObject($S).getMap())", name);
+  }
 
+  private String listOrSetParamExtract(String name, TypeInfo type) {
+    String coll = type.getKind() == ClassKind.LIST ? "List" : "Set";
+    TypeInfo typeArg = ((ParameterizedTypeInfo) type).getArg(0);
+    if (typeArg.isDataObjectHolder()) {
+      ClassTypeInfo doType = (ClassTypeInfo) typeArg;
+      return utils.generatedCodeBlock(
+        "json.getJsonArray($S)"
+          + ".stream()"
+          + ".map(v -> $L)"
+          + ".collect($T.to$L())",
+        name, GeneratorUtils.generateDeserializeDataObject("v", doType), Collectors.class, coll);
+    }
+    if (isBoxedIntegerType(typeArg.getName())) {
+      return utils.generatedCodeBlock(
+        "json.getJsonArray($S)"
+          + ".stream()"
+          + ".map(o -> ((Number)o).$LValue())"
+          + ".collect($T.to$L())",
+        name, numericMapping.get(typeArg.getName()), Collectors.class, coll);
+    }
+    return utils.generatedCodeBlock("HelperUtils.convert$L(json.getJsonArray($S).getList())", coll, name);
+  }
+
+  private String enumParamExtract(ParamInfo param, String name) {
+    return utils.generatedCodeBlock("json.getString($S) == null ? null : $L.valueOf(json.getString($S))",
+      name, param.getType().getName(), name);
+  }
+
+  private String floatingParamExtract(String name, String typeName) {
+    return utils.generatedCodeBlock("json.getValue($S) == null ? null : (json.getDouble($S).$LValue())",
+      name, name, numericMapping.get(typeName));
+  }
+
+  private String integerParamExtract(String name, String typeName) {
+    return utils.generatedCodeBlock("json.getValue($S) == null ? null : (json.getLong($S).$LValue())",
+      name, name, numericMapping.get(typeName));
+  }
+
+  private String charParamExtract(String name) {
+    return utils.generatedCodeBlock("json.getInteger($S) == null ? null : (char)(int)(json.getInteger($S))",
+      name, name);
+  }
+
+  private String apiTypeHandler(TypeInfo typeArg) {
+    return utils.generatedCodeBlock(
+      "res -> {\n"
+        + "  if (res.failed()) {\n"
+        + "    HelperUtils.manageFailure(msg,res.cause(),includeDebugInfo);\n"
+        + "  } else {\n"
+        + "    String proxyAddress= $T.randomUUID().toString();\n"
+        + "    new $T(vertx).setAddress(proxyAddress).setTopLevel(false).setTimeoutSeconds(timeoutSeconds).register($L.class, res.result());\n"
+        + "    msg.reply(null, new $T().addHeader(\"proxyaddr\", proxyAddress));\n"
+        + "  }\n"
+        + "}\n",
+      UUID.class, ServiceBinder.class, typeArg.getSimpleName(), DeliveryOptions.class);
+  }
+
+  private String dataObjectTypeHandler(ClassTypeInfo typeArg) {
+    return utils.generatedCodeBlock(
+      "res -> {\n"
+        + "  if (res.failed()) {\n"
+        + "    HelperUtils.manageFailure(msg, res.cause(), includeDebugInfo);\n"
+        + "  } else {\n"
+        + "    msg.reply($L);\n"
+        + "  }\n"
+        + "}\n",
+      GeneratorUtils.generateSerializeDataObject("res.result()", typeArg));
+  }
+
+  private String mapTypeHandler(ParameterizedTypeInfo typeArg) {
+    TypeInfo innerTypeArg = typeArg.getArg(1);
+    if (innerTypeArg.getName().equals("java.lang.Character")) {
+      return utils.generatedCodeBlock("HelperUtils.createMapCharHandler(msg, includeDebugInfo)");
+    }
+    if (innerTypeArg.isDataObjectHolder()) {
+      return utils.generatedCodeBlock(
+        "res -> {\n"
+          + "  if (res.failed()) {\n"
+          + "    if (res.cause() instanceof ServiceException) {\n"
+          + "      msg.reply(res.cause());\n"
+          + "    } else {\n"
+          + "      msg.reply(new ServiceException(-1, res.cause().getMessage()));\n"
+          + "    }\n"
+          + "  } else {\n"
+          + "    msg.reply(new JsonObject(res.result().entrySet().stream().collect($T.toMap($T.Entry::getKey,e->$L))));\n"
+          + "  }\n"
+          + "}\n",
+        Collectors.class, Map.class, GeneratorUtils.generateSerializeDataObject("e.getValue()", (ClassTypeInfo) innerTypeArg));
+    }
+    return utils.generatedCodeBlock("HelperUtils.createMapHandler(msg, includeDebugInfo)");
+  }
+
+  private String listOrSetTypeHandler(TypeInfo typeArg) {
+    String coll = typeArg.getKind() == ClassKind.LIST ? "List" : "Set";
+    TypeInfo innerTypeArg = ((ParameterizedTypeInfo) typeArg).getArg(0);
+    if (innerTypeArg.getName().equals("java.lang.Character")) {
+      return utils.generatedCodeBlock("HelperUtils.create$LCharHandler(msg, includeDebugInfo)", coll);
+    }
+    if (innerTypeArg.isDataObjectHolder()) {
+      return utils.generatedCodeBlock(
+        "res -> {\n"
+          + "  if (res.failed()) {\n"
+          + "    HelperUtils.manageFailure(msg, res.cause(), includeDebugInfo);\n"
+          + "  } else {\n"
+          + "    msg.reply(new $T(res.result().stream().map(v -> $L).collect($T.toList())));}\n"
+          + "}\n",
+        JsonArray.class, GeneratorUtils.generateSerializeDataObject("v", (ClassTypeInfo) innerTypeArg), Collectors.class);
+    }
+    return utils.generatedCodeBlock("HelperUtils.create$LHandler(msg, includeDebugInfo)", coll);
+  }
 }
