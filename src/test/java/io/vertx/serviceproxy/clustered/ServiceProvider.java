@@ -8,6 +8,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ServiceException;
 import io.vertx.serviceproxy.testmodel.MyServiceException;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
+import io.vertx.serviceproxy.testmodel.SomeEnumWithCustomConstructor;
 import io.vertx.serviceproxy.testmodel.SomeVertxEnum;
 import io.vertx.serviceproxy.testmodel.StringDataObject;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
@@ -102,6 +103,22 @@ public class ServiceProvider implements Service {
       result.handle(MyServiceException.fail(30, "failed!", "some extra"));
     }
     return this;
+  }
+
+  @Override
+  public Service methodUsingCustomEnum(SomeEnumWithCustomConstructor e, Handler<AsyncResult<Boolean>> result) {
+    if (e == SomeEnumWithCustomConstructor.ITEST) {
+      result.handle(Future.succeededFuture(true));
+    } else {
+      result.handle(Future.succeededFuture(false));
+    }
+  	return this;
+  }
+
+  @Override
+  public Service methodReturningCustomEnum(Handler<AsyncResult<SomeEnumWithCustomConstructor>> result) {
+    result.handle(Future.succeededFuture(SomeEnumWithCustomConstructor.DEV));
+  	return this;
   }
 
   /*@Override

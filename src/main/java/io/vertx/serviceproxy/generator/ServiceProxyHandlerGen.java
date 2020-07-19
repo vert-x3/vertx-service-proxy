@@ -200,8 +200,15 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
     if (typeName.equals("float") || typeName.equals("java.lang.Float") ||
       typeName.equals("double") || typeName.equals("java.lang.Double"))
       return "json.getValue(\"" + name + "\") == null ? null : (json.getDouble(\"" + name + "\")." + numericMapping.get(typeName) + "Value())";
-    if (type.getKind() == ClassKind.ENUM)
-      return "json.getString(\"" + name + "\") == null ? null : " + param.getType().getName() + ".valueOf(json.getString(\"" + name + "\"))";
+    if (type.getKind() == ClassKind.ENUM) {
+    	if (type.isDataObjectHolder()) {
+    	      ClassTypeInfo doType = (ClassTypeInfo) type;
+    	      String valueExtractionStmt = "json.getString(\"" + name + "\")";
+    	      return GeneratorUtils.generateDeserializeDataObject(valueExtractionStmt, doType);
+    	} else {
+    		return "json.getString(\"" + name + "\") == null ? null : " + param.getType().getName() + ".valueOf(json.getString(\"" + name + "\"))";    		
+    	}
+    }
     if (type.getKind() == ClassKind.LIST || type.getKind() == ClassKind.SET) {
       String coll = type.getKind() == ClassKind.LIST ? "List" : "Set";
       TypeInfo typeArg = ((ParameterizedTypeInfo)type).getArg(0);

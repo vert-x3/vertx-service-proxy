@@ -22,12 +22,12 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ServiceException;
 import io.vertx.serviceproxy.test.ServiceProxyTest;
 import io.vertx.serviceproxy.testmodel.*;
-
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
+
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -120,7 +120,19 @@ public class TestServiceImpl implements TestService {
   public void enumTypeAsResultNull(Handler<AsyncResult<SomeEnum>> handler) {
     handler.handle(Future.succeededFuture(null));
   }
-
+  
+  @Override
+  public void enumCustomTypeAsResult(String value, Handler<AsyncResult<SomeEnumWithCustomConstructor>> handler) {
+    handler.handle(Future.succeededFuture(SomeEnumWithCustomConstructor.of(value)));
+  }
+  
+  @Override
+  public void enumCustomTypeAsParameter(SomeEnumWithCustomConstructor customEnum, Handler<AsyncResult<String>> result) {
+    // TODO Auto-generated method stub
+    assertEquals(SomeEnumWithCustomConstructor.DEV, customEnum);
+    result.handle(Future.succeededFuture(SomeEnumWithCustomConstructor.DEV.getLongName()));
+  }
+  
   @Override
   public void dataObjectType(TestDataObject options) {
     assertEquals(new TestDataObject().setString("foo").setNumber(123).setBool(true), options);

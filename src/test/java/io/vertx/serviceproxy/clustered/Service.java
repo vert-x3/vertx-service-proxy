@@ -1,6 +1,8 @@
 package io.vertx.serviceproxy.clustered;
 
 
+import java.util.List;
+
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
@@ -10,11 +12,10 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.testmodel.SomeEnum;
+import io.vertx.serviceproxy.testmodel.SomeEnumWithCustomConstructor;
 import io.vertx.serviceproxy.testmodel.SomeVertxEnum;
 import io.vertx.serviceproxy.testmodel.StringDataObject;
 import io.vertx.serviceproxy.testmodel.TestDataObject;
-
-import java.util.List;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -39,7 +40,12 @@ public interface Service {
   @Fluent
   Service methodReturningVertxEnum(Handler<AsyncResult<SomeVertxEnum>> result);
 
-
+  @Fluent
+  Service methodUsingCustomEnum(SomeEnumWithCustomConstructor e, Handler<AsyncResult<Boolean>> result);
+  
+  @Fluent
+  Service methodReturningCustomEnum(Handler<AsyncResult<SomeEnumWithCustomConstructor>> result);
+  
   @Fluent
   Service methodWithJsonObject(JsonObject json, Handler<AsyncResult<JsonObject>> result);
 
