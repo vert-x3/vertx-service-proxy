@@ -122,15 +122,25 @@ public class TestServiceImpl implements TestService {
   }
   
   @Override
-  public void enumCustomTypeAsResult(String value, Handler<AsyncResult<SomeEnumWithCustomConstructor>> handler) {
-    handler.handle(Future.succeededFuture(SomeEnumWithCustomConstructor.of(value)));
+  public void enumCustomType(SomeEnumWithCustomConstructor someEnum) {
+    assertEquals(SomeEnumWithCustomConstructor.ITEST, someEnum);
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
-  
+
   @Override
-  public void enumCustomTypeAsParameter(SomeEnumWithCustomConstructor customEnum, Handler<AsyncResult<String>> result) {
-    // TODO Auto-generated method stub
-    assertEquals(SomeEnumWithCustomConstructor.DEV, customEnum);
-    result.handle(Future.succeededFuture(SomeEnumWithCustomConstructor.DEV.getLongName()));
+  public void enumCustomTypeNull(SomeEnumWithCustomConstructor someEnum) {
+    assertNull(someEnum);
+    vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
+  }
+
+  @Override
+  public void enumCustomTypeAsResult(Handler<AsyncResult<SomeEnumWithCustomConstructor>> handler) {
+    handler.handle(Future.succeededFuture(SomeEnumWithCustomConstructor.ITEST));
+  }
+
+  @Override
+  public void enumCustomTypeAsResultNull(Handler<AsyncResult<SomeEnumWithCustomConstructor>> handler) {
+    handler.handle(Future.succeededFuture(null));
   }
   
   @Override
@@ -796,5 +806,4 @@ public class TestServiceImpl implements TestService {
     assertEquals(expected, map);
     vertx.eventBus().send(ServiceProxyTest.TEST_ADDRESS, "ok");
   }
-
 }

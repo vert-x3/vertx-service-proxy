@@ -84,10 +84,14 @@ public interface TestService {
 
   void enumTypeAsResultNull(Handler<AsyncResult<SomeEnum>> someEnum);
 
-  void enumCustomTypeAsResult(String value, Handler<AsyncResult<SomeEnumWithCustomConstructor>> someEnum);
+  void enumCustomType(SomeEnumWithCustomConstructor someEnum);
 
-  void enumCustomTypeAsParameter(SomeEnumWithCustomConstructor customEnum, Handler<AsyncResult<String>> result);
-  
+  void enumCustomTypeNull(SomeEnumWithCustomConstructor someEnum);
+
+  void enumCustomTypeAsResult(Handler<AsyncResult<SomeEnumWithCustomConstructor>> someEnum);
+
+  void enumCustomTypeAsResultNull(Handler<AsyncResult<SomeEnumWithCustomConstructor>> someEnum);
+
   void dataObjectType(TestDataObject options);
 
   void listdataObjectType(List<TestDataObject> list);
