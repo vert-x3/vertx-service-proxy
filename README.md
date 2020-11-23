@@ -1,6 +1,6 @@
 # Service Proxies
 
-[![Build Status](https://travis-ci.org/vert-x3/vertx-service-proxy.svg?branch=master)](https://travis-ci.org/vert-x3/vertx-service-proxy)
+[![Build Status](https://github.com/vert-x3/vertx-service-proxy/workflows/CI/badge.svg?branch=master)](https://github.com/vert-x3/vertx-service-proxy/actions?query=workflow%3ACI)
 
 Please see the main documentation on the web-site for a full description:
 
