@@ -91,6 +91,14 @@ public class ProxyModel extends ClassModel {
     if (type.isVoid()) {
       return;
     }
+    if (type.getKind() == ClassKind.FUTURE) {
+      ParameterizedTypeInfo parameterizedTypeInfo = (ParameterizedTypeInfo) type;
+      TypeInfo arg = parameterizedTypeInfo.getArg(0);
+      if (isLegalAsyncResultType(arg)) {
+        return;
+      }
+      throw new GenException(elem, "type " + arg + " is not legal for use for a result in proxy");
+    }
 
     throw new GenException(elem, "Proxy methods must have void or Fluent returns");
   }

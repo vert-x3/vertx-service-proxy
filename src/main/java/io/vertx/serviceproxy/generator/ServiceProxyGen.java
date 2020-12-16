@@ -8,6 +8,7 @@ import io.vertx.codegen.annotations.ModuleGen;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.type.*;
 import io.vertx.codegen.writer.CodeWriter;
+import io.vertx.core.Promise;
 import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
 
@@ -50,6 +51,10 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
     writer.code("\n");
     utils.proxyGenImports(writer);
     utils.additionalImports(model).forEach(i -> utils.writeImport(writer, i));
+    boolean importPromise = model.getMethods().stream().anyMatch(m -> !m.isStaticMethod() && m.getReturnType().getKind() == ClassKind.FUTURE);
+    if (importPromise) {
+      utils.writeImport(writer, Promise.class.getName());
+    }
     utils.roger(writer);
     writer
       .code("@SuppressWarnings({\"unchecked\", \"rawtypes\"})\n")
@@ -111,14 +116,21 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
   private void generateMethodBody(ProxyMethodInfo method, CodeWriter writer) {
     ParamInfo lastParam = !method.getParams().isEmpty() ? method.getParam(method.getParams().size() - 1) : null;
     boolean hasResultHandler = utils.isResultHandler(lastParam);
-    if (hasResultHandler) {
+    TypeInfo returnType = method.getReturnType();
+    boolean returnFuture = returnType.getKind() == ClassKind.FUTURE;
+    if (hasResultHandler || returnFuture) {
       writer.code("if (closed) {\n");
       writer.indent();
-      writer.stmt(lastParam.getName() + ".handle(Future.failedFuture(new IllegalStateException(\"Proxy is closed\")))");
-      if (method.isFluent())
+      if (hasResultHandler) {
+        writer.stmt(lastParam.getName() + ".handle(Future.failedFuture(new IllegalStateException(\"Proxy is closed\")))");
+      }
+      if (method.isFluent()) {
         writer.stmt("return this");
-      else
+      } else if (returnFuture){
+        writer.println("return Future.failedFuture(new IllegalStateException(\"Proxy is closed\"));");
+      } else {
         writer.stmt("return");
+      }
       writer.unindent();
       writer.code("}\n");
     } else {
@@ -136,6 +148,8 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
     writer.stmt("_deliveryOptions.addHeader(\"action\", \"" + method.getName() + "\")");
     if (hasResultHandler) {
       generateSendCallWithResultHandler(lastParam, writer);
+    } else if (returnFuture){
+      generateSendCallWithFutureReturn(returnType, writer);
     } else {
       writer.stmt("_vertx.eventBus().send(_address, _json, _deliveryOptions)");
     }
@@ -196,6 +210,14 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
       writer.stmt("_json.put(\"" + name + "\", " + name + ")");
   }
 
+  private void generateSendCallWithFutureReturn(TypeInfo returnType, CodeWriter writer) {
+    ParameterizedTypeInfo parameterizedTypeInfo = ((ParameterizedTypeInfo)returnType);
+    TypeInfo t = parameterizedTypeInfo.getArg(0);
+//    String typeParams = parameterizedTypeInfo.getArgs().stream().map(TypeInfo::getSimpleName).collect(Collectors.joining(","));
+//    writer.format("Promise<%s> promise = Promise.promise();", typeParams).println();
+    wrapResult(t, "promise", true, writer);
+//    writer.println("return promise.future();");
+  }
   private void generateSendCallWithResultHandler(ParamInfo lastParam, CodeWriter writer) {
     String name = lastParam.getName();
     TypeInfo t = ((ParameterizedTypeInfo)((ParameterizedTypeInfo)lastParam.getType()).getArg(0)).getArg(0);
