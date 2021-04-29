@@ -83,16 +83,21 @@ public class ProxyModel extends ClassModel {
 
   @Override
   protected void checkReturnType(ExecutableElement elem, TypeInfo type, boolean allowAnyJavaType) {
-
     if (elem.getModifiers().contains(Modifier.STATIC)) {
       // Ignore static methods - we won't use them anyway
       return;
     }
-    if (type.isVoid()) {
-      return;
+    if (getModule().getUseFutures()) {
+      if (type.getKind() == ClassKind.FUTURE) {
+        return;
+      }
+      throw new GenException(elem, "Proxy methods must have Future returns");
+    } else {
+      if (type.isVoid()) {
+        return;
+      }
+      throw new GenException(elem, "Proxy methods must have void or Fluent returns");
     }
-
-    throw new GenException(elem, "Proxy methods must have void or Fluent returns");
   }
 
   @Override

@@ -3,6 +3,7 @@ package io.vertx.serviceproxy.codegen;
 import io.vertx.codegen.*;
 import io.vertx.codegen.type.ClassKind;
 import io.vertx.codegen.type.ParameterizedTypeInfo;
+import io.vertx.serviceproxy.codegen.future.FuturizedProxy;
 import io.vertx.serviceproxy.codegen.proxytestapi.*;
 import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
@@ -185,5 +186,10 @@ public class ProxyTest {
     } catch (GenException e) {
       // OK
     }
+  }
+
+  @Test
+  public void testValidFuture() throws Exception {
+    ProxyModel model = generateProxyModel(FuturizedProxy.class);
   }
 }
