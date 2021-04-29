@@ -151,7 +151,7 @@ public class ProxyTest {
   public void testValidCloseWithFuture() throws Exception {
     ProxyModel model = generateProxyModel(ValidProxyCloseWithFuture.class);
     assertEquals(1, model.getMethods().size());
-    assertEquals(MethodKind.FUTURE, model.getMethods().get(0).getKind());
+    assertEquals(MethodKind.CALLBACK, model.getMethods().get(0).getKind());
     ParameterizedTypeInfo handlerType = (ParameterizedTypeInfo) model.getMethods().get(0).getParams().get(0).getType();
     ParameterizedTypeInfo asyncResultType = (ParameterizedTypeInfo) handlerType.getArgs().get(0);
     assertEquals(ClassKind.VOID, asyncResultType.getArgs().get(0).getKind());
