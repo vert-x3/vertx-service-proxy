@@ -16,40 +16,16 @@
 
 package io.vertx.serviceproxy.test;
 
-import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.MessageConsumer;
-import io.vertx.core.eventbus.ReplyException;
-import io.vertx.core.eventbus.ReplyFailure;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ServiceBinder;
-import io.vertx.serviceproxy.ServiceException;
-import io.vertx.serviceproxy.testmodel.MyServiceException;
-import io.vertx.serviceproxy.testmodel.MyServiceExceptionMessageCodec;
-import io.vertx.serviceproxy.testmodel.SomeEnum;
-import io.vertx.serviceproxy.testmodel.TestDataObject;
-import io.vertx.serviceproxy.testmodel.TestService;
 import io.vertx.serviceproxy.testmodel2.FuturizedTestService;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
 import java.net.URI;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
- * @author <a href="http://tfox.org">Tim Fox</a>
- * @author lalitrao
  */
 public class FuturizedServiceProxyTest extends VertxTestBase {
 

@@ -111,7 +111,6 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
 
   private void generateMethodBody(ProxyMethodInfo method, CodeWriter writer) {
     ParamInfo lastParam = !method.getParams().isEmpty() ? method.getParam(method.getParams().size() - 1) : null;
-//    boolean hasResultHandler = utils.isResultHandler(lastParam);
     if (method.getKind() == MethodKind.CALLBACK) {
       writer.code("if (closed) {\n");
       writer.indent();
