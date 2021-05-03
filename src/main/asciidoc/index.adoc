@@ -1,5 +1,4 @@
 = Vert.x Service Proxy
-:toc: left
 
 When you compose a Vert.x application, you may want to isolate a functionality somewhere and make it available to
 the rest of your application. That's the main purpose of service proxies. It lets you expose a _service_ on the
@@ -113,7 +112,7 @@ the appropriate EventBus proxy code.
 .package-info.java
 [source,java]
 ----
-@io.vertx.codegen.annotations.ModuleGen(groupPackage = "io.vertx.example", name = "services")
+@io.vertx.codegen.annotations.ModuleGen(groupPackage = "io.vertx.example", name = "services", useFutures = true)
 package io.vertx.example;
 ----
 
@@ -143,10 +142,10 @@ public interface SomeDatabaseService {
 }
 ----
 
-== Async Interface
+== Async interface
 
 To be used by the service-proxy generation, the _service interface_ must comply to a couple of rules. First it
-should follow the async pattern. To return a result, the method should declare a `Handler<AsyncResult<ResultType>>` parameter.
+should follow the async pattern. To return a result, the method should declare a `Future<ResultType>` return type.
 `ResultType` can be another proxy (and so a proxies can be factories for other proxies).
 
 Let's see an example:
@@ -167,16 +166,13 @@ public interface SomeDatabaseService {
  }
 
  // A method notifying the completion without a result (void)
- void save(String collection, JsonObject document,
-   Handler<AsyncResult<Void>> result);
+ Future<Void> save(String collection, JsonObject document);
 
  // A method providing a result (a json object)
- void findOne(String collection, JsonObject query,
-   Handler<AsyncResult<JsonObject>> result);
+ Future<JsonObject> findOne(String collection, JsonObject query);
 
  // Create a connection
- void createConnection(String shoeSize,
-   Handler<AsyncResult<MyDatabaseConnection>> resultHandler);
+ Future<MyDatabaseConnection> createConnection(String shoeSize);
 
 }
 ----
@@ -191,7 +187,7 @@ public interface MyDatabaseConnection {
 
  void insert(JsonObject someData);
 
- void commit(Handler<AsyncResult<Void>> resultHandler);
+ Future<Void> commit();
 
  @ProxyClose
  void close();
@@ -202,6 +198,57 @@ You can also declare that a particular method unregisters the proxy by annotatin
 annotation. The proxy instance is disposed when this method is called.
 
 More constraints on the _service interfaces_ are described below.
+
+== Async interface with callbacks
+
+Until Vert.x 4.1, service async interfaces were defined by callbacks.
+
+You can still create service async interface using callbacks, with this module declaration:
+
+.package-info.java
+[source,java]
+----
+@io.vertx.codegen.annotations.ModuleGen(groupPackage = "io.vertx.example", name = "services", useFutures = false)
+package io.vertx.example;
+----
+
+NOTE: for backward compatibility, the default value of `useFutures` is `false` so you can also omit the declaration
+
+The service async interface with callbacks looks like:
+
+[source,java]
+----
+@ProxyGen
+public interface SomeDatabaseService {
+
+  // A method notifying the completion without a result (void)
+  void save(String collection, JsonObject document,
+   Handler<AsyncResult<Void>> result);
+
+  // A method providing a result (a json object)
+  void findOne(String collection, JsonObject query,
+   Handler<AsyncResult<JsonObject>> result);
+
+  // Create a connection
+  void createConnection(String shoeSize,
+   Handler<AsyncResult<MyDatabaseConnection>> resultHandler);
+
+}
+----
+
+Return types must be one of:
+
+* `void`
+* `@Fluent` and return reference to the service (`this`):
+
+[source,java]
+----
+@Fluent
+SomeDatabaseService doSomething();
+----
+
+This is because methods must not block and it's not possible to return a result immediately without blocking if
+the service is remote.
 
 == Security
 
@@ -346,59 +393,51 @@ instance to the method's `Handler`. A `ServiceException` contains an `int` failu
 [source,java]
 ----
 public class SomeDatabaseServiceImpl implements SomeDatabaseService {
-private static final BAD_SHOE_SIZE = 42;
-private static final CONNECTION_FAILED = 43;
+
+  private static final BAD_SHOE_SIZE = 42;
+  private static final CONNECTION_FAILED = 43;
 
   // Create a connection
-  void createConnection(String shoeSize, Handler<AsyncResult<MyDatabaseConnection>> resultHandler) {
+  public Future<MyDatabaseConnection> createConnection(String shoeSize) {
     if (!shoeSize.equals("9")) {
-      resultHandler.handle(ServiceException.fail(BAD_SHOE_SIZE, "The shoe size must be 9!",
-        new JsonObject().put("shoeSize", shoeSize));
+      return Future.failedFuture(ServiceException.fail(BAD_SHOE_SIZE, "The shoe size must be 9!",
+        new JsonObject().put("shoeSize", shoeSize)));
      } else {
-        doDbConnection(result -> {
-          if (result.succeeded()) {
-            resultHandler.handle(Future.succeededFuture(result.result()));
-          } else {
-            resultHandler.handle(ServiceException.fail(CONNECTION_FAILED, result.cause().getMessage()));
-          }
-        });
+        return doDbConnection().recover(err -> Future.failedFuture(ServiceException.fail(CONNECTION_FAILED, result.cause().getMessage())));
      }
   }
 }
 ----
 
-The client side can then check if the `Throwable` it receives from a failed `AsyncResult` is a `ServiceException`,
+The client side can then check if the `Throwable` it receives from a failed `Future` is a `ServiceException`,
 and if so, check the specific error code inside. It can use this information to differentiate business logic
 errors from system errors (like the service not being registered with the Event Bus), and to determine exactly
 which business logic error occurred.
 
 [source,java]
 ----
-public void foo(String shoeSize, Handler<AsyncResult<JsonObject>> handler) {
+public Future<JsonObject> foo(String shoeSize) {
   SomeDatabaseService service = SomeDatabaseService.createProxy(vertx, SERVICE_ADDRESS);
-  service.createConnection("8", result -> {
-    if (result.succeeded()) {
+  server.createConnection("8")
+    .compose(connection -> {
       // Do success stuff.
-    } else {
-      if (result.cause() instanceof ServiceException) {
-        ServiceException exc = (ServiceException) result.cause();
+      return doSuccessStuff(connection);
+    })
+    .recover(err -> {
+      if (err instanceof ServiceException) {
+        ServiceException exc = (ServiceException) err;
         if (exc.failureCode() == SomeDatabaseServiceImpl.BAD_SHOE_SIZE) {
-          handler.handle(Future.failedFuture(
+          return Future.failedFuture(
             new InvalidInputError("You provided a bad shoe size: " +
-              exc.getDebugInfo().getString("shoeSize"))
-          ));
+              exc.getDebugInfo().getString("shoeSize")));
         } else if (exc.failureCode() == SomeDatabaseServiceImpl.CONNECTION) {
-          handler.handle(Future.failedFuture(
-            new ConnectionError("Failed to connect to the DB")));
+          return Future.failedFuture(new ConnectionError("Failed to connect to the DB"));
         }
       } else {
         // Must be a system error (e.g. No service registered for the proxy)
-        handler.handle(Future.failedFuture(
-          new SystemError("An unexpected error occurred: + " result.cause().getMessage())
-        ));
+        return Future.failedFuture(new SystemError("An unexpected error occurred: + " result.cause().getMessage()));
       }
-    }
-  }
+    });
 }
 ----
 
@@ -421,7 +460,7 @@ class ShoeSizeException extends ServiceException {
     return extra;
   }
 
-  public static <T> AsyncResult<T> fail(int failureCode, String message, String shoeSize) {
+  public static <T> Future<T> fail(int failureCode, String message, String shoeSize) {
     return Future.failedFuture(new MyServiceException(failureCode, message, shoeSize));
   }
 }
@@ -442,12 +481,12 @@ public class SomeDatabaseServiceImpl implements SomeDatabaseService {
   }
 
   // Create a connection
-  void createConnection(String shoeSize, Handler<AsyncResult<MyDatabaseConnection>> resultHandler) {
+  Future<MyDatabaseConnection> createConnection(String shoeSize) {
     if (!shoeSize.equals("9")) {
-      resultHandler.handle(ShoeSizeException.fail(shoeSize));
+      return ShoeSizeException.fail(shoeSize);
     } else {
       // Create the connection here
-      resultHandler.Handle(Future.succeededFuture(myDbConnection));
+      return Future.succeededFuture(myDbConnection);
     }
   }
 }
@@ -456,27 +495,28 @@ Finally, the client can now check for the custom exception:
 
 [source,java]
 ----
-public void foo(String shoeSize, Handler<AsyncResult<JsonObject>> handler) {
+public Future<JsonObject> foo(String shoeSize) {
   // If this code is running on a different node in the cluster, the
   // ShoeSizeExceptionMessageCodec will need to be registered with the
   // Vertx instance on this node, too.
   SomeDatabaseService service = SomeDatabaseService.createProxy(vertx, SERVICE_ADDRESS);
-  service.createConnection("8", result -> {
-    if (result.succeeded()) {
+  service.createConnection("8")
+    .compose(connection -> {
       // Do success stuff.
-    } else {
+      return doSuccessStuff(connection);
+    })
+    .recover(err -> {
       if (result.cause() instanceof ShoeSizeException) {
         ShoeSizeException exc = (ShoeSizeException) result.cause();
-        handler.handle(Future.failedFuture(
-          new InvalidInputError("You provided a bad shoe size: " + exc.getShoeSize())));
+        return Future.failedFuture(
+          new InvalidInputError("You provided a bad shoe size: " + exc.getShoeSize()));
       } else {
         // Must be a system error (e.g. No service registered for the proxy)
-        handler.handle(Future.failedFuture(
+        return Future.failedFuture(
           new SystemError("An unexpected error occurred: + " result.cause().getMessage())
-        ));
+        );
       }
-    }
-  }
+    });
 }
 ----
 
@@ -488,23 +528,7 @@ with each `Vertx` instance in the cluster.
 There are restrictions on the types and return values that can be used in a service method so that these are easy to
 marshall over event bus messages and so they can be used asynchronously. They are:
 
-=== Return types
-
-Must be one of:
-
-* `void`
-* `@Fluent` and return reference to the service (`this`):
-
-[source,java]
-----
-@Fluent
-SomeDatabaseService doSomething();
-----
-
-This is because methods must not block and it's not possible to return a result immediately without blocking if
-the service is remote.
-
-=== Parameter types
+=== Data types
 
 Let `JSON` = `JsonObject | JsonArray`
 Let `PRIMITIVE` = Any primitive type or boxed primitive type
@@ -522,7 +546,10 @@ Parameters can be any of:
 * Any _Enum_ type
 * Any class annotated with `@DataObject`
 
-If an asynchronous result is required a last parameter of type `Handler<AsyncResult<R>>` can be provided.
+Asynchronous results are modelled as
+
+* `Future<R>`
+* `Handler<AsyncResult<R>>` for callback style
 
 `R` can be any of:
 

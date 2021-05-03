@@ -3,6 +3,7 @@ package io.vertx.serviceproxy.codegen;
 import io.vertx.codegen.*;
 import io.vertx.codegen.type.ClassKind;
 import io.vertx.codegen.type.ParameterizedTypeInfo;
+import io.vertx.serviceproxy.codegen.future.FuturizedProxy;
 import io.vertx.serviceproxy.codegen.proxytestapi.*;
 import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
@@ -151,7 +152,7 @@ public class ProxyTest {
   public void testValidCloseWithFuture() throws Exception {
     ProxyModel model = generateProxyModel(ValidProxyCloseWithFuture.class);
     assertEquals(1, model.getMethods().size());
-    assertEquals(MethodKind.FUTURE, model.getMethods().get(0).getKind());
+    assertEquals(MethodKind.CALLBACK, model.getMethods().get(0).getKind());
     ParameterizedTypeInfo handlerType = (ParameterizedTypeInfo) model.getMethods().get(0).getParams().get(0).getType();
     ParameterizedTypeInfo asyncResultType = (ParameterizedTypeInfo) handlerType.getArgs().get(0);
     assertEquals(ClassKind.VOID, asyncResultType.getArgs().get(0).getKind());
@@ -185,5 +186,10 @@ public class ProxyTest {
     } catch (GenException e) {
       // OK
     }
+  }
+
+  @Test
+  public void testValidFuture() throws Exception {
+    ProxyModel model = generateProxyModel(FuturizedProxy.class);
   }
 }

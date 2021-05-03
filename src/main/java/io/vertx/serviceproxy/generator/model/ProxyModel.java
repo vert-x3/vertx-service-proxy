@@ -83,16 +83,21 @@ public class ProxyModel extends ClassModel {
 
   @Override
   protected void checkReturnType(ExecutableElement elem, TypeInfo type, boolean allowAnyJavaType) {
-
     if (elem.getModifiers().contains(Modifier.STATIC)) {
       // Ignore static methods - we won't use them anyway
       return;
     }
-    if (type.isVoid()) {
-      return;
+    if (getModule().getUseFutures()) {
+      if (type.getKind() == ClassKind.FUTURE) {
+        return;
+      }
+      throw new GenException(elem, "Proxy methods must have Future returns");
+    } else {
+      if (type.isVoid()) {
+        return;
+      }
+      throw new GenException(elem, "Proxy methods must have void or Fluent returns");
     }
-
-    throw new GenException(elem, "Proxy methods must have void or Fluent returns");
   }
 
   @Override
@@ -105,19 +110,19 @@ public class ProxyModel extends ClassModel {
   }
 
   @Override
-  protected MethodInfo createMethodInfo(Set<ClassTypeInfo> ownerTypes, String methodName, String comment, Doc doc, TypeInfo returnType, Text returnDescription, boolean isFluent, boolean isCacheReturn, List<ParamInfo> mParams, ExecutableElement methodElt, boolean isStatic, boolean isDefault, ArrayList<TypeParamInfo.Method> typeParams, TypeElement declaringElt, boolean methodDeprecated, Text methodDeprecatedDesc) {
+  protected MethodInfo createMethodInfo(Set<ClassTypeInfo> ownerTypes, String methodName, String comment, Doc doc, TypeInfo returnType, Text returnDescription, boolean isFluent, boolean isCacheReturn, List<ParamInfo> mParams, ExecutableElement methodElt, boolean isStatic, boolean isDefault, ArrayList<TypeParamInfo.Method> typeParams, TypeElement declaringElt, boolean methodDeprecated, Text methodDeprecatedDesc, boolean useFutures) {
     AnnotationMirror proxyIgnoreAnnotation = Helper.resolveMethodAnnotation(ProxyIgnore.class, elementUtils, typeUtils, declaringElt, methodElt);
     boolean isProxyIgnore = proxyIgnoreAnnotation != null;
     AnnotationMirror proxyCloseAnnotation = Helper.resolveMethodAnnotation(ProxyClose.class, elementUtils, typeUtils, declaringElt, methodElt);
     boolean isProxyClose = proxyCloseAnnotation != null;
     ProxyMethodInfo proxyMeth = new ProxyMethodInfo(ownerTypes, methodName, returnType, returnDescription,
       isFluent, isCacheReturn, mParams, comment, doc, isStatic, isDefault, typeParams, isProxyIgnore,
-      isProxyClose, methodDeprecated, methodDeprecatedDesc);
+      isProxyClose, methodDeprecated, methodDeprecatedDesc, useFutures);
     if (isProxyClose && mParams.size() > 0) {
       if (mParams.size() > 1) {
         throw new GenException(this.modelElt, "@ProxyClose methods can't have more than one parameter");
       }
-      if (proxyMeth.getKind() != MethodKind.FUTURE) {
+      if (proxyMeth.getKind() != MethodKind.CALLBACK) {
         throw new GenException(this.modelElt, "@ProxyClose parameter must be Handler<AsyncResult<Void>>");
       }
       TypeInfo type = mParams.get(0).getType();

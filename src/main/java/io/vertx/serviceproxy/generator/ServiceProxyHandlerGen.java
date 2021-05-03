@@ -1,6 +1,7 @@
 package io.vertx.serviceproxy.generator;
 
 import io.vertx.codegen.Generator;
+import io.vertx.codegen.MethodKind;
 import io.vertx.codegen.ParamInfo;
 import io.vertx.codegen.annotations.ModuleGen;
 import io.vertx.codegen.annotations.ProxyGen;
@@ -158,28 +159,40 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
 
   public void generateActionSwitchEntry(ProxyMethodInfo m, CodeWriter writer) {
     ParamInfo lastParam = !m.getParams().isEmpty() ? m.getParam(m.getParams().size() - 1) : null;
-    boolean hasResultHandler = utils.isResultHandler(lastParam);
     writer
       .code("case \"" + m.getName() + "\": {\n")
       .indent()
       .code("service." + m.getName() + "(")
       .indent();
-    if (hasResultHandler) {
+    if (m.getKind() == MethodKind.CALLBACK) {
+      TypeInfo typeArg = ((ParameterizedTypeInfo) ((ParameterizedTypeInfo) lastParam.getType()).getArg(0)).getArg(0);
       writer.writeSeq(
         Stream.concat(
           m.getParams().subList(0, m.getParams().size() - 1).stream().map(this::generateJsonParamExtract),
-          Stream.of(generateHandler(lastParam))
+          Stream.of(generateHandler(typeArg))
         ),
         ",\n" + writer.indentation()
       );
+      writer.unindent();
+      writer.write(");\n");
+    } else if (m.getKind() == MethodKind.FUTURE) {
+      TypeInfo typeArg = ((ParameterizedTypeInfo) m.getReturnType()).getArg(0);
+      writer.writeSeq(
+        m.getParams().stream().map(this::generateJsonParamExtract),
+        ",\n" + writer.indentation()
+      );
+      writer.write(").onComplete(");
+      writer.write(generateHandler(typeArg));
+      writer.write(");\n");
+      writer.unindent();
     } else {
       writer.writeSeq(
         m.getParams().stream().map(this::generateJsonParamExtract),
         ",\n" + writer.indentation()
       );
+      writer.unindent();
+      writer.write(");\n");
     }
-    writer.unindent();
-    writer.write(");\n");
     if (m.isProxyClose()) writer.stmt("close()");
     writer.stmt("break");
     writer.unindent();
@@ -252,10 +265,6 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
       default:
         return "getValue";
     }
-  }
-  public String generateHandler(ParamInfo param) {
-    TypeInfo typeArg = ((ParameterizedTypeInfo) ((ParameterizedTypeInfo) param.getType()).getArg(0)).getArg(0);
-    return generateHandler(typeArg);
   }
   public String generateHandler(TypeInfo typeArg) {
     if (typeArg.getKind() == ClassKind.LIST || typeArg.getKind() == ClassKind.SET) {
