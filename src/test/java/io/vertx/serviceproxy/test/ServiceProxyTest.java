@@ -174,7 +174,7 @@ public class ServiceProxyTest extends VertxTestBase {
     proxy.enumTypeNull(null);
     await();
   }
-
+  
   @Test
   public void testEnumTypeAsResult() {
     proxy.enumTypeAsResult(ar -> {
@@ -191,6 +191,44 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testEnumTypeAsResultWithNull() {
     proxy.enumTypeAsResultNull(ar -> {
+      if (ar.failed()) {
+        fail("Failure not expected");
+      } else {
+        assertNull(ar.result());
+      }
+      testComplete();
+    });
+    await();
+  }
+  
+  @Test
+  public void testCustomEnumType() {
+    proxy.enumCustomType(SomeEnumWithCustomConstructor.ITEST);
+    await();
+  }
+
+  @Test
+  public void testCustomEnumTypeNull() {
+    proxy.enumCustomTypeNull(null);
+    await();
+  }
+
+  @Test
+  public void testCustomEnumTypeAsResult() {
+    proxy.enumCustomTypeAsResult(ar -> {
+      if (ar.failed()) {
+        fail("Failure not expected");
+      } else {
+        assertEquals(ar.result(), SomeEnumWithCustomConstructor.ITEST);
+      }
+      testComplete();
+    });
+    await();
+  }
+
+  @Test
+  public void testCustomEnumTypeAsResultWithNull() {
+    proxy.enumCustomTypeAsResultNull(ar -> {
       if (ar.failed()) {
         fail("Failure not expected");
       } else {
