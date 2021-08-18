@@ -35,16 +35,21 @@ public class GeneratorUtils {
   }
 
   public Stream<String> additionalImports(ProxyModel model) {
-    return Stream
-      .concat(
-        model.getImportedTypes().stream(),
-        model.getReferencedDataObjectTypes()
+    return Stream.concat(
+        Stream
+          .concat(
+            model.getImportedTypes().stream(),
+            model.getReferencedDataObjectTypes()
+              .stream()
+              .filter(t -> t.isDataObjectHolder() && t.getDataObject().getJsonType() instanceof ClassTypeInfo)
+              .map(t -> (ClassTypeInfo) t.getDataObject().getJsonType())
+          )
+          .filter(c -> !c.getPackageName().equals("java.lang") && !c.getPackageName().equals("io.vertx.core.json"))
+          .map(ClassTypeInfo::toString),
+        model.getReferencedTypes()
           .stream()
-          .filter(t -> t.isDataObjectHolder() && t.getDataObject().getJsonType() instanceof ClassTypeInfo)
-          .map(t -> (ClassTypeInfo) t.getDataObject().getJsonType())
-      )
-      .filter(c -> !c.getPackageName().equals("java.lang") && !c.getPackageName().equals("io.vertx.core.json"))
-      .map(ClassTypeInfo::toString)
+          .filter(t -> t.isProxyGen() && !t.getPackageName().equals(model.getIfacePackageName()))
+          .map(t -> t.getName() + "VertxEBProxy"))
       .distinct();
   }
 
