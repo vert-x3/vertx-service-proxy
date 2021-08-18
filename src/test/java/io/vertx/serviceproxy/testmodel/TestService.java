@@ -28,6 +28,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ServiceProxyBuilder;
 import io.vertx.serviceproxy.testmodel.impl.TestServiceImpl;
+import io.vertx.serviceproxy.testmodel.sub.TestSubConnection;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -61,6 +62,8 @@ public interface TestService {
   void longDeliveryFailed(Handler<AsyncResult<String>> resultHandler);
 
   void createConnection(String str, Handler<AsyncResult<TestConnection>> resultHandler);
+
+  void createSubConnection(String str, Handler<AsyncResult<TestSubConnection>> resultHandler);
 
   void noParams();
 

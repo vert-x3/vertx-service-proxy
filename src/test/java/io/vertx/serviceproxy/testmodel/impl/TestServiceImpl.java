@@ -22,6 +22,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ServiceException;
 import io.vertx.serviceproxy.test.ServiceProxyTest;
 import io.vertx.serviceproxy.testmodel.*;
+import io.vertx.serviceproxy.testmodel.sub.TestSubConnection;
 
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -44,6 +45,11 @@ public class TestServiceImpl implements TestService {
   @Override
   public void createConnection(String str, Handler<AsyncResult<TestConnection>> resultHandler) {
     resultHandler.handle(Future.succeededFuture(new TestConnectionImpl(vertx, str)));
+  }
+
+  @Override
+  public void createSubConnection(String str, Handler<AsyncResult<TestSubConnection>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(new TestSubConnectionImpl(vertx, str)));
   }
 
   @Override
