@@ -154,12 +154,12 @@ public class ServiceBinder {
   private <T> ProxyHandler getProxyHandler(Class<T> clazz, T service) {
     String handlerClassName = clazz.getName() + "VertxProxyHandler";
     Class<?> handlerClass = loadClass(handlerClassName, clazz);
-    Constructor constructor = getConstructor(handlerClass, Vertx.class, clazz, boolean.class, long.class, boolean.class);
+    Constructor<?> constructor = getConstructor(handlerClass, Vertx.class, clazz, boolean.class, long.class, boolean.class);
     Object instance = createInstance(constructor, vertx, service, topLevel, timeoutSeconds, includeDebugInfo);
     return (ProxyHandler) instance;
   }
 
-  private static Class<?> loadClass(String name, Class origin) {
+  private static Class<?> loadClass(String name, Class<?> origin) {
     try {
       return origin.getClassLoader().loadClass(name);
     } catch (ClassNotFoundException e) {
@@ -167,7 +167,7 @@ public class ServiceBinder {
     }
   }
 
-  private static Constructor getConstructor(Class<?> clazz, Class<?>... types) {
+  private static Constructor<?> getConstructor(Class<?> clazz, Class<?>... types) {
     try {
       return clazz.getDeclaredConstructor(types);
     } catch (NoSuchMethodException e) {
@@ -175,7 +175,7 @@ public class ServiceBinder {
     }
   }
 
-  private static Object createInstance(Constructor constructor, Object... args) {
+  private static Object createInstance(Constructor<?> constructor, Object... args) {
     try {
       return constructor.newInstance(args);
     } catch (Exception e) {

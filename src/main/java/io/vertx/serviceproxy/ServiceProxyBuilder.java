@@ -90,7 +90,7 @@ public class ServiceProxyBuilder {
 
     String proxyClassName = clazz.getName() + "VertxEBProxy";
     Class<?> proxyClass = loadClass(proxyClassName, clazz);
-    Constructor constructor;
+    Constructor<?> constructor;
     Object instance;
 
     if (token != null) {
@@ -110,7 +110,7 @@ public class ServiceProxyBuilder {
     return (T) instance;
   }
 
-  private static Class<?> loadClass(String name, Class origin) {
+  private static Class<?> loadClass(String name, Class<?> origin) {
     try {
       return origin.getClassLoader().loadClass(name);
     } catch (ClassNotFoundException e) {
@@ -118,7 +118,7 @@ public class ServiceProxyBuilder {
     }
   }
 
-  private static Constructor getConstructor(Class<?> clazz, Class<?>... types) {
+  private static Constructor<?> getConstructor(Class<?> clazz, Class<?>... types) {
     try {
       return clazz.getDeclaredConstructor(types);
     } catch (NoSuchMethodException e) {
@@ -126,7 +126,7 @@ public class ServiceProxyBuilder {
     }
   }
 
-  private static Object createInstance(Constructor constructor, Object... args) {
+  private static Object createInstance(Constructor<?> constructor, Object... args) {
     try {
       return constructor.newInstance(args);
     } catch (Exception e) {

@@ -110,14 +110,14 @@ public class ProxyModel extends ClassModel {
   }
 
   @Override
-  protected MethodInfo createMethodInfo(Set<ClassTypeInfo> ownerTypes, String methodName, String comment, Doc doc, TypeInfo returnType, Text returnDescription, boolean isFluent, boolean isCacheReturn, List<ParamInfo> mParams, ExecutableElement methodElt, boolean isStatic, boolean isDefault, ArrayList<TypeParamInfo.Method> typeParams, TypeElement declaringElt, boolean methodDeprecated, Text methodDeprecatedDesc, boolean useFutures) {
+  protected MethodInfo createMethodInfo(Set<ClassTypeInfo> ownerTypes, String methodName, String comment, Doc doc, TypeInfo returnType, Text returnDescription, boolean isFluent, boolean isCacheReturn, List<ParamInfo> mParams, ExecutableElement methodElt, boolean isStatic, boolean isDefault, ArrayList<TypeParamInfo.Method> typeParams, TypeElement declaringElt, boolean methodDeprecated, Text methodDeprecatedDesc, boolean useFutures, boolean methodOverride) {
     AnnotationMirror proxyIgnoreAnnotation = Helper.resolveMethodAnnotation(ProxyIgnore.class, elementUtils, typeUtils, declaringElt, methodElt);
     boolean isProxyIgnore = proxyIgnoreAnnotation != null;
     AnnotationMirror proxyCloseAnnotation = Helper.resolveMethodAnnotation(ProxyClose.class, elementUtils, typeUtils, declaringElt, methodElt);
     boolean isProxyClose = proxyCloseAnnotation != null;
     ProxyMethodInfo proxyMeth = new ProxyMethodInfo(ownerTypes, methodName, returnType, returnDescription,
       isFluent, isCacheReturn, mParams, comment, doc, isStatic, isDefault, typeParams, isProxyIgnore,
-      isProxyClose, methodDeprecated, methodDeprecatedDesc, useFutures);
+      isProxyClose, methodDeprecated, methodDeprecatedDesc, useFutures, methodOverride);
     if (isProxyClose && mParams.size() > 0) {
       if (mParams.size() > 1) {
         throw new GenException(this.modelElt, "@ProxyClose methods can't have more than one parameter");
