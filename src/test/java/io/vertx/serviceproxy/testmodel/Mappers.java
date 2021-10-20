@@ -11,4 +11,12 @@ public class Mappers {
   public static ZonedDateTime deserializeZonedDateTime(String value) throws IllegalArgumentException {
     return (value != null) ? ZonedDateTime.parse(value) : null;
   }
+
+  public static String serializeSomeEnumWithCustomConstructor(SomeEnumWithCustomConstructor value) throws IllegalArgumentException {
+    return (value != null) ? value.getLongName() : null;
+  }
+  
+  public static SomeEnumWithCustomConstructor deserializeSomeEnumWithCustomConstructor(String value) throws IllegalArgumentException {
+    return (value != null) ? SomeEnumWithCustomConstructor.of(value) : null;
+  }
 }

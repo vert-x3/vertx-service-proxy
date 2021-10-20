@@ -1,5 +1,10 @@
 package io.vertx.serviceproxy.codegen.proxytestapi;
 
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import io.vertx.codegen.annotations.ProxyClose;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.ProxyIgnore;
@@ -7,11 +12,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import io.vertx.serviceproxy.testmodel.SomeEnumWithCustomConstructor;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -33,6 +34,8 @@ public interface ValidProxy {
   void methodWithMapParams(Map<String, String> mapString, Map<String, Byte> mapByte, Map<String, Short> mapShort, Map<String, Integer> mapInt, Map<String, Long> mapLong, Map<String, JsonObject> mapJsonObject, Map<String, JsonArray> mapJsonArray);
 
   void enumType(SomeEnum someEnum);
+
+  void enumWithCustomConstructorType(SomeEnumWithCustomConstructor someCustomEnum);
 
   void dataObjectType(ProxyDataObject dataObject);
   void methodMapper(ZonedDateTime dateTime);
