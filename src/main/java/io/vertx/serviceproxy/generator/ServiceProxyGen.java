@@ -136,6 +136,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
     writer.newLine();
     writer.stmt("DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions()");
     writer.stmt("_deliveryOptions.addHeader(\"action\", \"" + method.getName() + "\")");
+    writer.stmt("_deliveryOptions.getHeaders().set(\"action\", \"" + method.getName() + "\")");
     if (method.getKind() == MethodKind.CALLBACK) {
       TypeInfo t = ((ParameterizedTypeInfo)((ParameterizedTypeInfo)lastParam.getType()).getArg(0)).getArg(0);
       generateSendCallWithResultHandler(t, lastParam.getName(), writer, false);
