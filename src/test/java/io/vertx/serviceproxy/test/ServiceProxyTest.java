@@ -1261,6 +1261,36 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
+  public void testWithInitialHeader1() {
+    DeliveryOptions options = new DeliveryOptions();
+    options.addHeader("any", "thing");
+    TestService p = TestService.createProxyWithOptions(vertx, SERVICE_ADDRESS, options);
+    p.jsonObjectNullHandler(onSuccess(json -> {
+      assertNull(json);
+    }));
+    p.jsonObjectHandler(onSuccess(json -> {
+      assertNotNull(json);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testWithInitialHeader2() {
+    DeliveryOptions options = new DeliveryOptions();
+    options.addHeader("action", "failingMethod");
+    TestService p = TestService.createProxyWithOptions(vertx, SERVICE_ADDRESS, options);
+    p.jsonObjectNullHandler(onSuccess(json -> {
+      assertNull(json);
+    }));
+    p.jsonObjectHandler(onSuccess(json -> {
+      assertNotNull(json);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
   public void testUnregisteringTheService() {
     proxy.booleanHandler(ar -> {
       consumer.unregister(ar1 -> {
