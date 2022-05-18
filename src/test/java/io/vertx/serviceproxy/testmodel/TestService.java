@@ -57,6 +57,10 @@ public interface TestService {
     return new ServiceProxyBuilder(vertx).setAddress(address).setOptions(options).build(TestService.class);
   }
 
+  static TestService createProxyWithOptions(Vertx vertx, String address, DeliveryOptions options) {
+    return new ServiceProxyBuilder(vertx).setAddress(address).setOptions(options).build(TestService.class);
+  }
+
   void longDeliverySuccess(Handler<AsyncResult<String>> resultHandler);
 
   void longDeliveryFailed(Handler<AsyncResult<String>> resultHandler);
