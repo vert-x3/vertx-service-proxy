@@ -9,7 +9,6 @@ import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.authorization.JWTAuthorization;
-import io.vertx.serviceproxy.InterceptorHolder;
 import io.vertx.serviceproxy.ServiceAuthInterceptor;
 import io.vertx.serviceproxy.ServiceBinder;
 import io.vertx.serviceproxy.ServiceProxyBuilder;
@@ -100,8 +99,8 @@ public class Examples {
       .setAddress("database-service-address")
       // Secure the messages in transit
       .addInterceptor(
-        new InterceptorHolder("action",
-          new ServiceAuthInterceptor()
+        "action",
+        new ServiceAuthInterceptor()
           // Tokens will be validated using JWT authentication
           .setAuthenticationProvider(JWTAuth.create(vertx, new JWTAuthOptions()))
           // optionally we can secure permissions too:
@@ -114,7 +113,7 @@ public class Examples {
           // where the authorizations are loaded, let's assume from the token
           // but they could be loaded from a database or a file if needed
           .setAuthorizationProvider(
-            JWTAuthorization.create("permissions"))))
+            JWTAuthorization.create("permissions")))
 
       .register(SomeDatabaseService.class, service);
   }

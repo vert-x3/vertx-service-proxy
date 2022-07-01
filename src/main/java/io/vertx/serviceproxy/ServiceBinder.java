@@ -15,12 +15,15 @@
  */
 package io.vertx.serviceproxy;
 
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * A binder for Service Proxies which state can be reused during the binder lifecycle.
@@ -95,11 +98,19 @@ public class ServiceBinder {
     return this;
   }
 
-  public ServiceBinder addInterceptor(InterceptorHolder interceptorHolder) {
+  public ServiceBinder addInterceptor(String action, Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
     if (interceptorHolders == null) {
       interceptorHolders = new ArrayList<>();
     }
-    interceptorHolders.add(interceptorHolder);
+    interceptorHolders.add(new InterceptorHolder(action, interceptor));
+    return this;
+  }
+
+  public ServiceBinder addInterceptor(Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
+    if (interceptorHolders == null) {
+      interceptorHolders = new ArrayList<>();
+    }
+    interceptorHolders.add(new InterceptorHolder(interceptor));
     return this;
   }
 

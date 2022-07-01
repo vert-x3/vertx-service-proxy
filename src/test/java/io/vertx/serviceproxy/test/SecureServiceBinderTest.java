@@ -23,7 +23,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
-import io.vertx.serviceproxy.InterceptorHolder;
 import io.vertx.serviceproxy.ServiceAuthInterceptor;
 import io.vertx.serviceproxy.ServiceBinder;
 import io.vertx.serviceproxy.ServiceProxyBuilder;
@@ -58,18 +57,16 @@ public class SecureServiceBinderTest extends VertxTestBase {
     ServiceBinder serviceBinder = new ServiceBinder(vertx)
       .setAddress(SERVICE_ADDRESS)
       .addInterceptor(
-        new InterceptorHolder(
-          new ServiceAuthInterceptor()
-            .setAuthenticationProvider(JWTAuth.create(vertx, getJWTConfig()))
-        ));
+        new ServiceAuthInterceptor()
+          .setAuthenticationProvider(JWTAuth.create(vertx, getJWTConfig()))
+      );
 
     ServiceBinder localServiceBinder = new ServiceBinder(vertx)
       .setAddress(SERVICE_LOCAL_ADDRESS)
       .addInterceptor(
-        new InterceptorHolder(
-          new ServiceAuthInterceptor()
-            .setAuthenticationProvider(JWTAuth.create(vertx, getJWTConfig()))
-        ));
+        new ServiceAuthInterceptor()
+          .setAuthenticationProvider(JWTAuth.create(vertx, getJWTConfig()))
+      );
 
     consumer = serviceBinder.register(OKService.class, service);
     localConsumer = localServiceBinder.registerLocal(OKService.class, service);
