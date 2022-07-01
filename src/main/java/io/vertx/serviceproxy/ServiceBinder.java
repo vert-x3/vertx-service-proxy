@@ -15,15 +15,12 @@
  */
 package io.vertx.serviceproxy;
 
-import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * A binder for Service Proxies which state can be reused during the binder lifecycle.
@@ -39,7 +36,7 @@ public class ServiceBinder {
   private String address;
   private boolean topLevel = true;
   private long timeoutSeconds = DEFAULT_CONNECTION_TIMEOUT;
-  private List<Function<Message<JsonObject>, Future<Message<JsonObject>>>> interceptors;
+  private List<InterceptorHolder> interceptorHolders;
   private boolean includeDebugInfo = false;
 
   /**
@@ -98,11 +95,11 @@ public class ServiceBinder {
     return this;
   }
 
-  public ServiceBinder addInterceptor(Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
-    if (interceptors == null) {
-      interceptors = new ArrayList<>();
+  public ServiceBinder addInterceptor(InterceptorHolder interceptorHolder) {
+    if (interceptorHolders == null) {
+      interceptorHolders = new ArrayList<>();
     }
-    interceptors.add(interceptor);
+    interceptorHolders.add(interceptorHolder);
     return this;
   }
 
@@ -117,7 +114,7 @@ public class ServiceBinder {
   public <T> MessageConsumer<JsonObject> register(Class<T> clazz, T service) {
     Objects.requireNonNull(address);
     // register
-    return getProxyHandler(clazz, service).register(vertx.eventBus(), address, interceptors);
+    return getProxyHandler(clazz, service).register(vertx.eventBus(), address, interceptorHolders);
   }
 
   /**
@@ -132,7 +129,7 @@ public class ServiceBinder {
   public <T> MessageConsumer<JsonObject> registerLocal(Class<T> clazz, T service) {
     Objects.requireNonNull(address);
     // register
-    return getProxyHandler(clazz, service).registerLocal(vertx.eventBus(), address, interceptors);
+    return getProxyHandler(clazz, service).registerLocal(vertx.eventBus(), address, interceptorHolders);
   }
 
   /**

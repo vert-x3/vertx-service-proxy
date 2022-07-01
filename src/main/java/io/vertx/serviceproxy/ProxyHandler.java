@@ -25,7 +25,6 @@ import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -44,7 +43,7 @@ public abstract class ProxyHandler implements Handler<Message<JsonObject>> {
    * Register the proxy handle on the event bus.
    *
    * @param eventBus the event bus
-   * @param address the proxy address
+   * @param address  the proxy address
    */
   public MessageConsumer<JsonObject> register(EventBus eventBus, String address) {
     return register(eventBus, address, null);
@@ -55,7 +54,7 @@ public abstract class ProxyHandler implements Handler<Message<JsonObject>> {
    * The registration will not be propagated to other nodes in the cluster.
    *
    * @param eventBus the event bus
-   * @param address the proxy address
+   * @param address  the proxy address
    */
   public MessageConsumer<JsonObject> registerLocal(EventBus eventBus, String address) {
     return registerLocal(eventBus, address, null);
@@ -64,11 +63,11 @@ public abstract class ProxyHandler implements Handler<Message<JsonObject>> {
   /**
    * Register the proxy handle on the event bus.
    *
-   * @param eventBus the event bus
-   * @param address the proxy address
+   * @param eventBus     the event bus
+   * @param address      the proxy address
    * @param interceptors the interceptors
    */
-  public MessageConsumer<JsonObject> register(EventBus eventBus, String address, List<Function<Message<JsonObject>, Future<Message<JsonObject>>>> interceptors) {
+  public MessageConsumer<JsonObject> register(EventBus eventBus, String address, List<InterceptorHolder> interceptors) {
     Handler<Message<JsonObject>> handler = configureHandler(interceptors);
     consumer = eventBus.consumer(address, handler);
     return consumer;
@@ -78,31 +77,38 @@ public abstract class ProxyHandler implements Handler<Message<JsonObject>> {
    * Register the local proxy handle on the event bus.
    * The registration will not be propagated to other nodes in the cluster.
    *
-   * @param eventBus the event bus
-   * @param address the proxy address
-   * @param interceptors the interceptors
+   * @param eventBus           the event bus
+   * @param address            the proxy address
+   * @param interceptorHolders the {@link InterceptorHolder} interceptorHolders
    */
-  public MessageConsumer<JsonObject> registerLocal(EventBus eventBus, String address, List<Function<Message<JsonObject>, Future<Message<JsonObject>>>> interceptors) {
-    Handler<Message<JsonObject>> handler = configureHandler(interceptors);
+  public MessageConsumer<JsonObject> registerLocal(EventBus eventBus, String address,
+                                                   List<InterceptorHolder> interceptorHolders) {
+    Handler<Message<JsonObject>> handler = configureHandler(interceptorHolders);
     consumer = eventBus.localConsumer(address, handler);
     return consumer;
   }
 
-  private Handler<Message<JsonObject>> configureHandler(List<Function<Message<JsonObject>, Future<Message<JsonObject>>>> interceptors) {
+  private Handler<Message<JsonObject>> configureHandler(List<InterceptorHolder> interceptorHolders) {
     Handler<Message<JsonObject>> handler = this;
-    if (interceptors != null) {
-      for (Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor : interceptors) {
+    if (interceptorHolders != null) {
+      for (InterceptorHolder interceptorHolder : interceptorHolders) {
         Handler<Message<JsonObject>> prev = handler;
         handler = msg -> {
-          Future<Message<JsonObject>> fut = interceptor.apply(msg);
-          fut.onComplete(ar -> {
-            if (ar.succeeded()) {
-              prev.handle(msg);
-            } else {
-              ReplyException exception = (ReplyException) ar.cause();
-              msg.fail(exception.failureCode(), exception.getMessage());
-            }
-          });
+          String action = msg.headers().get("action");
+          String holderAction = interceptorHolder.getAction();
+          if (holderAction == null || action.equals(holderAction)) {
+            Future<Message<JsonObject>> fut = interceptorHolder.getInterceptor().apply(msg);
+            fut.onComplete(ar -> {
+              if (ar.succeeded()) {
+                prev.handle(msg);
+              } else {
+                ReplyException exception = (ReplyException) ar.cause();
+                msg.fail(exception.failureCode(), exception.getMessage());
+              }
+            });
+          } else {
+            prev.handle(msg);
+          }
         };
       }
     }
