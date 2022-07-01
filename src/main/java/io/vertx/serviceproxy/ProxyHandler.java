@@ -16,7 +16,6 @@
 
 package io.vertx.serviceproxy;
 
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
@@ -95,17 +94,14 @@ public abstract class ProxyHandler implements Handler<Message<JsonObject>> {
         Handler<Message<JsonObject>> prev = handler;
         handler = msg -> {
           String action = msg.headers().get("action");
-          String holderAction = interceptorHolder.getAction();
+          String holderAction = interceptorHolder.action();
           if (holderAction == null || action.equals(holderAction)) {
-            Future<Message<JsonObject>> fut = interceptorHolder.getInterceptor().apply(msg);
-            fut.onComplete(ar -> {
-              if (ar.succeeded()) {
-                prev.handle(msg);
-              } else {
-                ReplyException exception = (ReplyException) ar.cause();
+            interceptorHolder.interceptor().apply(msg)
+              .onSuccess(prev::handle)
+              .onFailure(err -> {
+                ReplyException exception = (ReplyException) err;
                 msg.fail(exception.failureCode(), exception.getMessage());
-              }
-            });
+              });
           } else {
             prev.handle(msg);
           }
