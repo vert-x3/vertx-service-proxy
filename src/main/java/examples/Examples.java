@@ -99,6 +99,7 @@ public class Examples {
       .setAddress("database-service-address")
       // Secure the messages in transit
       .addInterceptor(
+        "action",
         new ServiceAuthInterceptor()
           // Tokens will be validated using JWT authentication
           .setAuthenticationProvider(JWTAuth.create(vertx, new JWTAuthOptions()))

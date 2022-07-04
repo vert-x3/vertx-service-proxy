@@ -58,15 +58,15 @@ public class SecureServiceBinderTest extends VertxTestBase {
       .setAddress(SERVICE_ADDRESS)
       .addInterceptor(
         new ServiceAuthInterceptor()
-          .setAuthenticationProvider(JWTAuth.create(vertx, getJWTConfig())
-      ));
+          .setAuthenticationProvider(JWTAuth.create(vertx, getJWTConfig()))
+      );
 
     ServiceBinder localServiceBinder = new ServiceBinder(vertx)
       .setAddress(SERVICE_LOCAL_ADDRESS)
       .addInterceptor(
         new ServiceAuthInterceptor()
-        .setAuthenticationProvider(JWTAuth.create(vertx, getJWTConfig())
-      ));
+          .setAuthenticationProvider(JWTAuth.create(vertx, getJWTConfig()))
+      );
 
     consumer = serviceBinder.register(OKService.class, service);
     localConsumer = localServiceBinder.registerLocal(OKService.class, service);
