@@ -22,8 +22,8 @@ import java.util.function.Function;
  * Create an event bus service interceptor using a token based authentication provider (e.g.: JWT or Oauth2) that will
  * verify all requests before the service is invoked.
  */
-//todo replace with 2 new interceptors, add adapter
-public class ServiceAuthInterceptor implements Function<Message<JsonObject>, Future<Message<JsonObject>>> {
+//todo use it
+public class AuthenticationInterceptor implements Function<Message<JsonObject>, Future<Message<JsonObject>>> {
 
   private AuthenticationProvider authn;
   private AuthorizationProvider authz;
@@ -36,12 +36,12 @@ public class ServiceAuthInterceptor implements Function<Message<JsonObject>, Fut
    * @param provider an authentication provider
    * @return self
    */
-  public ServiceAuthInterceptor setAuthenticationProvider(AuthenticationProvider provider) {
+  public AuthenticationInterceptor setAuthenticationProvider(AuthenticationProvider provider) {
     this.authn = provider;
     return this;
   }
 
-  public ServiceAuthInterceptor setAuthorizationProvider(AuthorizationProvider provider) {
+  public AuthenticationInterceptor setAuthorizationProvider(AuthorizationProvider provider) {
     this.authz = provider;
     return this;
   }
@@ -53,7 +53,7 @@ public class ServiceAuthInterceptor implements Function<Message<JsonObject>, Fut
    * @param authorizations set of authorities
    * @return self
    */
-  public ServiceAuthInterceptor setAuthorizations(Set<Authorization> authorizations) {
+  public AuthenticationInterceptor setAuthorizations(Set<Authorization> authorizations) {
     this.authorizations = authorizations;
     return this;
   }
@@ -64,7 +64,7 @@ public class ServiceAuthInterceptor implements Function<Message<JsonObject>, Fut
    * @param authorization authority
    * @return self
    */
-  public ServiceAuthInterceptor addAuthorization(Authorization authorization) {
+  public AuthenticationInterceptor addAuthorization(Authorization authorization) {
     if (authorizations == null) {
       authorizations = new HashSet<>();
     }
