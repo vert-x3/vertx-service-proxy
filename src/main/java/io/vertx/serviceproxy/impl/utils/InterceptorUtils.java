@@ -11,13 +11,18 @@ import io.vertx.serviceproxy.impl.InterceptorPriority;
 import java.util.List;
 import java.util.function.Function;
 
-//todo javadoc
 public class InterceptorUtils {
 
   private InterceptorUtils() {
     throw new UnsupportedOperationException();
   }
 
+  /**
+   * Returns interceptor's weight according to the class instance
+   *
+   * @param interceptor interceptor to define
+   * @return {@link InterceptorPriority}
+   */
   public static InterceptorPriority getWeight(Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
     if (interceptor instanceof AuthenticationInterceptor) {
       return InterceptorPriority.AUTHN;
@@ -29,6 +34,13 @@ public class InterceptorUtils {
     return InterceptorPriority.USER;
   }
 
+  /**
+   * Checks if interceptors are adding in the right priority (according to the {@link InterceptorPriority}).
+   * If not, throws an {@link IllegalStateException}
+   *
+   * @param interceptorHolders current interceptor holders
+   * @param interceptor        interceptor to add
+   */
   public static void checkInterceptorOrder(List<InterceptorHolder> interceptorHolders,
                                            Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
     if (interceptorHolders.isEmpty()) {
