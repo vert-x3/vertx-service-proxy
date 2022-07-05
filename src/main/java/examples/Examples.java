@@ -16,6 +16,7 @@ import io.vertx.serviceproxy.ServiceProxyBuilder;
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
+//todo add examples
 public class Examples {
 
   public void example1(Vertx vertx) {

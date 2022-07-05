@@ -34,7 +34,6 @@ import static io.vertx.serviceproxy.impl.utils.InterceptorUtils.checkInterceptor
  *
  * @author <a href="mailto:plopes@redhat.com">Paulo Lopes</a>
  */
-//todo javadoc
 public class ServiceBinder {
 
   public static final long DEFAULT_CONNECTION_TIMEOUT = 5 * 60; // 5 minutes
@@ -159,6 +158,12 @@ public class ServiceBinder {
     }
   }
 
+  /**
+   * Checks current interceptors correct order and adds a new one if it's OK
+   *
+   * @param action      interceptor's action
+   * @param interceptor interceptor to add
+   */
   private void checkAndAddInterceptor(String action,
                                       Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
     List<InterceptorHolder> currentInterceptorHolders = getInterceptorHolders();
@@ -166,6 +171,11 @@ public class ServiceBinder {
     currentInterceptorHolders.add(new InterceptorHolder(action, interceptor));
   }
 
+  /**
+   * Checks current interceptors correct order and adds a new one if it's OK
+   *
+   * @param interceptor interceptor to add
+   */
   private void checkAndAddInterceptor(Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
     List<InterceptorHolder> currentInterceptorHolders = getInterceptorHolders();
     checkInterceptorOrder(currentInterceptorHolders, interceptor);

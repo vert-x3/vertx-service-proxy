@@ -30,6 +30,7 @@ import io.vertx.serviceproxy.testmodel.*;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
+//todo add tests
 public class SecureServiceBinderTest extends VertxTestBase {
 
   private final static String SERVICE_ADDRESS = "someaddress";
