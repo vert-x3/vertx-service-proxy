@@ -9,6 +9,8 @@ import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.authorization.JWTAuthorization;
+import io.vertx.serviceproxy.AuthenticationInterceptor;
+import io.vertx.serviceproxy.AuthorizationInterceptor;
 import io.vertx.serviceproxy.ServiceAuthInterceptor;
 import io.vertx.serviceproxy.ServiceBinder;
 import io.vertx.serviceproxy.ServiceProxyBuilder;
@@ -16,7 +18,6 @@ import io.vertx.serviceproxy.ServiceProxyBuilder;
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-//todo add examples
 public class Examples {
 
   public void example1(Vertx vertx) {
@@ -35,8 +36,8 @@ public class Examples {
       .onSuccess(msg -> {
         // done
       }).onFailure(err -> {
-      // failure
-    });
+        // failure
+      });
   }
 
   public void example2(Vertx vertx) {
@@ -92,6 +93,33 @@ public class Examples {
       .build(SomeDatabaseService.class);
   }
 
+  @Deprecated
+  public void secureDeprecated(Vertx vertx) {
+    // Create an instance of your service implementation
+    SomeDatabaseService service = new SomeDatabaseServiceImpl();
+    // Register the handler
+    new ServiceBinder(vertx)
+      .setAddress("database-service-address")
+      // Secure the messages in transit
+      .addInterceptor(
+        new ServiceAuthInterceptor()
+          // Tokens will be validated using JWT authentication
+          .setAuthenticationProvider(JWTAuth.create(vertx, new JWTAuthOptions()))
+          // optionally we can secure permissions too:
+
+          // an admin
+          .addAuthorization(RoleBasedAuthorization.create("admin"))
+          // that can print
+          .addAuthorization(PermissionBasedAuthorization.create("print"))
+
+          // where the authorizations are loaded, let's assume from the token
+          // but they could be loaded from a database or a file if needed
+          .setAuthorizationProvider(
+            JWTAuthorization.create("permissions")))
+
+      .register(SomeDatabaseService.class, service);
+  }
+
   public void secure(Vertx vertx) {
     // Create an instance of your service implementation
     SomeDatabaseService service = new SomeDatabaseServiceImpl();
@@ -101,9 +129,11 @@ public class Examples {
       // Secure the messages in transit
       .addInterceptor(
         "action",
-        new ServiceAuthInterceptor()
+        new AuthenticationInterceptor()
           // Tokens will be validated using JWT authentication
-          .setAuthenticationProvider(JWTAuth.create(vertx, new JWTAuthOptions()))
+          .setAuthenticationProvider(JWTAuth.create(vertx, new JWTAuthOptions())))
+      .addInterceptor(
+        new AuthorizationInterceptor()
           // optionally we can secure permissions too:
 
           // an admin

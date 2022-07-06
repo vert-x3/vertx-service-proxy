@@ -1,15 +1,12 @@
 package io.vertx.serviceproxy.impl.utils;
 
-import io.vertx.core.Future;
-import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.AuthenticationInterceptor;
 import io.vertx.serviceproxy.AuthorizationInterceptor;
 import io.vertx.serviceproxy.InterceptorHolder;
+import io.vertx.serviceproxy.ServiceInterceptor;
 import io.vertx.serviceproxy.impl.InterceptorPriority;
 
 import java.util.List;
-import java.util.function.Function;
 
 public class InterceptorUtils {
 
@@ -23,7 +20,7 @@ public class InterceptorUtils {
    * @param interceptor interceptor to define
    * @return {@link InterceptorPriority}
    */
-  public static InterceptorPriority getWeight(Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
+  public static InterceptorPriority getWeight(ServiceInterceptor interceptor) {
     if (interceptor instanceof AuthenticationInterceptor) {
       return InterceptorPriority.AUTHN;
     }
@@ -42,7 +39,7 @@ public class InterceptorUtils {
    * @param interceptor        interceptor to add
    */
   public static void checkInterceptorOrder(List<InterceptorHolder> interceptorHolders,
-                                           Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
+                                           ServiceInterceptor interceptor) {
     if (interceptorHolders.isEmpty()) {
       return;
     }
