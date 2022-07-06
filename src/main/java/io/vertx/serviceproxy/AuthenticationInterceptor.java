@@ -14,8 +14,7 @@ import io.vertx.ext.auth.authentication.TokenCredentials;
 import java.util.Map;
 
 /**
- * Create an event bus service interceptor using a token based authentication provider (e.g.: JWT or Oauth2) that will
- * verify all requests before the service is invoked.
+ * Create an event bus service interceptor that will provide an authentication check
  */
 public class AuthenticationInterceptor implements ServiceInterceptor {
 
