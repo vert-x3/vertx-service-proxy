@@ -16,14 +16,18 @@
 
 package io.vertx.serviceproxy;
 
+import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.ReplyException;
+import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.JsonObject;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -95,13 +99,14 @@ public abstract class ProxyHandler implements Handler<Message<JsonObject>> {
 
   private Handler<Message<JsonObject>> configureHandler(List<InterceptorHolder> interceptorHolders) {
     Handler<Message<JsonObject>> handler = this;
+    Map<String, Object> context = new HashMap<>();
     for (InterceptorHolder interceptorHolder : interceptorHolders) {
       Handler<Message<JsonObject>> prev = handler;
       handler = msg -> {
         String action = msg.headers().get("action");
         String holderAction = interceptorHolder.action();
         if (holderAction == null || action.equals(holderAction)) {
-          interceptorHolder.interceptor().apply(msg)
+          interceptorHolder.interceptor().intercept(context, msg)
             .onSuccess(prev::handle)
             .onFailure(err -> {
               ReplyException exception = (ReplyException) err;

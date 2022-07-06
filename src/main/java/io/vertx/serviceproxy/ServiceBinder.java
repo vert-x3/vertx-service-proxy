@@ -103,12 +103,25 @@ public class ServiceBinder {
   }
 
   public ServiceBinder addInterceptor(String action,
-                                      Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
+                                      ServiceInterceptor interceptor) {
     checkAndAddInterceptor(action, interceptor);
     return this;
   }
 
+  /**
+   * Wrapper method, remove when old interceptors will be removed
+   *
+   * @param interceptor interceptor to add
+   * @return self
+   */
+  @Deprecated
   public ServiceBinder addInterceptor(Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
+    ServiceInterceptor serviceInterceptor = (context, msg) -> interceptor.apply(msg);
+    checkAndAddInterceptor(serviceInterceptor);
+    return this;
+  }
+
+  public ServiceBinder addInterceptor(ServiceInterceptor interceptor) {
     checkAndAddInterceptor(interceptor);
     return this;
   }
@@ -165,7 +178,7 @@ public class ServiceBinder {
    * @param interceptor interceptor to add
    */
   private void checkAndAddInterceptor(String action,
-                                      Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
+                                      ServiceInterceptor interceptor) {
     List<InterceptorHolder> currentInterceptorHolders = getInterceptorHolders();
     checkInterceptorOrder(currentInterceptorHolders, interceptor);
     currentInterceptorHolders.add(new InterceptorHolder(action, interceptor));
@@ -176,7 +189,7 @@ public class ServiceBinder {
    *
    * @param interceptor interceptor to add
    */
-  private void checkAndAddInterceptor(Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
+  private void checkAndAddInterceptor(ServiceInterceptor interceptor) {
     List<InterceptorHolder> currentInterceptorHolders = getInterceptorHolders();
     checkInterceptorOrder(currentInterceptorHolders, interceptor);
     currentInterceptorHolders.add(new InterceptorHolder(interceptor));
@@ -185,7 +198,8 @@ public class ServiceBinder {
   private <T> ProxyHandler getProxyHandler(Class<T> clazz, T service) {
     String handlerClassName = clazz.getName() + "VertxProxyHandler";
     Class<?> handlerClass = loadClass(handlerClassName, clazz);
-    Constructor<?> constructor = getConstructor(handlerClass, Vertx.class, clazz, boolean.class, long.class, boolean.class);
+    Constructor<?> constructor = getConstructor(handlerClass, Vertx.class, clazz, boolean.class, long.class,
+      boolean.class);
     Object instance = createInstance(constructor, vertx, service, topLevel, timeoutSeconds, includeDebugInfo);
     return (ProxyHandler) instance;
   }

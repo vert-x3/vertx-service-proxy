@@ -10,122 +10,55 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.auth.authentication.CredentialValidationException;
 import io.vertx.ext.auth.authentication.TokenCredentials;
-import io.vertx.ext.auth.authorization.Authorization;
-import io.vertx.ext.auth.authorization.AuthorizationContext;
-import io.vertx.ext.auth.authorization.AuthorizationProvider;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.function.Function;
+import java.util.Map;
 
 /**
  * Create an event bus service interceptor using a token based authentication provider (e.g.: JWT or Oauth2) that will
  * verify all requests before the service is invoked.
  */
-//todo use it
-public class AuthenticationInterceptor implements Function<Message<JsonObject>, Future<Message<JsonObject>>> {
+public class AuthenticationInterceptor implements ServiceInterceptor {
 
-  private AuthenticationProvider authn;
-  private AuthorizationProvider authz;
-
-  private Set<Authorization> authorizations;
+  private AuthenticationProvider authenticationProvider;
 
   /**
-   * Set an authentication provider that will verify all requests before the service is invoked.
+   * Set an authentication authenticationProvider that will verify all requests before the service is invoked.
    *
-   * @param provider an authentication provider
+   * @param authenticationProvider an authentication provider
    * @return self
    */
-  public AuthenticationInterceptor setAuthenticationProvider(AuthenticationProvider provider) {
-    this.authn = provider;
-    return this;
-  }
-
-  public AuthenticationInterceptor setAuthorizationProvider(AuthorizationProvider provider) {
-    this.authz = provider;
-    return this;
-  }
-
-  /**
-   * Set the required authorities for the service, once a JWT is validated it will be
-   * queried for these authorities. If authorities are missing a error 403 is returned.
-   *
-   * @param authorizations set of authorities
-   * @return self
-   */
-  public AuthenticationInterceptor setAuthorizations(Set<Authorization> authorizations) {
-    this.authorizations = authorizations;
-    return this;
-  }
-
-  /**
-   * Add a single authority to the authorities set.
-   *
-   * @param authorization authority
-   * @return self
-   */
-  public AuthenticationInterceptor addAuthorization(Authorization authorization) {
-    if (authorizations == null) {
-      authorizations = new HashSet<>();
-    }
-    authorizations.add(authorization);
+  public AuthenticationInterceptor setAuthenticationProvider(AuthenticationProvider authenticationProvider) {
+    this.authenticationProvider = authenticationProvider;
     return this;
   }
 
   @Override
-  public Future<Message<JsonObject>> apply(Message<JsonObject> msg) {
-
-    final TokenCredentials authorization = new TokenCredentials(msg.headers().get("auth-token"));
-
+  public Future<Message<JsonObject>> intercept(Map<String, Object> context, Message<JsonObject> msg) {
+    final TokenCredentials tokenCredentials = new TokenCredentials(msg.headers().get("auth-token"));
     try {
-      authorization.checkValid(null);
-
+      tokenCredentials.checkValid(null);
       Promise<Message<JsonObject>> promise = Promise.promise();
-
-      if (authn == null) {
+      if (authenticationProvider == null) {
         promise.fail(new ReplyException(ReplyFailure.RECIPIENT_FAILURE, 500, "No AuthenticationProvider present"));
         return promise.future();
       }
-
-      authn.authenticate(authorization, authenticate -> {
-        if (authenticate.failed()) {
-          promise.fail(new ReplyException(ReplyFailure.RECIPIENT_FAILURE, 500, authenticate.cause().getMessage()));
+      authenticationProvider.authenticate(tokenCredentials, authenticationAsyncResult -> {
+        if (authenticationAsyncResult.failed()) {
+          promise.fail(
+            new ReplyException(ReplyFailure.RECIPIENT_FAILURE, 500, authenticationAsyncResult.cause().getMessage()));
           return;
         }
-
-        final User user = authenticate.result();
-
+        final User user = authenticationAsyncResult.result();
         if (user == null) {
-          promise.fail(new ReplyException(ReplyFailure.RECIPIENT_FAILURE, 401, "Unauthorized"));
+          promise.fail(new ReplyException(ReplyFailure.RECIPIENT_FAILURE, 401, "User is null"));
           return;
         }
-
-        if (authorizations == null || authorizations.isEmpty()) {
-          promise.complete(msg);
-          return;
-        }
-
-        authz.getAuthorizations(user, getAuthorizations -> {
-          if (getAuthorizations.failed()) {
-            promise.fail(new ReplyException(ReplyFailure.RECIPIENT_FAILURE, 500, authenticate.cause().getMessage()));
-          } else {
-            AuthorizationContext context = AuthorizationContext.create(user);
-            for (Authorization authority : authorizations) {
-              if (!authority.match(context)) {
-                // failed
-                promise.fail(new ReplyException(ReplyFailure.RECIPIENT_FAILURE, 403, "Forbidden"));
-                return;
-              }
-            }
-            // all authorities have passed
-            promise.complete(msg);
-          }
-        });
+        context.put("user", user);
+        promise.complete(msg);
       });
-
       return promise.future();
     } catch (CredentialValidationException e) {
-      return Future.failedFuture(new ReplyException(ReplyFailure.RECIPIENT_FAILURE, 401, "Unauthorized"));
+      return Future.failedFuture(new ReplyException(ReplyFailure.RECIPIENT_FAILURE, 401, e.getMessage()));
     }
   }
 }
