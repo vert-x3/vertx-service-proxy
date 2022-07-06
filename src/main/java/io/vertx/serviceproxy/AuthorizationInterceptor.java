@@ -17,8 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Create an event bus service interceptor using a token based authentication provider (e.g.: JWT or Oauth2) that will
- * verify all requests before the service is invoked.
+ * Create an event bus service interceptor that will provide an authorization check
  */
 public class AuthorizationInterceptor implements ServiceInterceptor {
   private AuthorizationProvider authorizationProvider;
