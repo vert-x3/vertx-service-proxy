@@ -3,6 +3,7 @@ package io.vertx.serviceproxy;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.ext.auth.authorization.Authorization;
 import io.vertx.ext.auth.authorization.AuthorizationProvider;
+import io.vertx.serviceproxy.impl.AuthorizationInterceptorImpl;
 
 import java.util.Set;
 
@@ -12,7 +13,9 @@ import java.util.Set;
 @VertxGen
 public interface AuthorizationInterceptor extends ServiceInterceptor {
 
-  AuthorizationInterceptor setAuthorizationProvider(AuthorizationProvider authorizationProvider);
+  static AuthorizationInterceptor create(AuthorizationProvider authorizationProvider) {
+    return new AuthorizationInterceptorImpl(authorizationProvider);
+  }
 
   /**
    * Set the required authorities for the service, once a JWT is validated it will be

@@ -19,18 +19,11 @@ import java.util.Map;
  */
 public class AuthenticationInterceptorImpl implements AuthenticationInterceptor {
 
-  AuthenticationProvider authenticationProvider;
+  //an authentication authenticationProvider that will verify all requests before the service is invoked.
+  final AuthenticationProvider authenticationProvider;
 
-  /**
-   * Set an authentication authenticationProvider that will verify all requests before the service is invoked.
-   *
-   * @param authenticationProvider an authentication provider
-   * @return self
-   */
-  @Override
-  public AuthenticationInterceptorImpl setAuthenticationProvider(AuthenticationProvider authenticationProvider) {
+  public AuthenticationInterceptorImpl(AuthenticationProvider authenticationProvider) {
     this.authenticationProvider = authenticationProvider;
-    return this;
   }
 
   @Override

@@ -1,10 +1,10 @@
 package io.vertx.serviceproxy.impl.utils;
 
 import io.vertx.core.Future;
+import io.vertx.serviceproxy.AuthenticationInterceptor;
+import io.vertx.serviceproxy.AuthorizationInterceptor;
 import io.vertx.serviceproxy.InterceptorHolder;
 import io.vertx.serviceproxy.ServiceInterceptor;
-import io.vertx.serviceproxy.impl.AuthenticationInterceptorImpl;
-import io.vertx.serviceproxy.impl.AuthorizationInterceptorImpl;
 import io.vertx.serviceproxy.impl.InterceptorPriority;
 import org.junit.Test;
 
@@ -18,13 +18,13 @@ public class InterceptorUtilsTest {
 
   @Test
   public void testGetWeightAuthn() {
-    ServiceInterceptor authn = new AuthenticationInterceptorImpl();
+    ServiceInterceptor authn = AuthenticationInterceptor.create(null);
     assertEquals(InterceptorPriority.AUTHENTICATION, InterceptorUtils.getWeight(authn));
   }
 
   @Test
   public void testGetWeightAuthz() {
-    ServiceInterceptor authz = new AuthorizationInterceptorImpl();
+    ServiceInterceptor authz = AuthorizationInterceptor.create(null);
     assertEquals(InterceptorPriority.AUTHORIZATION, InterceptorUtils.getWeight(authz));
   }
 
@@ -37,10 +37,10 @@ public class InterceptorUtilsTest {
   @Test
   public void testCheckInterceptorOrderFromEmptyList() {
     List<InterceptorHolder> interceptorHolders = new ArrayList<>();
-    ServiceInterceptor authn = new AuthenticationInterceptorImpl();
+    ServiceInterceptor authn = AuthenticationInterceptor.create(null);
     InterceptorUtils.checkInterceptorOrder(interceptorHolders, authn);
     interceptorHolders.clear();
-    ServiceInterceptor authz = new AuthorizationInterceptorImpl();
+    ServiceInterceptor authz = AuthorizationInterceptor.create(null);
     InterceptorUtils.checkInterceptorOrder(interceptorHolders, authz);
     interceptorHolders.clear();
     ServiceInterceptor user = (vertx, context, msg) -> Future.succeededFuture();
@@ -50,10 +50,10 @@ public class InterceptorUtilsTest {
   @Test
   public void testCheckInterceptorOrderRightPriority() {
     List<InterceptorHolder> interceptorHolders = new ArrayList<>();
-    ServiceInterceptor authn = new AuthenticationInterceptorImpl();
+    ServiceInterceptor authn = AuthenticationInterceptor.create(null);
     InterceptorUtils.checkInterceptorOrder(interceptorHolders, authn);
     interceptorHolders.add(new InterceptorHolder(authn));
-    ServiceInterceptor authz = new AuthorizationInterceptorImpl();
+    ServiceInterceptor authz = AuthorizationInterceptor.create(null);
     InterceptorUtils.checkInterceptorOrder(interceptorHolders, authz);
     interceptorHolders.add(new InterceptorHolder(authz));
     ServiceInterceptor user = (vertx, context, msg) -> Future.succeededFuture();
@@ -63,9 +63,9 @@ public class InterceptorUtilsTest {
   @Test
   public void testCheckInterceptorOrderWrongPriority() {
     List<InterceptorHolder> interceptorHolders = new ArrayList<>();
-    ServiceInterceptor authz = new AuthorizationInterceptorImpl();
+    ServiceInterceptor authz = AuthorizationInterceptor.create(null);
     interceptorHolders.add(new InterceptorHolder(authz));
-    ServiceInterceptor authn = new AuthenticationInterceptorImpl();
+    ServiceInterceptor authn = AuthenticationInterceptor.create(null);
     assertThrows(IllegalStateException.class, () ->
       InterceptorUtils.checkInterceptorOrder(interceptorHolders, authn));
     interceptorHolders.clear();

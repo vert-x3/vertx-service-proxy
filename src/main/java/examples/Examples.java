@@ -9,11 +9,11 @@ import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.authorization.JWTAuthorization;
+import io.vertx.serviceproxy.AuthenticationInterceptor;
+import io.vertx.serviceproxy.AuthorizationInterceptor;
 import io.vertx.serviceproxy.ServiceAuthInterceptor;
 import io.vertx.serviceproxy.ServiceBinder;
 import io.vertx.serviceproxy.ServiceProxyBuilder;
-import io.vertx.serviceproxy.impl.AuthenticationInterceptorImpl;
-import io.vertx.serviceproxy.impl.AuthorizationInterceptorImpl;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -130,23 +130,16 @@ public class Examples {
       // Secure the messages in transit
       .addInterceptor(
         "action",
-        new AuthenticationInterceptorImpl()
-          // Tokens will be validated using JWT authentication
-          .setAuthenticationProvider(JWTAuth.create(vertx, new JWTAuthOptions())))
+        // Tokens will be validated using JWT authentication
+        AuthenticationInterceptor.create(
+          JWTAuth.create(vertx, new JWTAuthOptions())))
       .addInterceptor(
-        new AuthorizationInterceptorImpl()
+        AuthorizationInterceptor.create(JWTAuthorization.create("permissions"))
           // optionally we can secure permissions too:
-
           // an admin
           .addAuthorization(RoleBasedAuthorization.create("admin"))
           // that can print
-          .addAuthorization(PermissionBasedAuthorization.create("print"))
-
-          // where the authorizations are loaded, let's assume from the token
-          // but they could be loaded from a database or a file if needed
-          .setAuthorizationProvider(
-            JWTAuthorization.create("permissions")))
-
+          .addAuthorization(PermissionBasedAuthorization.create("print")))
       .register(SomeDatabaseService.class, service);
   }
 }

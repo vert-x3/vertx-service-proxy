@@ -21,14 +21,12 @@ import java.util.Set;
  * Create an event bus service interceptor that will provide an authorization check
  */
 public class AuthorizationInterceptorImpl implements AuthorizationInterceptor {
-  private AuthorizationProvider authorizationProvider;
+  private final AuthorizationProvider authorizationProvider;
 
   private Set<Authorization> authorizations;
 
-  @Override
-  public AuthorizationInterceptorImpl setAuthorizationProvider(AuthorizationProvider authorizationProvider) {
+  public AuthorizationInterceptorImpl(AuthorizationProvider authorizationProvider) {
     this.authorizationProvider = authorizationProvider;
-    return this;
   }
 
   /**
