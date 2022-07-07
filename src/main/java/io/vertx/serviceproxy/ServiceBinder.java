@@ -115,7 +115,7 @@ public class ServiceBinder {
    */
   @Deprecated
   public ServiceBinder addInterceptor(Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
-    ServiceInterceptor serviceInterceptor = (context, msg) -> interceptor.apply(msg);
+    ServiceInterceptor serviceInterceptor = (vertx, context, msg) -> interceptor.apply(msg);
     checkAndAddInterceptor(serviceInterceptor);
     return this;
   }
@@ -129,7 +129,7 @@ public class ServiceBinder {
   @Deprecated
   public ServiceBinder addInterceptor(String action,
                                       Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
-    ServiceInterceptor serviceInterceptor = (context, msg) -> interceptor.apply(msg);
+    ServiceInterceptor serviceInterceptor = (vertx, context, msg) -> interceptor.apply(msg);
     checkAndAddInterceptor(action, serviceInterceptor);
     return this;
   }
@@ -150,7 +150,7 @@ public class ServiceBinder {
   public <T> MessageConsumer<JsonObject> register(Class<T> clazz, T service) {
     Objects.requireNonNull(address);
     // register
-    return getProxyHandler(clazz, service).register(vertx.eventBus(), address, getInterceptorHolders());
+    return getProxyHandler(clazz, service).register(vertx, address, getInterceptorHolders());
   }
 
   /**
@@ -165,7 +165,7 @@ public class ServiceBinder {
   public <T> MessageConsumer<JsonObject> registerLocal(Class<T> clazz, T service) {
     Objects.requireNonNull(address);
     // register
-    return getProxyHandler(clazz, service).registerLocal(vertx.eventBus(), address, getInterceptorHolders());
+    return getProxyHandler(clazz, service).registerLocal(vertx, address, getInterceptorHolders());
   }
 
   /**

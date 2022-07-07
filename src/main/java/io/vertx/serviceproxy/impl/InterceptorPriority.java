@@ -5,7 +5,7 @@ package io.vertx.serviceproxy.impl;
  */
 public enum InterceptorPriority {
 
-  AUTHN,
-  AUTHZ,
+  AUTHENTICATION,
+  AUTHORIZATION,
   USER
 }

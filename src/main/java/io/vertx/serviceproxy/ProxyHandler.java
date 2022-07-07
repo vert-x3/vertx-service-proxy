@@ -16,13 +16,12 @@
 
 package io.vertx.serviceproxy;
 
-import io.vertx.core.Context;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.ReplyException;
-import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.JsonObject;
 
 import java.util.HashMap;
@@ -57,15 +56,15 @@ public abstract class ProxyHandler implements Handler<Message<JsonObject>> {
   /**
    * Register the proxy handle on the event bus.
    *
-   * @param eventBus           the event bus
+   * @param vertx              the VertX instance
    * @param address            the proxy address
    * @param interceptorHolders the interceptorHolders
    */
-  public MessageConsumer<JsonObject> register(EventBus eventBus, String address,
+  public MessageConsumer<JsonObject> register(Vertx vertx, String address,
                                               List<InterceptorHolder> interceptorHolders) {
     Objects.requireNonNull(interceptorHolders);
-    Handler<Message<JsonObject>> handler = configureHandler(interceptorHolders);
-    consumer = eventBus.consumer(address, handler);
+    Handler<Message<JsonObject>> handler = configureHandler(vertx, interceptorHolders);
+    consumer = vertx.eventBus().consumer(address, handler);
     return consumer;
   }
 
@@ -85,19 +84,19 @@ public abstract class ProxyHandler implements Handler<Message<JsonObject>> {
    * Register the local proxy handle on the event bus.
    * The registration will not be propagated to other nodes in the cluster.
    *
-   * @param eventBus           the event bus
+   * @param vertx              the VertX instance
    * @param address            the proxy address
    * @param interceptorHolders the {@link InterceptorHolder} interceptorHolders
    */
-  public MessageConsumer<JsonObject> registerLocal(EventBus eventBus, String address,
+  public MessageConsumer<JsonObject> registerLocal(Vertx vertx, String address,
                                                    List<InterceptorHolder> interceptorHolders) {
     Objects.requireNonNull(interceptorHolders);
-    Handler<Message<JsonObject>> handler = configureHandler(interceptorHolders);
-    consumer = eventBus.localConsumer(address, handler);
+    Handler<Message<JsonObject>> handler = configureHandler(vertx, interceptorHolders);
+    consumer = vertx.eventBus().localConsumer(address, handler);
     return consumer;
   }
 
-  private Handler<Message<JsonObject>> configureHandler(List<InterceptorHolder> interceptorHolders) {
+  private Handler<Message<JsonObject>> configureHandler(Vertx vertx, List<InterceptorHolder> interceptorHolders) {
     Handler<Message<JsonObject>> handler = this;
     Map<String, Object> context = new HashMap<>();
     for (InterceptorHolder interceptorHolder : interceptorHolders) {
@@ -106,7 +105,7 @@ public abstract class ProxyHandler implements Handler<Message<JsonObject>> {
         String action = msg.headers().get("action");
         String holderAction = interceptorHolder.action();
         if (holderAction == null || action.equals(holderAction)) {
-          interceptorHolder.interceptor().intercept(context, msg)
+          interceptorHolder.interceptor().intercept(vertx, context, msg)
             .onSuccess(prev::handle)
             .onFailure(err -> {
               ReplyException exception = (ReplyException) err;

@@ -22,10 +22,10 @@ public class InterceptorUtils {
    */
   public static InterceptorPriority getWeight(ServiceInterceptor interceptor) {
     if (interceptor instanceof AuthenticationInterceptor) {
-      return InterceptorPriority.AUTHN;
+      return InterceptorPriority.AUTHENTICATION;
     }
     if (interceptor instanceof AuthorizationInterceptor) {
-      return InterceptorPriority.AUTHZ;
+      return InterceptorPriority.AUTHORIZATION;
     }
 
     return InterceptorPriority.USER;
