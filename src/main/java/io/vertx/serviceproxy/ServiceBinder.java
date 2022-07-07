@@ -22,8 +22,12 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
+
+import static io.vertx.serviceproxy.impl.utils.InterceptorUtils.checkInterceptorOrder;
 
 /**
  * A binder for Service Proxies which state can be reused during the binder lifecycle.
@@ -90,7 +94,7 @@ public class ServiceBinder {
    * When an exception is thrown by the service or the underlying handler, include
    * debugging info in the ServiceException, that you can access with {@link ServiceException#getDebugInfo()}
    *
-   * @param includeDebugInfo
+   * @param includeDebugInfo the parameter
    * @return self
    */
   public ServiceBinder setIncludeDebugInfo(boolean includeDebugInfo) {
@@ -98,19 +102,40 @@ public class ServiceBinder {
     return this;
   }
 
-  public ServiceBinder addInterceptor(String action, Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
-    if (interceptorHolders == null) {
-      interceptorHolders = new ArrayList<>();
-    }
-    interceptorHolders.add(new InterceptorHolder(action, interceptor));
+  public ServiceBinder addInterceptor(String action, ServiceInterceptor interceptor) {
+    checkAndAddInterceptor(action, interceptor);
     return this;
   }
 
+  /**
+   * Wrapper method, remove when old interceptors will be removed
+   *
+   * @param interceptor interceptor to add
+   * @return self
+   */
+  @Deprecated
   public ServiceBinder addInterceptor(Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
-    if (interceptorHolders == null) {
-      interceptorHolders = new ArrayList<>();
-    }
-    interceptorHolders.add(new InterceptorHolder(interceptor));
+    ServiceInterceptor serviceInterceptor = (vertx, context, msg) -> interceptor.apply(msg);
+    checkAndAddInterceptor(serviceInterceptor);
+    return this;
+  }
+
+  /**
+   * Wrapper method, remove when old interceptors will be removed
+   *
+   * @param interceptor interceptor to add
+   * @return self
+   */
+  @Deprecated
+  public ServiceBinder addInterceptor(String action,
+                                      Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
+    ServiceInterceptor serviceInterceptor = (vertx, context, msg) -> interceptor.apply(msg);
+    checkAndAddInterceptor(action, serviceInterceptor);
+    return this;
+  }
+
+  public ServiceBinder addInterceptor(ServiceInterceptor interceptor) {
+    checkAndAddInterceptor(interceptor);
     return this;
   }
 
@@ -125,7 +150,7 @@ public class ServiceBinder {
   public <T> MessageConsumer<JsonObject> register(Class<T> clazz, T service) {
     Objects.requireNonNull(address);
     // register
-    return getProxyHandler(clazz, service).register(vertx.eventBus(), address, interceptorHolders);
+    return getProxyHandler(clazz, service).register(vertx, address, getInterceptorHolders());
   }
 
   /**
@@ -140,7 +165,7 @@ public class ServiceBinder {
   public <T> MessageConsumer<JsonObject> registerLocal(Class<T> clazz, T service) {
     Objects.requireNonNull(address);
     // register
-    return getProxyHandler(clazz, service).registerLocal(vertx.eventBus(), address, interceptorHolders);
+    return getProxyHandler(clazz, service).registerLocal(vertx, address, getInterceptorHolders());
   }
 
   /**
@@ -159,10 +184,36 @@ public class ServiceBinder {
     }
   }
 
+  /**
+   * Checks current interceptors correct order and adds a new one if it's OK
+   *
+   * @param action      interceptor's action
+   * @param interceptor interceptor to add
+   */
+  private void checkAndAddInterceptor(String action,
+                                      ServiceInterceptor interceptor) {
+    List<InterceptorHolder> currentInterceptorHolders = getInterceptorHolders();
+    checkInterceptorOrder(currentInterceptorHolders, interceptor);
+    currentInterceptorHolders.add(new InterceptorHolder(action, interceptor));
+  }
+
+  /**
+   * Checks current interceptors correct order and adds a new one if it's OK
+   *
+   * @param interceptor interceptor to add
+   */
+  private void checkAndAddInterceptor(ServiceInterceptor interceptor) {
+    List<InterceptorHolder> currentInterceptorHolders = getInterceptorHolders();
+    checkInterceptorOrder(currentInterceptorHolders, interceptor);
+    currentInterceptorHolders.add(new InterceptorHolder(interceptor));
+  }
+
   private <T> ProxyHandler getProxyHandler(Class<T> clazz, T service) {
     String handlerClassName = clazz.getName() + "VertxProxyHandler";
     Class<?> handlerClass = loadClass(handlerClassName, clazz);
-    Constructor<?> constructor = getConstructor(handlerClass, Vertx.class, clazz, boolean.class, long.class, boolean.class);
+    Constructor<?> constructor = getConstructor(
+      handlerClass, Vertx.class, clazz, boolean.class, long.class, boolean.class
+    );
     Object instance = createInstance(constructor, vertx, service, topLevel, timeoutSeconds, includeDebugInfo);
     return (ProxyHandler) instance;
   }
@@ -189,5 +240,12 @@ public class ServiceBinder {
     } catch (Exception e) {
       throw new IllegalStateException("Failed to call constructor on", e);
     }
+  }
+
+  private List<InterceptorHolder> getInterceptorHolders() {
+    if (interceptorHolders == null) {
+      interceptorHolders = new ArrayList<>();
+    }
+    return interceptorHolders;
   }
 }

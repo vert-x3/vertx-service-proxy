@@ -21,11 +21,15 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
+import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
+import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
-import io.vertx.serviceproxy.ServiceAuthInterceptor;
+import io.vertx.ext.auth.jwt.authorization.JWTAuthorization;
 import io.vertx.serviceproxy.ServiceBinder;
 import io.vertx.serviceproxy.ServiceProxyBuilder;
+import io.vertx.serviceproxy.impl.AuthenticationInterceptorImpl;
+import io.vertx.serviceproxy.impl.AuthorizationInterceptorImpl;
 import io.vertx.serviceproxy.testmodel.*;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
@@ -57,15 +61,31 @@ public class SecureServiceBinderTest extends VertxTestBase {
     ServiceBinder serviceBinder = new ServiceBinder(vertx)
       .setAddress(SERVICE_ADDRESS)
       .addInterceptor(
-        new ServiceAuthInterceptor()
-          .setAuthenticationProvider(JWTAuth.create(vertx, getJWTConfig()))
+        new AuthenticationInterceptorImpl()
+          .setAuthenticationProvider(JWTAuth.create(vertx, getJWTConfig())))
+      .addInterceptor(
+        new AuthorizationInterceptorImpl()
+          // an admin
+          .addAuthorization(RoleBasedAuthorization.create("admin"))
+          // that can print
+          .addAuthorization(PermissionBasedAuthorization.create("print"))
+          .setAuthorizationProvider(
+            JWTAuthorization.create("permissions"))
       );
 
     ServiceBinder localServiceBinder = new ServiceBinder(vertx)
       .setAddress(SERVICE_LOCAL_ADDRESS)
       .addInterceptor(
-        new ServiceAuthInterceptor()
-          .setAuthenticationProvider(JWTAuth.create(vertx, getJWTConfig()))
+        new AuthenticationInterceptorImpl()
+          .setAuthenticationProvider(JWTAuth.create(vertx, getJWTConfig())))
+      .addInterceptor(
+        new AuthorizationInterceptorImpl()
+          // an admin
+          .addAuthorization(RoleBasedAuthorization.create("admin"))
+          // that can print
+          .addAuthorization(PermissionBasedAuthorization.create("print"))
+          .setAuthorizationProvider(
+            JWTAuthorization.create("permissions"))
       );
 
     consumer = serviceBinder.register(OKService.class, service);

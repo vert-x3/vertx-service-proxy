@@ -12,6 +12,8 @@ import io.vertx.ext.auth.jwt.authorization.JWTAuthorization;
 import io.vertx.serviceproxy.ServiceAuthInterceptor;
 import io.vertx.serviceproxy.ServiceBinder;
 import io.vertx.serviceproxy.ServiceProxyBuilder;
+import io.vertx.serviceproxy.impl.AuthenticationInterceptorImpl;
+import io.vertx.serviceproxy.impl.AuthorizationInterceptorImpl;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -34,8 +36,8 @@ public class Examples {
       .onSuccess(msg -> {
         // done
       }).onFailure(err -> {
-      // failure
-    });
+        // failure
+      });
   }
 
   public void example2(Vertx vertx) {
@@ -91,7 +93,8 @@ public class Examples {
       .build(SomeDatabaseService.class);
   }
 
-  public void secure(Vertx vertx) {
+  @Deprecated
+  public void secureDeprecated(Vertx vertx) {
     // Create an instance of your service implementation
     SomeDatabaseService service = new SomeDatabaseServiceImpl();
     // Register the handler
@@ -103,6 +106,35 @@ public class Examples {
         new ServiceAuthInterceptor()
           // Tokens will be validated using JWT authentication
           .setAuthenticationProvider(JWTAuth.create(vertx, new JWTAuthOptions()))
+          // optionally we can secure permissions too:
+
+          // an admin
+          .addAuthorization(RoleBasedAuthorization.create("admin"))
+          // that can print
+          .addAuthorization(PermissionBasedAuthorization.create("print"))
+
+          // where the authorizations are loaded, let's assume from the token
+          // but they could be loaded from a database or a file if needed
+          .setAuthorizationProvider(
+            JWTAuthorization.create("permissions")))
+
+      .register(SomeDatabaseService.class, service);
+  }
+
+  public void secure(Vertx vertx) {
+    // Create an instance of your service implementation
+    SomeDatabaseService service = new SomeDatabaseServiceImpl();
+    // Register the handler
+    new ServiceBinder(vertx)
+      .setAddress("database-service-address")
+      // Secure the messages in transit
+      .addInterceptor(
+        "action",
+        new AuthenticationInterceptorImpl()
+          // Tokens will be validated using JWT authentication
+          .setAuthenticationProvider(JWTAuth.create(vertx, new JWTAuthOptions())))
+      .addInterceptor(
+        new AuthorizationInterceptorImpl()
           // optionally we can secure permissions too:
 
           // an admin

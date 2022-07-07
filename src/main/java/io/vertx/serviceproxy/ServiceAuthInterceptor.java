@@ -21,7 +21,10 @@ import java.util.function.Function;
 /**
  * Create an event bus service interceptor using a token based authentication provider (e.g.: JWT or Oauth2) that will
  * verify all requests before the service is invoked.
+ *
+ * @deprecated use {@link AuthenticationInterceptor}, {@link AuthorizationInterceptor} instead
  */
+@Deprecated
 public class ServiceAuthInterceptor implements Function<Message<JsonObject>, Future<Message<JsonObject>>> {
 
   private AuthenticationProvider authn;
