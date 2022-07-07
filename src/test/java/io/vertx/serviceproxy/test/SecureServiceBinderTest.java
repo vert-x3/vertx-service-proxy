@@ -26,10 +26,10 @@ import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.authorization.JWTAuthorization;
-import io.vertx.serviceproxy.AuthenticationInterceptor;
-import io.vertx.serviceproxy.AuthorizationInterceptor;
 import io.vertx.serviceproxy.ServiceBinder;
 import io.vertx.serviceproxy.ServiceProxyBuilder;
+import io.vertx.serviceproxy.impl.AuthenticationInterceptorImpl;
+import io.vertx.serviceproxy.impl.AuthorizationInterceptorImpl;
 import io.vertx.serviceproxy.testmodel.*;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
@@ -61,10 +61,10 @@ public class SecureServiceBinderTest extends VertxTestBase {
     ServiceBinder serviceBinder = new ServiceBinder(vertx)
       .setAddress(SERVICE_ADDRESS)
       .addInterceptor(
-        new AuthenticationInterceptor()
+        new AuthenticationInterceptorImpl()
           .setAuthenticationProvider(JWTAuth.create(vertx, getJWTConfig())))
       .addInterceptor(
-        new AuthorizationInterceptor()
+        new AuthorizationInterceptorImpl()
           // an admin
           .addAuthorization(RoleBasedAuthorization.create("admin"))
           // that can print
@@ -76,10 +76,10 @@ public class SecureServiceBinderTest extends VertxTestBase {
     ServiceBinder localServiceBinder = new ServiceBinder(vertx)
       .setAddress(SERVICE_LOCAL_ADDRESS)
       .addInterceptor(
-        new AuthenticationInterceptor()
+        new AuthenticationInterceptorImpl()
           .setAuthenticationProvider(JWTAuth.create(vertx, getJWTConfig())))
       .addInterceptor(
-        new AuthorizationInterceptor()
+        new AuthorizationInterceptorImpl()
           // an admin
           .addAuthorization(RoleBasedAuthorization.create("admin"))
           // that can print
