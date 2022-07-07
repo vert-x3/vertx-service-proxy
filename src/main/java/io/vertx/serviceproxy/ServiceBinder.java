@@ -94,7 +94,7 @@ public class ServiceBinder {
    * When an exception is thrown by the service or the underlying handler, include
    * debugging info in the ServiceException, that you can access with {@link ServiceException#getDebugInfo()}
    *
-   * @param includeDebugInfo
+   * @param includeDebugInfo the parameter
    * @return self
    */
   public ServiceBinder setIncludeDebugInfo(boolean includeDebugInfo) {
