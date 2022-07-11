@@ -20,6 +20,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.serviceproxy.impl.InterceptorHolder;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;

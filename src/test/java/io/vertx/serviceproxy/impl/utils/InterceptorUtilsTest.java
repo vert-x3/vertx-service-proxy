@@ -3,7 +3,7 @@ package io.vertx.serviceproxy.impl.utils;
 import io.vertx.core.Future;
 import io.vertx.serviceproxy.AuthenticationInterceptor;
 import io.vertx.serviceproxy.AuthorizationInterceptor;
-import io.vertx.serviceproxy.InterceptorHolder;
+import io.vertx.serviceproxy.impl.InterceptorHolder;
 import io.vertx.serviceproxy.ServiceInterceptor;
 import io.vertx.serviceproxy.impl.InterceptorPriority;
 import org.junit.Test;

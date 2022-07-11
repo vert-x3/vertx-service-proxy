@@ -23,6 +23,7 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
+import io.vertx.serviceproxy.impl.InterceptorHolder;
 
 import java.util.HashMap;
 import java.util.List;
@@ -106,7 +107,7 @@ public abstract class ProxyHandler implements Handler<Message<JsonObject>> {
         String holderAction = interceptorHolder.action();
         if (holderAction == null || action.equals(holderAction)) {
           interceptorHolder.interceptor().intercept(vertx, context, msg)
-            .onSuccess(prev::handle)
+            .onSuccess(prev)
             .onFailure(err -> {
               ReplyException exception = (ReplyException) err;
               msg.fail(exception.failureCode(), exception.getMessage());
