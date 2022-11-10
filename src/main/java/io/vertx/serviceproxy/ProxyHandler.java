@@ -100,7 +100,9 @@ public abstract class ProxyHandler implements Handler<Message<JsonObject>> {
   private Handler<Message<JsonObject>> configureHandler(Vertx vertx, List<InterceptorHolder> interceptorHolders) {
     Handler<Message<JsonObject>> handler = this;
     Map<String, Object> context = new HashMap<>();
-    for (InterceptorHolder interceptorHolder : interceptorHolders) {
+    // construct the handler backwards, this allows the checks to be performed in the correct order
+    for (int i = interceptorHolders.size() - 1; i >= 0; i--) {
+      final InterceptorHolder interceptorHolder = interceptorHolders.get(i);
       Handler<Message<JsonObject>> prev = handler;
       handler = msg -> {
         String action = msg.headers().get("action");

@@ -22,7 +22,6 @@ import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
-import io.vertx.ext.auth.authorization.RoleBasedAuthorization;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.auth.jwt.authorization.JWTAuthorization;
@@ -64,11 +63,14 @@ public class SecureServiceBinderTest extends VertxTestBase {
       .addInterceptor(
         AuthenticationInterceptor.create(JWTAuth.create(vertx, getJWTConfig())))
       .addInterceptor(
-        AuthorizationInterceptor.create(JWTAuthorization.create("permissions"))
+        AuthorizationInterceptor.create(JWTAuthorization.create("roles"))
           // an admin
-          .addAuthorization(RoleBasedAuthorization.create("admin"))
-          // that can print
-          .addAuthorization(PermissionBasedAuthorization.create("print"))
+          .addAuthorization(PermissionBasedAuthorization.create("admin"))
+      )
+      .addInterceptor(
+        AuthorizationInterceptor.create(JWTAuthorization.create("permissions"))
+          // that can write
+          .addAuthorization(PermissionBasedAuthorization.create("write"))
       );
 
     ServiceBinder localServiceBinder = new ServiceBinder(vertx)
@@ -76,11 +78,14 @@ public class SecureServiceBinderTest extends VertxTestBase {
       .addInterceptor(
         AuthenticationInterceptor.create(JWTAuth.create(vertx, getJWTConfig())))
       .addInterceptor(
-        AuthorizationInterceptor.create(JWTAuthorization.create("permissions"))
+        AuthorizationInterceptor.create(JWTAuthorization.create("roles"))
           // an admin
-          .addAuthorization(RoleBasedAuthorization.create("admin"))
-          // that can print
-          .addAuthorization(PermissionBasedAuthorization.create("print"))
+          .addAuthorization(PermissionBasedAuthorization.create("admin"))
+      )
+      .addInterceptor(
+        AuthorizationInterceptor.create(JWTAuthorization.create("permissions"))
+          // that can write
+          .addAuthorization(PermissionBasedAuthorization.create("write"))
       );
 
     consumer = serviceBinder.register(OKService.class, service);
