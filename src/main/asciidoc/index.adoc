@@ -43,6 +43,7 @@ To *implement* service proxies, also add:
   <groupId>${maven.groupId}</groupId>
   <artifactId>vertx-codegen</artifactId>
   <version>${maven.version}</version>
+  <classifier>processor</classifier>
   <scope>provided</scope>
 </dependency>
 ----
