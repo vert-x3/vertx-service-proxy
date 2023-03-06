@@ -14,7 +14,7 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-@ModuleGen(name = "vertx-service-proxy", groupPackage = "io.vertx")
+@ModuleGen(name = "vertx-service-proxy", groupPackage = "io.vertx", useFutures = true)
 package io.vertx.serviceproxy;
 
 import io.vertx.codegen.annotations.ModuleGen;
