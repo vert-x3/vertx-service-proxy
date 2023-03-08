@@ -21,7 +21,6 @@ import io.vertx.core.json.JsonObject;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author <a href="http://slinkydeveloper.github.io">Francesco Guardiani @slinkydeveloper</a>

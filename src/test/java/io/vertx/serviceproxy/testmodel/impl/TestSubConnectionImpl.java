@@ -16,12 +16,7 @@
 
 package io.vertx.serviceproxy.testmodel.impl;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
-import io.vertx.serviceproxy.testmodel.TestConnection;
 import io.vertx.serviceproxy.testmodel.sub.TestSubConnection;
 
 /**

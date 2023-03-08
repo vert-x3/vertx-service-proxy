@@ -105,8 +105,8 @@ public class ServiceProxyTest extends VertxTestBase {
     proxy.failingCall("Fail subclass", handler -> {
       assertTrue(handler.cause() instanceof MyServiceException);
       assertEquals("Call has failed", handler.cause().getMessage());
-      assertEquals(25, ((MyServiceException)handler.cause()).failureCode());
-      assertEquals("some extra", ((MyServiceException)handler.cause()).getExtra());
+      assertEquals(25, ((MyServiceException) handler.cause()).failureCode());
+      assertEquals("some extra", ((MyServiceException) handler.cause()).getExtra());
       testComplete();
     });
     await();
@@ -174,7 +174,7 @@ public class ServiceProxyTest extends VertxTestBase {
     proxy.enumTypeNull(null);
     await();
   }
-  
+
   @Test
   public void testEnumTypeAsResult() {
     proxy.enumTypeAsResult(ar -> {
@@ -200,7 +200,7 @@ public class ServiceProxyTest extends VertxTestBase {
     });
     await();
   }
-  
+
   @Test
   public void testCustomEnumType() {
     proxy.enumCustomType(SomeEnumWithCustomConstructor.ITEST);
@@ -350,19 +350,19 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testListTypes() {
     proxy.listParams(Arrays.asList("foo", "bar"), Arrays.asList((byte) 12, (byte) 13), Arrays.asList((short) 123, (short) 134), Arrays.asList(1234, 1235),
-        Arrays.asList(12345l, 12346l), Arrays.asList(new JsonObject().put("foo", "bar"), new JsonObject().put("blah", "eek")),
-        Arrays.asList(new JsonArray().add("foo"), new JsonArray().add("blah")),
-        Arrays.asList(new TestDataObject().setNumber(1).setString("String 1").setBool(false), new TestDataObject().setNumber(2).setString("String 2").setBool(true)));
+      Arrays.asList(12345l, 12346l), Arrays.asList(new JsonObject().put("foo", "bar"), new JsonObject().put("blah", "eek")),
+      Arrays.asList(new JsonArray().add("foo"), new JsonArray().add("blah")),
+      Arrays.asList(new TestDataObject().setNumber(1).setString("String 1").setBool(false), new TestDataObject().setNumber(2).setString("String 2").setBool(true)));
     await();
   }
 
   @Test
   public void testSetTypes() {
     proxy.setParams(new HashSet<>(Arrays.asList("foo", "bar")), new HashSet<>(Arrays.asList((byte) 12, (byte) 13)), new HashSet<>(Arrays.asList((short) 123, (short) 134)),
-        new HashSet<>(Arrays.asList(1234, 1235)),
-        new HashSet<>(Arrays.asList(12345l, 12346l)), new HashSet<>(Arrays.asList(new JsonObject().put("foo", "bar"), new JsonObject().put("blah", "eek"))),
-        new HashSet<>(Arrays.asList(new JsonArray().add("foo"), new JsonArray().add("blah"))),
-        new HashSet<>(Arrays.asList(new TestDataObject().setNumber(1).setString("String 1").setBool(false), new TestDataObject().setNumber(2).setString("String 2").setBool(true))));
+      new HashSet<>(Arrays.asList(1234, 1235)),
+      new HashSet<>(Arrays.asList(12345l, 12346l)), new HashSet<>(Arrays.asList(new JsonObject().put("foo", "bar"), new JsonObject().put("blah", "eek"))),
+      new HashSet<>(Arrays.asList(new JsonArray().add("foo"), new JsonArray().add("blah"))),
+      new HashSet<>(Arrays.asList(new TestDataObject().setNumber(1).setString("String 1").setBool(false), new TestDataObject().setNumber(2).setString("String 2").setBool(true))));
     await();
   }
 
@@ -372,30 +372,30 @@ public class ServiceProxyTest extends VertxTestBase {
                       put("eek", "foo");
                       put("wob", "bar");
                     }},
-        new HashMap<String, Byte>() {{
-          put("eek", (byte) 12);
-          put("wob", (byte) 13);
-        }},
-        new HashMap<String, Short>() {{
-          put("eek", (short) 123);
-          put("wob", (short) 134);
-        }},
-        new HashMap<String, Integer>() {{
-          put("eek", 1234);
-          put("wob", 1235);
-        }},
-        new HashMap<String, Long>() {{
-          put("eek", 12345l);
-          put("wob", 12356l);
-        }},
-        new HashMap<String, JsonObject>() {{
-          put("eek", new JsonObject().put("foo", "bar"));
-          put("wob", new JsonObject().put("blah", "eek"));
-        }},
-        new HashMap<String, JsonArray>() {{
-          put("eek", new JsonArray().add("foo"));
-          put("wob", new JsonArray().add("blah"));
-        }});
+      new HashMap<String, Byte>() {{
+        put("eek", (byte) 12);
+        put("wob", (byte) 13);
+      }},
+      new HashMap<String, Short>() {{
+        put("eek", (short) 123);
+        put("wob", (short) 134);
+      }},
+      new HashMap<String, Integer>() {{
+        put("eek", 1234);
+        put("wob", 1235);
+      }},
+      new HashMap<String, Long>() {{
+        put("eek", 12345l);
+        put("wob", 12356l);
+      }},
+      new HashMap<String, JsonObject>() {{
+        put("eek", new JsonObject().put("foo", "bar"));
+        put("wob", new JsonObject().put("blah", "eek"));
+      }},
+      new HashMap<String, JsonArray>() {{
+        put("eek", new JsonArray().add("foo"));
+        put("wob", new JsonArray().add("blah"));
+      }});
     await();
   }
 
@@ -661,12 +661,13 @@ public class ServiceProxyTest extends VertxTestBase {
     message.put("object", new JsonObject().put("foo", "bar"));
     message.put("str", "blah");
     message.put("i", 1234);
-    message.put("chr", (int)'X'); // chars are mapped to ints
+    message.put("chr", (int) 'X'); // chars are mapped to ints
     message.put("senum", SomeEnum.BAR.toString()); // enums are mapped to strings
-    vertx.eventBus().<String>request("someaddress", message, new DeliveryOptions().addHeader("action", "invokeWithMessage"), onSuccess(res -> {
-      assertEquals("goats", res.body());
-      testComplete();
-    }));
+    vertx.eventBus().<String>request("someaddress", message, new DeliveryOptions().addHeader("action", "invokeWithMessage"))
+      .onComplete(onSuccess(res -> {
+        assertEquals("goats", res.body());
+        testComplete();
+      }));
     await();
   }
 
@@ -676,14 +677,15 @@ public class ServiceProxyTest extends VertxTestBase {
     message.put("object", new JsonObject().put("foo", "bar"));
     message.put("str", "blah");
     message.put("i", 1234);
-    vertx.eventBus().request(SERVICE_WITH_DEBUG_ADDRESS, message, new DeliveryOptions().addHeader("action", "yourmum").setSendTimeout(500), onFailure(t -> {
-      assertTrue(t instanceof ServiceException);
-      ServiceException se = (ServiceException) t;
-      // This will as operation will fail to be invoked
-      assertEquals(ReplyFailure.RECIPIENT_FAILURE, se.failureType());
-      assertEquals(IllegalStateException.class.getCanonicalName(), se.getDebugInfo().getString("causeName"));
-      testComplete();
-    }));
+    vertx.eventBus().request(SERVICE_WITH_DEBUG_ADDRESS, message, new DeliveryOptions().addHeader("action", "yourmum").setSendTimeout(500))
+      .onComplete(onFailure(t -> {
+        assertTrue(t instanceof ServiceException);
+        ServiceException se = (ServiceException) t;
+        // This will as operation will fail to be invoked
+        assertEquals(ReplyFailure.RECIPIENT_FAILURE, se.failureType());
+        assertEquals(IllegalStateException.class.getCanonicalName(), se.getDebugInfo().getString("causeName"));
+        testComplete();
+      }));
     await();
   }
 
@@ -693,17 +695,18 @@ public class ServiceProxyTest extends VertxTestBase {
     message.put("object", new JsonObject().put("foo", "bar"));
     message.put("str", 76523); // <- wrong one
     message.put("i", 1234);
-    message.put("char", (int)'X'); // chars are mapped to ints
+    message.put("char", (int) 'X'); // chars are mapped to ints
     message.put("enum", SomeEnum.BAR.toString()); // enums are mapped to strings
-    vertx.eventBus().request(SERVICE_WITH_DEBUG_ADDRESS, message, new DeliveryOptions().addHeader("action", "invokeWithMessage").setSendTimeout(500), onFailure(t -> {
-      assertTrue(t instanceof ServiceException);
-      ServiceException se = (ServiceException) t;
-      // This will as operation will fail to be invoked
-      assertEquals(ReplyFailure.RECIPIENT_FAILURE, se.failureType());
-      assertEquals(ClassCastException.class.getCanonicalName(), se.getDebugInfo().getString("causeName"));
-      assertFalse(se.getDebugInfo().getJsonArray("causeStackTrace").isEmpty());
-      testComplete();
-    }));
+    vertx.eventBus().request(SERVICE_WITH_DEBUG_ADDRESS, message, new DeliveryOptions().addHeader("action", "invokeWithMessage").setSendTimeout(500))
+      .onComplete(onFailure(t -> {
+        assertTrue(t instanceof ServiceException);
+        ServiceException se = (ServiceException) t;
+        // This will as operation will fail to be invoked
+        assertEquals(ReplyFailure.RECIPIENT_FAILURE, se.failureType());
+        assertEquals(ClassCastException.class.getCanonicalName(), se.getDebugInfo().getString("causeName"));
+        assertFalse(se.getDebugInfo().getJsonArray("causeStackTrace").isEmpty());
+        testComplete();
+      }));
     await();
   }
 
@@ -942,9 +945,9 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testMapByteHandler() {
     Map<String, Byte> expected = new HashMap<>();
-    expected.put("1", (byte)1);
-    expected.put("2", (byte)2);
-    expected.put("3", (byte)3);
+    expected.put("1", (byte) 1);
+    expected.put("2", (byte) 2);
+    expected.put("3", (byte) 3);
     proxy.mapByteHandler(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
@@ -955,9 +958,9 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testMapShortHandler() {
     Map<String, Short> expected = new HashMap<>();
-    expected.put("1", (short)11);
-    expected.put("2", (short)12);
-    expected.put("3", (short)13);
+    expected.put("1", (short) 11);
+    expected.put("2", (short) 12);
+    expected.put("3", (short) 13);
     proxy.mapShortHandler(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
@@ -1293,7 +1296,8 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testUnregisteringTheService() {
     proxy.booleanHandler(ar -> {
-      consumer.unregister(ar1 -> {
+      consumer.unregister()
+        .onComplete(ar1 -> {
         if (ar1.failed()) fail(ar1.cause());
         else testComplete();
       });

@@ -31,21 +31,21 @@ public class ClusteredTest {
   public void setUp() {
     VertxOptions options = new VertxOptions();
     options.getEventBusOptions().setHost("127.0.0.1");
-    Vertx.clusteredVertx(options, ar -> {
-      Vertx vertx = ar.result();
-      vertx.eventBus().registerDefaultCodec(MyServiceException.class,
+    Vertx.clusteredVertx(options)
+      .onSuccess(vertx -> {
+        vertx.eventBus().registerDefaultCodec(MyServiceException.class,
           new MyServiceExceptionMessageCodec());
-      providerNode.set(vertx);
-      vertx.deployVerticle(ServiceProviderVerticle.class.getName());
-      vertx.deployVerticle(LocalServiceProviderVerticle.class.getName());
-    });
+        providerNode.set(vertx);
+        vertx.deployVerticle(ServiceProviderVerticle.class.getName());
+        vertx.deployVerticle(LocalServiceProviderVerticle.class.getName());
+      });
 
-    Vertx.clusteredVertx(options, ar -> {
-      Vertx vertx = ar.result();
-      vertx.eventBus().registerDefaultCodec(MyServiceException.class,
+    Vertx.clusteredVertx(options)
+      .onSuccess(vertx -> {
+        vertx.eventBus().registerDefaultCodec(MyServiceException.class,
           new MyServiceExceptionMessageCodec());
-      consumerNode.set(vertx);
-    });
+        consumerNode.set(vertx);
+      });
 
     Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> providerNode.get() != null);
     Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> consumerNode.get() != null);
@@ -237,8 +237,8 @@ public class ClusteredTest {
     Service service = Service.createProxy(consumerNode.get(), "my.service");
     service.methodWthFailingResult("Fail", ar -> {
       assertThat(ar.cause() instanceof ServiceException).isTrue();
-      assertThat(((ServiceException)ar.cause()).failureCode()).isEqualTo(30);
-      assertThat(((ServiceException)ar.cause()).getDebugInfo()).isEqualTo(new JsonObject().put("test", "val"));
+      assertThat(((ServiceException) ar.cause()).failureCode()).isEqualTo(30);
+      assertThat(((ServiceException) ar.cause()).getDebugInfo()).isEqualTo(new JsonObject().put("test", "val"));
       result.set(ar.cause());
     });
     Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> result.get() != null);
@@ -250,8 +250,8 @@ public class ClusteredTest {
     Service service = Service.createProxy(consumerNode.get(), "my.service");
     service.methodWthFailingResult("cluster Fail", ar -> {
       assertThat(ar.cause() instanceof MyServiceException).isTrue();
-      assertThat(((MyServiceException)ar.cause()).failureCode()).isEqualTo(30);
-      assertThat(((MyServiceException)ar.cause()).getExtra()).isEqualTo("some extra");
+      assertThat(((MyServiceException) ar.cause()).failureCode()).isEqualTo(30);
+      assertThat(((MyServiceException) ar.cause()).getExtra()).isEqualTo("some extra");
       result.set(ar.cause());
     });
     Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> result.get() != null);
