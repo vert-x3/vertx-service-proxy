@@ -1,6 +1,7 @@
 # Service Proxies
 
-[![Build Status](https://github.com/vert-x3/vertx-service-proxy/workflows/CI/badge.svg?branch=master)](https://github.com/vert-x3/vertx-service-proxy/actions?query=workflow%3ACI)
+[![Build Status (5.x)](https://github.com/vert-x3/vertx-service-proxy/actions/workflows/ci-5.x.yml/badge.svg)](https://github.com/vert-x3/vertx-service-proxy/actions/workflows/ci-5.x.yml)
+[![Build Status (4.x)](https://github.com/vert-x3/vertx-service-proxy/actions/workflows/ci-4.x.yml/badge.svg)](https://github.com/vert-x3/vertx-service-proxy/actions/workflows/ci-4.x.yml)
 
 Please see the main documentation on the web-site for a full description:
 
