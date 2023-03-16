@@ -50,7 +50,7 @@ public class Examples {
     // Save some data in the database - this time using the proxy
     service.save(
       "mycollection",
-      new JsonObject().put("name", "tim"),
+      new JsonObject().put("name", "tim")).onComplete(
       res2 -> {
         if (res2.succeeded()) {
           // done

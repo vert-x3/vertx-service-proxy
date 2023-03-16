@@ -1,6 +1,7 @@
 package examples;
 
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 
@@ -10,12 +11,12 @@ import io.vertx.core.json.JsonObject;
 public class SomeDatabaseServiceImpl implements SomeDatabaseService {
 
   @Override
-  public void save(String collection, JsonObject document, Handler<AsyncResult<Void>> result) {
-
+  public Future<Void> save(String collection, JsonObject document) {
+    return null;
   }
 
   @Override
-  public SomeDatabaseService foo(String collection, JsonObject document, Handler<AsyncResult<Void>> result) {
-    return this;
+  public Future<Void> foo(String collection, JsonObject document) {
+    return null;
   }
 }
