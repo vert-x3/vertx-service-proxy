@@ -162,10 +162,10 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
             name,
             GeneratorUtils.generateSerializeDataObject(name, (ClassTypeInfo) t)
           ));
-      } else {   
+      } else {
           writer.stmt("_json.put(\"" + name + "\", " + name + " == null ? null : " + name + ".name())");
         }
-    } 
+    }
     else if (t.getKind() == ClassKind.LIST) {
       if (((ParameterizedTypeInfo)t).getArg(0).isDataObjectHolder()) {
         ClassTypeInfo doType = (ClassTypeInfo) ((ParameterizedTypeInfo) t).getArg(0);
@@ -229,7 +229,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
       writer.indent();
       writer.print("return ");
     } else {
-      writer.println(", res -> {");
+      writer.println(").onComplete(res -> {");
       writer.indent()
         .code("if (res.failed()) {\n")
         .indent();
