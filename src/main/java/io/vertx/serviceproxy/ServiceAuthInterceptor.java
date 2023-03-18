@@ -104,7 +104,7 @@ public class ServiceAuthInterceptor implements Function<Message<JsonObject>, Fut
         return promise.future();
       }
 
-      authn.authenticate(authorization, authenticate -> {
+      authn.authenticate(authorization).onComplete(authenticate -> {
         if (authenticate.failed()) {
           promise.fail(new ReplyException(ReplyFailure.RECIPIENT_FAILURE, 500, authenticate.cause().getMessage()));
           return;
@@ -122,7 +122,7 @@ public class ServiceAuthInterceptor implements Function<Message<JsonObject>, Fut
           return;
         }
 
-        authz.getAuthorizations(user, getAuthorizations -> {
+        authz.getAuthorizations(user).onComplete(getAuthorizations -> {
           if (getAuthorizations.failed()) {
             promise.fail(new ReplyException(ReplyFailure.RECIPIENT_FAILURE, 500, authenticate.cause().getMessage()));
           } else {
