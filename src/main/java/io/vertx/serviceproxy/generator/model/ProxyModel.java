@@ -88,6 +88,10 @@ public class ProxyModel extends ClassModel {
       return;
     }
     if (getModule().getUseFutures()) {
+      if (type.isVoid() || type.getName().startsWith("io.vertx.core.Future")) {
+        return;
+      }
+      throw new GenException(elem, "Proxy methods must return Future<T>");
     } else {
       if (type.isVoid()) {
         return;
@@ -114,18 +118,16 @@ public class ProxyModel extends ClassModel {
     ProxyMethodInfo proxyMeth = new ProxyMethodInfo(ownerTypes, methodName, returnType, returnDescription,
       isFluent, isCacheReturn, mParams, comment, doc, isStatic, isDefault, typeParams, isProxyIgnore,
       isProxyClose, methodDeprecated, methodDeprecatedDesc, useFutures, methodOverride);
-    if (isProxyClose && mParams.size() > 0) {
-      if (mParams.size() > 1) {
-        throw new GenException(this.modelElt, "@ProxyClose methods can't have more than one parameter");
+    if (isProxyClose) {
+      if (mParams.size() > 0) {
+        throw new GenException(this.modelElt, "@ProxyClose methods can't have parameters");
       }
-      if (proxyMeth.getKind() != MethodKind.CALLBACK) {
-        throw new GenException(this.modelElt, "@ProxyClose parameter must be Handler<AsyncResult<Void>>");
-      }
-      TypeInfo type = mParams.get(0).getType();
-      TypeInfo arg = ((ParameterizedTypeInfo) ((ParameterizedTypeInfo) type).getArgs().get(0)).getArgs().get(0);
-      if (arg.getKind() != ClassKind.VOID) {
-        throw new GenException(this.modelElt, "@ProxyClose parameter must be " +
-            "Handler<AsyncResult<Void>> instead of " + type);
+      if (proxyMeth.getReturnType().getKind() == ClassKind.FUTURE) {
+        TypeInfo type = proxyMeth.getReturnType();
+        TypeInfo arg = (((ParameterizedTypeInfo) type).getArgs().get(0));
+        if (arg.getKind() != ClassKind.VOID) {
+          throw new GenException(this.modelElt, "@ProxyClose  must return Future<Void> instead of " + type);
+        }
       }
     }
     return proxyMeth;

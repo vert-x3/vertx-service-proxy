@@ -111,17 +111,7 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
 
   private void generateMethodBody(ProxyMethodInfo method, CodeWriter writer) {
     ParamInfo lastParam = !method.getParams().isEmpty() ? method.getParam(method.getParams().size() - 1) : null;
-    if (method.getKind() == MethodKind.CALLBACK) {
-      writer.code("if (closed) {\n");
-      writer.indent();
-      writer.stmt(lastParam.getName() + ".handle(Future.failedFuture(new IllegalStateException(\"Proxy is closed\")))");
-      if (method.isFluent())
-        writer.stmt("return this");
-      else
-        writer.stmt("return");
-      writer.unindent();
-      writer.code("}\n");
-    } else if (method.getKind() == MethodKind.FUTURE) {
+    if (method.getKind() == MethodKind.FUTURE) {
       writer.code("if (closed) return io.vertx.core.Future.failedFuture(\"Proxy is closed\");\n");
     } else {
       writer.code("if (closed) throw new IllegalStateException(\"Proxy is closed\");\n");
@@ -130,17 +120,13 @@ public class ServiceProxyGen extends Generator<ProxyModel> {
       writer.stmt("closed = true");
     writer.stmt("JsonObject _json = new JsonObject()");
     List<ParamInfo> paramsExcludedHandler =
-      (method.getParams().isEmpty()) ? new ArrayList<>() :
-        (method.getKind() == MethodKind.CALLBACK) ? method.getParams().subList(0, method.getParams().size() - 1) : method.getParams();
+      (method.getParams().isEmpty()) ? new ArrayList<>() : method.getParams();
     paramsExcludedHandler.forEach(p -> generateAddToJsonStmt(p, writer));
     writer.newLine();
     writer.stmt("DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions()");
     writer.stmt("_deliveryOptions.addHeader(\"action\", \"" + method.getName() + "\")");
     writer.stmt("_deliveryOptions.getHeaders().set(\"action\", \"" + method.getName() + "\")");
-    if (method.getKind() == MethodKind.CALLBACK) {
-      TypeInfo t = ((ParameterizedTypeInfo)((ParameterizedTypeInfo)lastParam.getType()).getArg(0)).getArg(0);
-      generateSendCallWithResultHandler(t, lastParam.getName(), writer, false);
-    } else if (method.getKind() == MethodKind.FUTURE) {
+    if (method.getKind() == MethodKind.FUTURE) {
       TypeInfo t = ((ParameterizedTypeInfo)method.getReturnType()).getArg(0);
       generateSendCallWithResultHandler(t, null, writer, true);
     } else {

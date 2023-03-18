@@ -3,6 +3,7 @@ package io.vertx.serviceproxy.codegen.proxytestapi;
 import io.vertx.codegen.annotations.ProxyClose;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 
 /**
@@ -12,6 +13,6 @@ import io.vertx.core.Handler;
 public interface ValidProxyCloseWithFuture {
 
   @ProxyClose
-  void closeIt(Handler<AsyncResult<Void>> handler);
+  Future<Void> closeIt();
 
 }

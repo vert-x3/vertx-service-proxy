@@ -169,18 +169,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
       .indent()
       .code("service." + m.getName() + "(")
       .indent();
-    if (m.getKind() == MethodKind.CALLBACK) {
-      TypeInfo typeArg = ((ParameterizedTypeInfo) ((ParameterizedTypeInfo) lastParam.getType()).getArg(0)).getArg(0);
-      writer.writeSeq(
-        Stream.concat(
-          m.getParams().subList(0, m.getParams().size() - 1).stream().map(this::generateJsonParamExtract),
-          Stream.of(generateHandler(typeArg))
-        ),
-        ",\n" + writer.indentation()
-      );
-      writer.unindent();
-      writer.write(");\n");
-    } else if (m.getKind() == MethodKind.FUTURE) {
+    if (m.getKind() == MethodKind.FUTURE) {
       TypeInfo typeArg = ((ParameterizedTypeInfo) m.getReturnType()).getArg(0);
       writer.writeSeq(
         m.getParams().stream().map(this::generateJsonParamExtract),
