@@ -44,7 +44,7 @@ public class MyServiceException extends ServiceException {
    * @param <T>         The type returned if the Future succeeds.
    * @return The MyServiceException wrapped in a failed future.
    */
-  public static <T> AsyncResult<T> fail(int failureCode, String message, String extra) {
+  public static <T> Future<T> fail(int failureCode, String message, String extra) {
     return Future.failedFuture(new MyServiceException(failureCode, message, extra));
   }
 }

@@ -58,7 +58,7 @@ public class ServiceBinderTest extends VertxTestBase {
 
   @Test
   public void testFactory() {
-    proxy.ok(res -> {
+    proxy.ok().onComplete(res -> {
       assertFalse(res.failed());
       testComplete();
     });
@@ -67,7 +67,7 @@ public class ServiceBinderTest extends VertxTestBase {
 
   @Test
   public void testLocalFactory() {
-    localProxy.ok(res -> {
+    localProxy.ok().onComplete(res -> {
       assertFalse(res.failed());
       testComplete();
     });

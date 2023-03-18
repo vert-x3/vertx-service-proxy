@@ -63,7 +63,7 @@ public class ServiceException extends ReplyException {
    * @param <T> The type of the AsyncResult.
    * @return A failed Future containing the ServiceException.
    */
-  public static <T> AsyncResult<T> fail(int failureCode, String message) {
+  public static <T> Future<T> fail(int failureCode, String message) {
     return Future.failedFuture(new ServiceException(failureCode, message));
   }
 
@@ -77,7 +77,7 @@ public class ServiceException extends ReplyException {
    * @param <T> The type of the AsyncResult.
    * @return A failed Future containing the ServiceException.
    */
-  public static <T> AsyncResult<T> fail(int failureCode, String message, JsonObject debugInfo) {
+  public static <T> Future<T> fail(int failureCode, String message, JsonObject debugInfo) {
     return Future.failedFuture(new ServiceException(failureCode, message, debugInfo));
   }
 

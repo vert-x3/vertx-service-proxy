@@ -16,9 +16,7 @@
 
 package io.vertx.serviceproxy.testmodel.impl;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.testmodel.TestConnection;
@@ -37,27 +35,23 @@ public class TestConnectionImpl implements TestConnection {
   }
 
   @Override
-  public TestConnection startTransaction(Handler<AsyncResult<String>> resultHandler) {
-    resultHandler.handle(Future.succeededFuture(str));
-    return this;
+  public Future<String> startTransaction() {
+    return Future.succeededFuture(str);
   }
 
   @Override
-  public TestConnection insert(String name, JsonObject data, Handler<AsyncResult<String>> resultHandler) {
-    resultHandler.handle(Future.succeededFuture(str));
-    return this;
+  public Future<String> insert(String name, JsonObject data) {
+    return Future.succeededFuture(str);
   }
 
   @Override
-  public TestConnection commit(Handler<AsyncResult<String>> resultHandler) {
-    resultHandler.handle(Future.succeededFuture(str));
-    return this;
+  public Future<String> commit() {
+    return Future.succeededFuture(str);
   }
 
   @Override
-  public TestConnection rollback(Handler<AsyncResult<String>> resultHandler) {
-    resultHandler.handle(Future.succeededFuture(str));
-    return this;
+  public Future<String> rollback() {
+    return Future.succeededFuture(str);
   }
 
   @Override

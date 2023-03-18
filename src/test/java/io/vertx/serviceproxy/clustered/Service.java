@@ -3,11 +3,9 @@ package io.vertx.serviceproxy.clustered;
 
 import java.util.List;
 
-import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -28,55 +26,35 @@ public interface Service {
     return new ServiceVertxEBProxy(vertx, address);
   }
 
-  @Fluent
-  Service hello(String name, Handler<AsyncResult<String>> result);
+  Future<String> hello(String name);
 
-  @Fluent
-  Service methodUsingEnum(SomeEnum e, Handler<AsyncResult<Boolean>> result);
+  Future<Boolean> methodUsingEnum(SomeEnum e);
 
-  @Fluent
-  Service methodReturningEnum(Handler<AsyncResult<SomeEnum>> result);
+  Future<SomeEnum> methodReturningEnum();
 
-  @Fluent
-  Service methodReturningVertxEnum(Handler<AsyncResult<SomeVertxEnum>> result);
+  Future<SomeVertxEnum> methodReturningVertxEnum();
 
-  @Fluent
-  Service methodUsingCustomEnum(SomeEnumWithCustomConstructor e, Handler<AsyncResult<Boolean>> result);
-  
-  @Fluent
-  Service methodReturningCustomEnum(Handler<AsyncResult<SomeEnumWithCustomConstructor>> result);
-  
-  @Fluent
-  Service methodWithJsonObject(JsonObject json, Handler<AsyncResult<JsonObject>> result);
+  Future<Boolean> methodUsingCustomEnum(SomeEnumWithCustomConstructor e);
 
-  @Fluent
-  Service methodWithJsonArray(JsonArray json, Handler<AsyncResult<JsonArray>> result);
+  Future<SomeEnumWithCustomConstructor> methodReturningCustomEnum();
 
-  @Fluent
-  Service methodWithList(List<String> list, Handler<AsyncResult<List<String>>> result);
+  Future<JsonObject> methodWithJsonObject(JsonObject json);
 
-  @Fluent
-  Service methodWithDataObject(TestDataObject data,
-                                     Handler<AsyncResult<TestDataObject>> result);
+  Future<JsonArray> methodWithJsonArray(JsonArray json);
 
-  @Fluent
-  Service methodWithListOfDataObject(List<TestDataObject> list,
-                                     Handler<AsyncResult<List<TestDataObject>>> result);
+  Future<List<String>> methodWithList(List<String> list);
 
-  @Fluent
-  Service methodWithStringDataObject(StringDataObject data,
-                                     Handler<AsyncResult<StringDataObject>> result);
+  Future<TestDataObject> methodWithDataObject(TestDataObject data);
 
-  @Fluent
-  Service methodWithListOfStringDataObject(List<StringDataObject> list,
-                                     Handler<AsyncResult<List<StringDataObject>>> result);
+  Future<List<TestDataObject>> methodWithListOfDataObject(List<TestDataObject> list);
+
+  Future<StringDataObject> methodWithStringDataObject(StringDataObject data);
+
+  Future<List<StringDataObject>> methodWithListOfStringDataObject(List<StringDataObject> list);
 
 
-  @Fluent
-  Service methodWithListOfJsonObject(List<JsonObject> list,
-                                     Handler<AsyncResult<List<JsonObject>>> result);
+  Future<List<JsonObject>> methodWithListOfJsonObject(List<JsonObject> list);
 
-  @Fluent
-  Service methodWthFailingResult(String input, Handler<AsyncResult<JsonObject>> result);
+  Future<JsonObject> methodWthFailingResult(String input);
 
 }

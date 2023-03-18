@@ -56,7 +56,7 @@ public class ClusteredTest {
   public void testHello() {
     AtomicReference<String> result = new AtomicReference<>();
     Service service = Service.createProxy(consumerNode.get(), "my.service");
-    service.hello("vert.x", ar -> {
+    service.hello("vert.x").onComplete(ar -> {
       result.set(ar.result());
     });
 
@@ -68,7 +68,7 @@ public class ClusteredTest {
   public void testEnumAsParameter() {
     AtomicReference<Boolean> result = new AtomicReference<>();
     Service service = Service.createProxy(consumerNode.get(), "my.service");
-    service.methodUsingEnum(SomeEnum.WIBBLE, ar -> {
+    service.methodUsingEnum(SomeEnum.WIBBLE).onComplete(ar -> {
       result.set(ar.result());
     });
 
@@ -79,7 +79,7 @@ public class ClusteredTest {
   public void testEnumAsResult() {
     AtomicReference<SomeEnum> result = new AtomicReference<>();
     Service service = Service.createProxy(consumerNode.get(), "my.service");
-    service.methodReturningEnum(ar -> {
+    service.methodReturningEnum().onComplete(ar -> {
       result.set(ar.result());
     });
 
@@ -90,7 +90,7 @@ public class ClusteredTest {
   public void testVertxEnumAsResult() {
     AtomicReference<SomeVertxEnum> result = new AtomicReference<>();
     Service service = Service.createProxy(consumerNode.get(), "my.service");
-    service.methodReturningVertxEnum(ar -> {
+    service.methodReturningVertxEnum().onComplete(ar -> {
       result.set(ar.result());
     });
 
@@ -102,7 +102,7 @@ public class ClusteredTest {
     AtomicReference<TestDataObject> result = new AtomicReference<>();
     Service service = Service.createProxy(consumerNode.get(), "my.service");
     TestDataObject data = new TestDataObject().setBool(true).setNumber(25).setString("vert.x");
-    service.methodWithDataObject(data, ar -> {
+    service.methodWithDataObject(data).onComplete(ar -> {
       result.set(ar.result());
     });
 
@@ -119,7 +119,7 @@ public class ClusteredTest {
     Service service = Service.createProxy(consumerNode.get(), "my.service");
     TestDataObject data = new TestDataObject().setBool(true).setNumber(25).setString("vert.x");
     TestDataObject data2 = new TestDataObject().setBool(true).setNumber(26).setString("vert.x");
-    service.methodWithListOfDataObject(Arrays.asList(data, data2), ar -> {
+    service.methodWithListOfDataObject(Arrays.asList(data, data2)).onComplete(ar -> {
       if (ar.failed()) {
         ar.cause().printStackTrace();
       }
@@ -141,7 +141,7 @@ public class ClusteredTest {
     AtomicReference<StringDataObject> result = new AtomicReference<>();
     Service service = Service.createProxy(consumerNode.get(), "my.service");
     StringDataObject data = new StringDataObject().setValue("vert.x");
-    service.methodWithStringDataObject(data, ar -> {
+    service.methodWithStringDataObject(data).onComplete(ar -> {
       result.set(ar.result());
     });
 
@@ -156,7 +156,7 @@ public class ClusteredTest {
     Service service = Service.createProxy(consumerNode.get(), "my.service");
     StringDataObject data = new StringDataObject().setValue("vert.x-1");
     StringDataObject data2 = new StringDataObject().setValue("vert.x-2");
-    service.methodWithListOfStringDataObject(Arrays.asList(data, data2), ar -> {
+    service.methodWithListOfStringDataObject(Arrays.asList(data, data2)).onComplete(ar -> {
       if (ar.failed()) {
         ar.cause().printStackTrace();
       }
@@ -175,7 +175,7 @@ public class ClusteredTest {
     Service service = Service.createProxy(consumerNode.get(), "my.service");
     TestDataObject data = new TestDataObject().setBool(true).setNumber(25).setString("vert.x");
     TestDataObject data2 = new TestDataObject().setBool(true).setNumber(26).setString("vert.x");
-    service.methodWithListOfJsonObject(Arrays.asList(data.toJson(), data2.toJson()), ar -> {
+    service.methodWithListOfJsonObject(Arrays.asList(data.toJson(), data2.toJson())).onComplete(ar -> {
       if (ar.failed()) {
         ar.cause().printStackTrace();
       }
@@ -200,7 +200,7 @@ public class ClusteredTest {
     AtomicReference<TestDataObject> result = new AtomicReference<>();
     Service service = Service.createProxy(consumerNode.get(), "my.service");
     TestDataObject data = new TestDataObject().setBool(true).setNumber(25).setString("vert.x");
-    service.methodWithJsonObject(data.toJson(), ar -> {
+    service.methodWithJsonObject(data.toJson()).onComplete(ar -> {
       result.set(new TestDataObject(ar.result()));
     });
 
@@ -219,7 +219,7 @@ public class ClusteredTest {
     JsonArray array = new JsonArray();
     array.add("vert.x").add(data.toJson());
 
-    service.methodWithJsonArray(array, ar -> {
+    service.methodWithJsonArray(array).onComplete(ar -> {
       result.set(ar.result());
     });
 
@@ -235,7 +235,7 @@ public class ClusteredTest {
   public void testWithFailingResult() {
     AtomicReference<Throwable> result = new AtomicReference<>();
     Service service = Service.createProxy(consumerNode.get(), "my.service");
-    service.methodWthFailingResult("Fail", ar -> {
+    service.methodWthFailingResult("Fail").onComplete(ar -> {
       assertThat(ar.cause() instanceof ServiceException).isTrue();
       assertThat(((ServiceException) ar.cause()).failureCode()).isEqualTo(30);
       assertThat(((ServiceException) ar.cause()).getDebugInfo()).isEqualTo(new JsonObject().put("test", "val"));
@@ -248,7 +248,7 @@ public class ClusteredTest {
   public void testWithFailingResultServiceExceptionSubclass() {
     AtomicReference<Throwable> result = new AtomicReference<>();
     Service service = Service.createProxy(consumerNode.get(), "my.service");
-    service.methodWthFailingResult("cluster Fail", ar -> {
+    service.methodWthFailingResult("cluster Fail").onComplete(ar -> {
       assertThat(ar.cause() instanceof MyServiceException).isTrue();
       assertThat(((MyServiceException) ar.cause()).failureCode()).isEqualTo(30);
       assertThat(((MyServiceException) ar.cause()).getExtra()).isEqualTo("some extra");
@@ -261,7 +261,7 @@ public class ClusteredTest {
   public void testLocalServiceShouldBeUnreachable() {
     AtomicReference<Throwable> result = new AtomicReference<>();
     Service service = Service.createProxy(consumerNode.get(), "my.local.service");
-    service.hello("vert.x", (ar) -> {
+    service.hello("vert.x").onComplete((ar) -> {
       assertThat(ar.succeeded()).isFalse().withFailMessage("Local service should not be accessible from a different node in the cluster");
       assertThat(ar.cause()).isNotNull();
       assertThat(ar.cause()).isInstanceOf(ReplyException.class);

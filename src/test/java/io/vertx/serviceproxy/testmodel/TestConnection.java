@@ -16,12 +16,10 @@
 
 package io.vertx.serviceproxy.testmodel;
 
-import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.ProxyClose;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
+import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -31,17 +29,13 @@ import io.vertx.core.json.JsonObject;
 @VertxGen
 public interface TestConnection {
 
-  @Fluent
-  TestConnection startTransaction(Handler<AsyncResult<String>> resultHandler);
+  Future<String> startTransaction();
 
-  @Fluent
-  TestConnection insert(String name, JsonObject data, Handler<AsyncResult<String>> resultHandler);
+  Future<String> insert(String name, JsonObject data);
 
-  @Fluent
-  TestConnection commit(Handler<AsyncResult<String>> resultHandler);
+  Future<String> commit();
 
-  @Fluent
-  TestConnection rollback(Handler<AsyncResult<String>> resultHandler);
+  Future<String> rollback();
 
   @ProxyClose
   void close();

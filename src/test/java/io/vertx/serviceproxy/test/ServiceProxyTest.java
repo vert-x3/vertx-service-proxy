@@ -88,7 +88,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testErrorHandling() {
-    proxy.failingCall("Fail", handler -> {
+    proxy.failingCall("Fail").onComplete(handler -> {
       assertTrue(handler.cause() instanceof ServiceException);
       assertEquals("Call has failed", handler.cause().getMessage());
       assertEquals(25, ((ServiceException) handler.cause()).failureCode());
@@ -102,7 +102,7 @@ public class ServiceProxyTest extends VertxTestBase {
   public void testErrorHandlingServiceExceptionSubclass() {
     vertx.eventBus().registerDefaultCodec(MyServiceException.class,
       new MyServiceExceptionMessageCodec());
-    proxy.failingCall("Fail subclass", handler -> {
+    proxy.failingCall("Fail subclass").onComplete(handler -> {
       assertTrue(handler.cause() instanceof MyServiceException);
       assertEquals("Call has failed", handler.cause().getMessage());
       assertEquals(25, ((MyServiceException) handler.cause()).failureCode());
@@ -115,7 +115,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testCauseErrorHandling() {
-    proxyWithDebug.failingCall("Fail with cause", handler -> {
+    proxyWithDebug.failingCall("Fail with cause").onComplete(handler -> {
       assertTrue(handler.cause() instanceof ServiceException);
       ServiceException cause = (ServiceException) handler.cause();
       assertEquals("Failed!", handler.cause().getMessage());
@@ -177,7 +177,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testEnumTypeAsResult() {
-    proxy.enumTypeAsResult(ar -> {
+    proxy.enumTypeAsResult().onComplete(ar -> {
       if (ar.failed()) {
         fail("Failure not expected");
       } else {
@@ -190,7 +190,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testEnumTypeAsResultWithNull() {
-    proxy.enumTypeAsResultNull(ar -> {
+    proxy.enumTypeAsResultNull().onComplete(ar -> {
       if (ar.failed()) {
         fail("Failure not expected");
       } else {
@@ -215,7 +215,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testCustomEnumTypeAsResult() {
-    proxy.enumCustomTypeAsResult(ar -> {
+    proxy.enumCustomTypeAsResult().onComplete(ar -> {
       if (ar.failed()) {
         fail("Failure not expected");
       } else {
@@ -228,7 +228,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testCustomEnumTypeAsResultWithNull() {
-    proxy.enumCustomTypeAsResultNull(ar -> {
+    proxy.enumCustomTypeAsResultNull().onComplete(ar -> {
       if (ar.failed()) {
         fail("Failure not expected");
       } else {
@@ -401,7 +401,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testStringHandler() {
-    proxy.stringHandler(onSuccess(res -> {
+    proxy.stringHandler().onComplete(onSuccess(res -> {
       assertEquals("foobar", res);
       testComplete();
     }));
@@ -410,7 +410,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testStringNullHandler() {
-    proxy.stringNullHandler(onSuccess(res -> {
+    proxy.stringNullHandler().onComplete(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
@@ -419,7 +419,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testByteHandler() {
-    proxy.byteHandler(onSuccess(res -> {
+    proxy.byteHandler().onComplete(onSuccess(res -> {
       assertEquals(Byte.valueOf((byte) 123), res);
       testComplete();
     }));
@@ -428,7 +428,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testByteNullHandler() {
-    proxy.byteNullHandler(onSuccess(res -> {
+    proxy.byteNullHandler().onComplete(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
@@ -437,7 +437,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testShortHandler() {
-    proxy.shortHandler(onSuccess(res -> {
+    proxy.shortHandler().onComplete(onSuccess(res -> {
       assertEquals(Short.valueOf((short) 1234), res);
       testComplete();
     }));
@@ -446,7 +446,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testShortNullHandler() {
-    proxy.shortNullHandler(onSuccess(res -> {
+    proxy.shortNullHandler().onComplete(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
@@ -455,7 +455,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testIntHandler() {
-    proxy.intHandler(onSuccess(res -> {
+    proxy.intHandler().onComplete(onSuccess(res -> {
       assertEquals(Integer.valueOf(12345), res);
       testComplete();
     }));
@@ -464,7 +464,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testIntNullHandler() {
-    proxy.intNullHandler(onSuccess(res -> {
+    proxy.intNullHandler().onComplete(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
@@ -473,7 +473,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testLongHandler() {
-    proxy.longHandler(onSuccess(res -> {
+    proxy.longHandler().onComplete(onSuccess(res -> {
       assertEquals(Long.valueOf(123456l), res);
       testComplete();
     }));
@@ -482,7 +482,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testLongNullHandler() {
-    proxy.longNullHandler(onSuccess(res -> {
+    proxy.longNullHandler().onComplete(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
@@ -491,7 +491,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testFloatHandler() {
-    proxy.floatHandler(onSuccess(res -> {
+    proxy.floatHandler().onComplete(onSuccess(res -> {
       assertEquals(Float.valueOf(12.34f), res);
       testComplete();
     }));
@@ -500,7 +500,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testFloatNullHandler() {
-    proxy.floatNullHandler(onSuccess(res -> {
+    proxy.floatNullHandler().onComplete(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
@@ -509,7 +509,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testDoubleHandler() {
-    proxy.doubleHandler(onSuccess(res -> {
+    proxy.doubleHandler().onComplete(onSuccess(res -> {
       assertEquals(Double.valueOf(12.3456d), res);
       testComplete();
     }));
@@ -518,7 +518,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testDoubleNullHandler() {
-    proxy.doubleNullHandler(onSuccess(res -> {
+    proxy.doubleNullHandler().onComplete(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
@@ -527,7 +527,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testCharHandler() {
-    proxy.charHandler(onSuccess(res -> {
+    proxy.charHandler().onComplete(onSuccess(res -> {
       assertEquals(Character.valueOf('X'), res);
       testComplete();
     }));
@@ -536,7 +536,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testCharNullHandler() {
-    proxy.charNullHandler(onSuccess(res -> {
+    proxy.charNullHandler().onComplete(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
@@ -545,7 +545,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testBooleanHandler() {
-    proxy.booleanHandler(onSuccess(res -> {
+    proxy.booleanHandler().onComplete(onSuccess(res -> {
       assertEquals(true, res);
       testComplete();
     }));
@@ -554,7 +554,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testBooleanNullHandler() {
-    proxy.booleanNullHandler(onSuccess(res -> {
+    proxy.booleanNullHandler().onComplete(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
@@ -563,7 +563,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testJsonObjectHandler() {
-    proxy.jsonObjectHandler(onSuccess(res -> {
+    proxy.jsonObjectHandler().onComplete(onSuccess(res -> {
       assertEquals("wibble", res.getString("blah"));
       testComplete();
     }));
@@ -572,7 +572,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testJsonObjectNullHandler() {
-    proxy.jsonObjectNullHandler(onSuccess(res -> {
+    proxy.jsonObjectNullHandler().onComplete(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
@@ -581,7 +581,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testJsonArrayHandler() {
-    proxy.jsonArrayHandler(onSuccess(res -> {
+    proxy.jsonArrayHandler().onComplete(onSuccess(res -> {
       assertEquals("blurrg", res.getString(0));
       testComplete();
     }));
@@ -590,7 +590,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testJsonArrayNullHandler() {
-    proxy.jsonArrayNullHandler(onSuccess(res -> {
+    proxy.jsonArrayNullHandler().onComplete(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
@@ -599,7 +599,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testDataObjectHandler() {
-    proxy.dataObjectHandler(onSuccess(res -> {
+    proxy.dataObjectHandler().onComplete(onSuccess(res -> {
       assertEquals(new TestDataObject().setString("foo").setNumber(123).setBool(true), res);
       testComplete();
     }));
@@ -608,7 +608,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testDataObjectNullHandler() {
-    proxy.dataObjectNullHandler(onSuccess(res -> {
+    proxy.dataObjectNullHandler().onComplete(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
@@ -617,7 +617,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testVoidHandler() {
-    proxy.voidHandler(onSuccess(res -> {
+    proxy.voidHandler().onComplete(onSuccess(res -> {
       assertNull(res);
       testComplete();
     }));
@@ -625,26 +625,8 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   @Test
-  public void testFluentMethod() {
-    assertSame(proxy, proxy.fluentMethod("foo", onSuccess(res -> {
-      assertEquals("bar", res);
-      testComplete();
-    })));
-    await();
-  }
-
-  @Test
-  public void testFluentNoParams() {
-    vertx.eventBus().consumer("fluentReceived").handler(msg -> {
-      testComplete();
-    });
-    assertSame(proxy, proxy.fluentNoParams());
-    await();
-  }
-
-  @Test
   public void testFailingMethod() {
-    proxy.failingMethod(onFailure(t -> {
+    proxy.failingMethod().onComplete(onFailure(t -> {
       assertTrue(t instanceof ReplyException);
       ServiceException se = (ServiceException) t;
       assertEquals(ReplyFailure.RECIPIENT_FAILURE, se.failureType());
@@ -712,7 +694,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testListStringHandler() {
-    proxy.listStringHandler(onSuccess(list -> {
+    proxy.listStringHandler().onComplete(onSuccess(list -> {
       assertEquals("foo", list.get(0));
       assertEquals("bar", list.get(1));
       assertEquals("wibble", list.get(2));
@@ -723,7 +705,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testListByteHandler() {
-    proxy.listByteHandler(onSuccess(list -> {
+    proxy.listByteHandler().onComplete(onSuccess(list -> {
       assertEquals(Byte.valueOf((byte) 1), list.get(0));
       assertEquals(Byte.valueOf((byte) 2), list.get(1));
       assertEquals(Byte.valueOf((byte) 3), list.get(2));
@@ -734,7 +716,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testListShortHandler() {
-    proxy.listShortHandler(onSuccess(list -> {
+    proxy.listShortHandler().onComplete(onSuccess(list -> {
       assertEquals(Short.valueOf((short) 11), list.get(0));
       assertEquals(Short.valueOf((short) 12), list.get(1));
       assertEquals(Short.valueOf((short) 13), list.get(2));
@@ -745,7 +727,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testListIntHandler() {
-    proxy.listIntHandler(onSuccess(list -> {
+    proxy.listIntHandler().onComplete(onSuccess(list -> {
       assertEquals(100, list.get(0).intValue());
       assertEquals(101, list.get(1).intValue());
       assertEquals(102, list.get(2).intValue());
@@ -756,7 +738,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testListLongHandler() {
-    proxy.listLongHandler(onSuccess(list -> {
+    proxy.listLongHandler().onComplete(onSuccess(list -> {
       assertEquals(1000l, list.get(0).longValue());
       assertEquals(1001l, list.get(1).longValue());
       assertEquals(1002l, list.get(2).longValue());
@@ -767,7 +749,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testListFloatHandler() {
-    proxy.listFloatHandler(onSuccess(list -> {
+    proxy.listFloatHandler().onComplete(onSuccess(list -> {
       assertEquals(1.1f, list.get(0), 0);
       assertEquals(1.2f, list.get(1), 0);
       assertEquals(1.3f, list.get(2), 0);
@@ -778,7 +760,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testListDoubleHandler() {
-    proxy.listDoubleHandler(onSuccess(list -> {
+    proxy.listDoubleHandler().onComplete(onSuccess(list -> {
       assertEquals(1.11d, list.get(0), 0);
       assertEquals(1.12d, list.get(1), 0);
       assertEquals(1.13d, list.get(2), 0);
@@ -789,7 +771,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testListCharHandler() {
-    proxy.listCharHandler(onSuccess(list -> {
+    proxy.listCharHandler().onComplete(onSuccess(list -> {
       assertEquals('X', list.get(0).charValue());
       assertEquals('Y', list.get(1).charValue());
       assertEquals('Z', list.get(2).charValue());
@@ -800,7 +782,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testListBoolHandler() {
-    proxy.listBoolHandler(onSuccess(list -> {
+    proxy.listBoolHandler().onComplete(onSuccess(list -> {
       assertEquals(true, list.get(0));
       assertEquals(false, list.get(1));
       assertEquals(true, list.get(2));
@@ -811,7 +793,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testListJsonObjectHandler() {
-    proxy.listJsonObjectHandler(onSuccess(list -> {
+    proxy.listJsonObjectHandler().onComplete(onSuccess(list -> {
       assertEquals("foo", list.get(0).getString("a"));
       assertEquals("bar", list.get(1).getString("b"));
       assertEquals("wibble", list.get(2).getString("c"));
@@ -822,7 +804,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testListJsonArrayHandler() {
-    proxy.listJsonArrayHandler(onSuccess(list -> {
+    proxy.listJsonArrayHandler().onComplete(onSuccess(list -> {
       assertEquals("foo", list.get(0).getString(0));
       assertEquals("bar", list.get(1).getString(0));
       assertEquals("wibble", list.get(2).getString(0));
@@ -833,7 +815,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testSetStringHandler() {
-    proxy.setStringHandler(onSuccess(set -> {
+    proxy.setStringHandler().onComplete(onSuccess(set -> {
       assertTrue(set.contains("foo"));
       assertTrue(set.contains("bar"));
       assertTrue(set.contains("wibble"));
@@ -844,7 +826,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testSetByteHandler() {
-    proxy.setByteHandler(onSuccess(set -> {
+    proxy.setByteHandler().onComplete(onSuccess(set -> {
       assertTrue(set.contains((byte) 1));
       assertTrue(set.contains((byte) 2));
       assertTrue(set.contains((byte) 3));
@@ -855,7 +837,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testSetShortHandler() {
-    proxy.setShortHandler(onSuccess(set -> {
+    proxy.setShortHandler().onComplete(onSuccess(set -> {
       assertTrue(set.contains((short) 11));
       assertTrue(set.contains((short) 12));
       assertTrue(set.contains((short) 13));
@@ -866,7 +848,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testSetIntHandler() {
-    proxy.setIntHandler(onSuccess(set -> {
+    proxy.setIntHandler().onComplete(onSuccess(set -> {
       assertTrue(set.contains(100));
       assertTrue(set.contains(101));
       assertTrue(set.contains(102));
@@ -877,7 +859,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testSetLongHandler() {
-    proxy.setLongHandler(onSuccess(set -> {
+    proxy.setLongHandler().onComplete(onSuccess(set -> {
       assertTrue(set.contains(1000l));
       assertTrue(set.contains(1001l));
       assertTrue(set.contains(1002l));
@@ -888,7 +870,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testSetFloatHandler() {
-    proxy.setFloatHandler(onSuccess(set -> {
+    proxy.setFloatHandler().onComplete(onSuccess(set -> {
       assertTrue(set.contains(1.1f));
       assertTrue(set.contains(1.2f));
       assertTrue(set.contains(1.3f));
@@ -899,7 +881,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testSetDoubleHandler() {
-    proxy.setDoubleHandler(onSuccess(set -> {
+    proxy.setDoubleHandler().onComplete(onSuccess(set -> {
       assertTrue(set.contains(1.11d));
       assertTrue(set.contains(1.12d));
       assertTrue(set.contains(1.13d));
@@ -910,7 +892,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testSetCharHandler() {
-    proxy.setCharHandler(onSuccess(set -> {
+    proxy.setCharHandler().onComplete(onSuccess(set -> {
       assertTrue(set.contains('X'));
       assertTrue(set.contains('Y'));
       assertTrue(set.contains('Z'));
@@ -921,7 +903,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testSetBoolHandler() {
-    proxy.setBoolHandler(onSuccess(set -> {
+    proxy.setBoolHandler().onComplete(onSuccess(set -> {
       assertTrue(set.contains(true));
       assertTrue(set.contains(false));
       testComplete();
@@ -935,7 +917,7 @@ public class ServiceProxyTest extends VertxTestBase {
     expected.put("1", "foo");
     expected.put("2", "bar");
     expected.put("3", "wibble");
-    proxy.mapStringHandler(onSuccess(map -> {
+    proxy.mapStringHandler().onComplete(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
@@ -948,7 +930,7 @@ public class ServiceProxyTest extends VertxTestBase {
     expected.put("1", (byte) 1);
     expected.put("2", (byte) 2);
     expected.put("3", (byte) 3);
-    proxy.mapByteHandler(onSuccess(map -> {
+    proxy.mapByteHandler().onComplete(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
@@ -961,7 +943,7 @@ public class ServiceProxyTest extends VertxTestBase {
     expected.put("1", (short) 11);
     expected.put("2", (short) 12);
     expected.put("3", (short) 13);
-    proxy.mapShortHandler(onSuccess(map -> {
+    proxy.mapShortHandler().onComplete(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
@@ -974,7 +956,7 @@ public class ServiceProxyTest extends VertxTestBase {
     expected.put("1", 100);
     expected.put("2", 101);
     expected.put("3", 102);
-    proxy.mapIntHandler(onSuccess(map -> {
+    proxy.mapIntHandler().onComplete(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
@@ -987,7 +969,7 @@ public class ServiceProxyTest extends VertxTestBase {
     expected.put("1", 1000l);
     expected.put("2", 1001l);
     expected.put("3", 1002l);
-    proxy.mapLongHandler(onSuccess(map -> {
+    proxy.mapLongHandler().onComplete(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
@@ -1000,7 +982,7 @@ public class ServiceProxyTest extends VertxTestBase {
     expected.put("1", 1.1f);
     expected.put("2", 1.2f);
     expected.put("3", 1.3f);
-    proxy.mapFloatHandler(onSuccess(map -> {
+    proxy.mapFloatHandler().onComplete(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
@@ -1013,7 +995,7 @@ public class ServiceProxyTest extends VertxTestBase {
     expected.put("1", 1.11d);
     expected.put("2", 1.12d);
     expected.put("3", 1.13d);
-    proxy.mapDoubleHandler(onSuccess(map -> {
+    proxy.mapDoubleHandler().onComplete(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
@@ -1026,7 +1008,7 @@ public class ServiceProxyTest extends VertxTestBase {
     expected.put("1", 'X');
     expected.put("2", 'Y');
     expected.put("3", 'Z');
-    proxy.mapCharHandler(onSuccess(map -> {
+    proxy.mapCharHandler().onComplete(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
@@ -1039,7 +1021,7 @@ public class ServiceProxyTest extends VertxTestBase {
     expected.put("1", true);
     expected.put("2", false);
     expected.put("3", true);
-    proxy.mapBoolHandler(onSuccess(map -> {
+    proxy.mapBoolHandler().onComplete(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
@@ -1048,7 +1030,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testSetJsonObjectHandler() {
-    proxy.setJsonObjectHandler(onSuccess(set -> {
+    proxy.setJsonObjectHandler().onComplete(onSuccess(set -> {
       assertTrue(set.contains(new JsonObject().put("a", "foo")));
       assertTrue(set.contains(new JsonObject().put("b", "bar")));
       assertTrue(set.contains(new JsonObject().put("c", "wibble")));
@@ -1063,7 +1045,7 @@ public class ServiceProxyTest extends VertxTestBase {
     expected.put("1", new JsonObject().put("a", "foo"));
     expected.put("2", new JsonObject().put("b", "bar"));
     expected.put("3", new JsonObject().put("c", "wibble"));
-    proxy.mapJsonObjectHandler(onSuccess(map -> {
+    proxy.mapJsonObjectHandler().onComplete(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
@@ -1072,7 +1054,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void setSetJsonArrayHandler() {
-    proxy.setJsonArrayHandler(onSuccess(set -> {
+    proxy.setJsonArrayHandler().onComplete(onSuccess(set -> {
       assertTrue(set.contains(new JsonArray().add("foo")));
       assertTrue(set.contains(new JsonArray().add("bar")));
       assertTrue(set.contains(new JsonArray().add("wibble")));
@@ -1087,7 +1069,7 @@ public class ServiceProxyTest extends VertxTestBase {
     expected.put("1", new JsonArray().add("foo"));
     expected.put("2", new JsonArray().add("bar"));
     expected.put("3", new JsonArray().add("wibble"));
-    proxy.mapJsonArrayHandler(onSuccess(map -> {
+    proxy.mapJsonArrayHandler().onComplete(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
@@ -1096,7 +1078,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testListDataObjectHandler() {
-    proxy.listDataObjectHandler(onSuccess(list -> {
+    proxy.listDataObjectHandler().onComplete(onSuccess(list -> {
       assertEquals(1, list.get(0).getNumber());
       assertEquals("String 1", list.get(0).getString());
       assertEquals(false, list.get(0).isBool());
@@ -1110,7 +1092,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testSetDataObjectHandler() {
-    proxy.setDataObjectHandler(onSuccess(set -> {
+    proxy.setDataObjectHandler().onComplete(onSuccess(set -> {
       Set<JsonObject> setJson = set.stream().map(d -> d.toJson()).collect(Collectors.toSet());
       assertEquals(2, setJson.size());
       assertTrue(setJson.contains(new JsonObject().put("number", 1).put("string", "String 1").put("bool", false)));
@@ -1125,7 +1107,7 @@ public class ServiceProxyTest extends VertxTestBase {
     Map<String, TestDataObject> expected = new HashMap<>();
     expected.put("do1", new TestDataObject().setNumber(1).setString("String 1").setBool(false));
     expected.put("do2", new TestDataObject().setNumber(2).setString("String 2").setBool(true));
-    proxy.mapDataObject(onSuccess(map -> {
+    proxy.mapDataObject().onComplete(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
@@ -1134,7 +1116,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testDateTimeHandler() {
-    proxy.zonedDateTimeHandler(onSuccess(dateTime -> {
+    proxy.zonedDateTimeHandler().onComplete(onSuccess(dateTime -> {
       assertEquals(ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"), dateTime);
       testComplete();
     }));
@@ -1143,7 +1125,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testListDateTimeHandler() {
-    proxy.listZonedDateTimeHandler(onSuccess(list -> {
+    proxy.listZonedDateTimeHandler().onComplete(onSuccess(list -> {
       assertEquals(Arrays.asList(
         ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"),
         ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1)
@@ -1155,7 +1137,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testSetDateTimeHandler() {
-    proxy.setZonedDateTimeHandler(onSuccess(set -> {
+    proxy.setZonedDateTimeHandler().onComplete(onSuccess(set -> {
       assertEquals(new HashSet<>(Arrays.asList(
         ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"),
         ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1)
@@ -1170,7 +1152,7 @@ public class ServiceProxyTest extends VertxTestBase {
     Map<String, ZonedDateTime> expected = new HashMap<>();
     expected.put("date1", ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]"));
     expected.put("date2", ZonedDateTime.parse("2019-03-25T17:08:31.069+01:00[Europe/Rome]").plusHours(1));
-    proxy.mapZonedDateTimeHandler(onSuccess(map -> {
+    proxy.mapZonedDateTimeHandler().onComplete(onSuccess(map -> {
       assertEquals(expected, map);
       testComplete();
     }));
@@ -1186,14 +1168,14 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testConnection() {
-    proxy.createConnection("foo", onSuccess(conn -> {
-      conn.startTransaction(onSuccess(res -> {
+    proxy.createConnection("foo").onComplete(onSuccess(conn -> {
+      conn.startTransaction().onComplete(onSuccess(res -> {
         assertEquals("foo", res);
       }));
-      conn.insert("blah", new JsonObject(), onSuccess(res -> {
+      conn.insert("blah", new JsonObject()).onComplete(onSuccess(res -> {
         assertEquals("foo", res);
       }));
-      conn.commit(onSuccess(res -> {
+      conn.commit().onComplete(onSuccess(res -> {
         assertEquals("foo", res);
       }));
       vertx.eventBus().consumer("closeCalled").handler(msg -> {
@@ -1202,9 +1184,9 @@ public class ServiceProxyTest extends VertxTestBase {
       });
       conn.close();
 
-      conn.startTransaction(onFailure(cause -> {
+      conn.startTransaction().onComplete(onFailure(cause -> {
         assertNotNull(cause);
-        assertTrue(cause instanceof IllegalStateException);
+        assertEquals("Proxy is closed", cause.getMessage());
       }));
     }));
 
@@ -1242,7 +1224,7 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testLongDelivery1() {
     TestService proxyLong = TestService.createProxyLongDelivery(vertx, SERVICE_ADDRESS);
-    proxyLong.longDeliverySuccess(onSuccess(str -> {
+    proxyLong.longDeliverySuccess().onComplete(onSuccess(str -> {
       assertEquals("blah", str);
       testComplete();
     }));
@@ -1252,7 +1234,7 @@ public class ServiceProxyTest extends VertxTestBase {
   @Test
   public void testLongDelivery2() {
     TestService proxyLong = TestService.createProxyLongDelivery(vertx, SERVICE_ADDRESS);
-    proxyLong.longDeliveryFailed(onFailure(t -> {
+    proxyLong.longDeliveryFailed().onComplete(onFailure(t -> {
       assertNotNull(t);
       assertTrue(t instanceof ReplyException);
       assertFalse(t instanceof ServiceException);
@@ -1268,10 +1250,10 @@ public class ServiceProxyTest extends VertxTestBase {
     DeliveryOptions options = new DeliveryOptions();
     options.addHeader("any", "thing");
     TestService p = TestService.createProxyWithOptions(vertx, SERVICE_ADDRESS, options);
-    p.jsonObjectNullHandler(onSuccess(json -> {
+    p.jsonObjectNullHandler().onComplete(onSuccess(json -> {
       assertNull(json);
     }));
-    p.jsonObjectHandler(onSuccess(json -> {
+    p.jsonObjectHandler().onComplete(onSuccess(json -> {
       assertNotNull(json);
       testComplete();
     }));
@@ -1283,10 +1265,10 @@ public class ServiceProxyTest extends VertxTestBase {
     DeliveryOptions options = new DeliveryOptions();
     options.addHeader("action", "failingMethod");
     TestService p = TestService.createProxyWithOptions(vertx, SERVICE_ADDRESS, options);
-    p.jsonObjectNullHandler(onSuccess(json -> {
+    p.jsonObjectNullHandler().onComplete(onSuccess(json -> {
       assertNull(json);
     }));
-    p.jsonObjectHandler(onSuccess(json -> {
+    p.jsonObjectHandler().onComplete(onSuccess(json -> {
       assertNotNull(json);
       testComplete();
     }));
@@ -1295,7 +1277,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testUnregisteringTheService() {
-    proxy.booleanHandler(ar -> {
+    proxy.booleanHandler().onComplete(ar -> {
       consumer.unregister()
         .onComplete(ar1 -> {
         if (ar1.failed()) fail(ar1.cause());
@@ -1305,7 +1287,7 @@ public class ServiceProxyTest extends VertxTestBase {
     await();
 
     AtomicReference<Throwable> caughtError = new AtomicReference<>();
-    proxy.booleanHandler(ar -> {
+    proxy.booleanHandler().onComplete(ar -> {
       caughtError.set(ar.cause());
     });
     assertWaitUntil(() -> caughtError.get() != null);
@@ -1313,7 +1295,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testAListContainingNullValues() {
-    proxy.listDataObjectContainingNullHandler(onSuccess(list -> {
+    proxy.listDataObjectContainingNullHandler().onComplete(onSuccess(list -> {
       // Entry 1
       assertEquals(1, list.get(0).getNumber());
       assertEquals("String 1", list.get(0).getString());
@@ -1334,7 +1316,7 @@ public class ServiceProxyTest extends VertxTestBase {
 
   @Test
   public void testASetContainingNullValues() {
-    proxy.setDataObjectContainingNullHandler(onSuccess(set -> {
+    proxy.setDataObjectContainingNullHandler().onComplete(onSuccess(set -> {
       AtomicInteger countNull = new AtomicInteger();
       AtomicInteger countNotNull = new AtomicInteger();
       set.forEach(t -> {
@@ -1360,10 +1342,10 @@ public class ServiceProxyTest extends VertxTestBase {
   }
 
   private void checkConnection(TestService proxy, long timeoutSeconds) {
-    proxy.createConnection("foo", onSuccess(conn -> {
+    proxy.createConnection("foo").onComplete(onSuccess(conn -> {
       long start = System.nanoTime();
 
-      conn.startTransaction(onSuccess(res -> {
+      conn.startTransaction().onComplete(onSuccess(res -> {
         assertEquals("foo", res);
 
         vertx.eventBus().consumer("closeCalled").handler(msg -> {
@@ -1373,7 +1355,7 @@ public class ServiceProxyTest extends VertxTestBase {
           assertTrue(String.valueOf(duration), duration >= SECONDS.toNanos(timeoutSeconds));
 
           // Should be closed now
-          conn.startTransaction(onFailure(this::checkCause));
+          conn.startTransaction().onComplete(onFailure(this::checkCause));
         });
 
       }));

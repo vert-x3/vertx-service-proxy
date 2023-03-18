@@ -23,7 +23,7 @@ import io.vertx.core.Handler;
 public class OKServiceImpl implements OKService {
 
   @Override
-  public void ok(Handler<AsyncResult<String>> resultHandler) {
-    resultHandler.handle(Future.succeededFuture("ok"));
+  public Future<String> ok() {
+    return Future.succeededFuture("ok");
   }
 }

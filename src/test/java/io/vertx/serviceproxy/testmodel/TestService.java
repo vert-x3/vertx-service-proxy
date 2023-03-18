@@ -16,12 +16,10 @@
 
 package io.vertx.serviceproxy.testmodel;
 
-import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.ProxyIgnore;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonArray;
@@ -61,13 +59,13 @@ public interface TestService {
     return new ServiceProxyBuilder(vertx).setAddress(address).setOptions(options).build(TestService.class);
   }
 
-  void longDeliverySuccess(Handler<AsyncResult<String>> resultHandler);
+  Future<String> longDeliverySuccess() ;
 
-  void longDeliveryFailed(Handler<AsyncResult<String>> resultHandler);
+  Future<String> longDeliveryFailed() ;
 
-  void createConnection(String str, Handler<AsyncResult<TestConnection>> resultHandler);
+  Future<TestConnection> createConnection(String str);
 
-  void createSubConnection(String str, Handler<AsyncResult<TestSubConnection>> resultHandler);
+  Future<TestSubConnection> createSubConnection(String str);
 
   void noParams();
 
@@ -87,17 +85,17 @@ public interface TestService {
 
   void enumTypeNull(SomeEnum someEnum);
 
-  void enumTypeAsResult(Handler<AsyncResult<SomeEnum>> someEnum);
+  Future<SomeEnum> enumTypeAsResult() ;
 
-  void enumTypeAsResultNull(Handler<AsyncResult<SomeEnum>> someEnum);
+  Future<SomeEnum> enumTypeAsResultNull() ;
 
   void enumCustomType(SomeEnumWithCustomConstructor someEnum);
 
   void enumCustomTypeNull(SomeEnumWithCustomConstructor someEnum);
 
-  void enumCustomTypeAsResult(Handler<AsyncResult<SomeEnumWithCustomConstructor>> someEnum);
+  Future<SomeEnumWithCustomConstructor> enumCustomTypeAsResult() ;
 
-  void enumCustomTypeAsResultNull(Handler<AsyncResult<SomeEnumWithCustomConstructor>> someEnum);
+  Future<SomeEnumWithCustomConstructor> enumCustomTypeAsResultNull() ;
 
   void dataObjectType(TestDataObject options);
 
@@ -131,151 +129,145 @@ public interface TestService {
 
   void mapParams(Map<String, String> mapString, Map<String, Byte> mapByte, Map<String, Short> mapShort, Map<String, Integer> mapInt, Map<String, Long> mapLong, Map<String, JsonObject> mapJsonObject, Map<String, JsonArray> mapJsonArray);
 
-  void stringHandler(Handler<AsyncResult<String>> resultHandler);
+  Future<String> stringHandler() ;
 
-  void stringNullHandler(Handler<AsyncResult<String>> resultHandler);
+  Future<String> stringNullHandler() ;
 
-  void byteHandler(Handler<AsyncResult<Byte>> resultHandler);
+  Future<Byte> byteHandler() ;
 
-  void byteNullHandler(Handler<AsyncResult<Byte>> resultHandler);
+  Future<Byte> byteNullHandler() ;
 
-  void shortHandler(Handler<AsyncResult<Short>> resultHandler);
+  Future<Short> shortHandler() ;
 
-  void shortNullHandler(Handler<AsyncResult<Short>> resultHandler);
+  Future<Short> shortNullHandler() ;
 
-  void intHandler(Handler<AsyncResult<Integer>> resultHandler);
+  Future<Integer> intHandler() ;
 
-  void intNullHandler(Handler<AsyncResult<Integer>> resultHandler);
+  Future<Integer> intNullHandler() ;
 
-  void longHandler(Handler<AsyncResult<Long>> resultHandler);
+  Future<Long> longHandler() ;
 
-  void longNullHandler(Handler<AsyncResult<Long>> resultHandler);
+  Future<Long> longNullHandler() ;
 
-  void floatHandler(Handler<AsyncResult<Float>> resultHandler);
+  Future<Float> floatHandler() ;
 
-  void floatNullHandler(Handler<AsyncResult<Float>> resultHandler);
+  Future<Float> floatNullHandler() ;
 
-  void doubleHandler(Handler<AsyncResult<Double>> resultHandler);
+  Future<Double> doubleHandler() ;
 
-  void doubleNullHandler(Handler<AsyncResult<Double>> resultHandler);
+  Future<Double> doubleNullHandler() ;
 
-  void charHandler(Handler<AsyncResult<Character>> resultHandler);
+  Future<Character> charHandler() ;
 
-  void charNullHandler(Handler<AsyncResult<Character>> resultHandler);
+  Future<Character> charNullHandler() ;
 
-  void booleanHandler(Handler<AsyncResult<Boolean>> resultHandler);
+  Future<Boolean> booleanHandler() ;
 
-  void booleanNullHandler(Handler<AsyncResult<Boolean>> resultHandler);
+  Future<Boolean> booleanNullHandler() ;
 
-  void jsonObjectHandler(Handler<AsyncResult<JsonObject>> resultHandler);
+  Future<JsonObject> jsonObjectHandler() ;
 
-  void jsonObjectNullHandler(Handler<AsyncResult<JsonObject>> resultHandler);
+  Future<JsonObject> jsonObjectNullHandler() ;
 
-  void jsonArrayHandler(Handler<AsyncResult<JsonArray>> resultHandler);
+  Future<JsonArray> jsonArrayHandler() ;
 
-  void jsonArrayNullHandler(Handler<AsyncResult<JsonArray>> resultHandler);
+  Future<JsonArray> jsonArrayNullHandler() ;
 
-  void dataObjectHandler(Handler<AsyncResult<TestDataObject>> resultHandler);
+  Future<TestDataObject> dataObjectHandler() ;
 
-  void dataObjectNullHandler(Handler<AsyncResult<TestDataObject>> resultHandler);
+  Future<TestDataObject> dataObjectNullHandler() ;
 
-  void voidHandler(Handler<AsyncResult<Void>> resultHandler);
+  Future<Void> voidHandler() ;
 
-  @Fluent
-  TestService fluentMethod(String str, Handler<AsyncResult<String>> resultHandler);
+  Future<JsonObject> failingMethod() ;
 
-  @Fluent
-  TestService fluentNoParams();
+  Future<String> invokeWithMessage(JsonObject object, String str, int i, char chr, SomeEnum senum);
 
-  void failingMethod(Handler<AsyncResult<JsonObject>> resultHandler);
+  Future<List<String>> listStringHandler() ;
 
-  void invokeWithMessage(JsonObject object, String str, int i, char chr, SomeEnum senum, Handler<AsyncResult<String>> resultHandler);
+  Future<List<Byte>> listByteHandler() ;
 
-  void listStringHandler(Handler<AsyncResult<List<String>>> resultHandler);
+  Future<List<Short>> listShortHandler() ;
 
-  void listByteHandler(Handler<AsyncResult<List<Byte>>> resultHandler);
+  Future<List<Integer>> listIntHandler() ;
 
-  void listShortHandler(Handler<AsyncResult<List<Short>>> resultHandler);
+  Future<List<Long>> listLongHandler() ;
 
-  void listIntHandler(Handler<AsyncResult<List<Integer>>> resultHandler);
+  Future<List<Float>> listFloatHandler() ;
 
-  void listLongHandler(Handler<AsyncResult<List<Long>>> resultHandler);
+  Future<List<Double>> listDoubleHandler() ;
 
-  void listFloatHandler(Handler<AsyncResult<List<Float>>> resultHandler);
+  Future<List<Character>> listCharHandler() ;
 
-  void listDoubleHandler(Handler<AsyncResult<List<Double>>> resultHandler);
+  Future<List<Boolean>> listBoolHandler() ;
 
-  void listCharHandler(Handler<AsyncResult<List<Character>>> resultHandler);
+  Future<List<JsonObject>> listJsonObjectHandler() ;
 
-  void listBoolHandler(Handler<AsyncResult<List<Boolean>>> resultHandler);
+  Future<List<JsonArray>> listJsonArrayHandler() ;
 
-  void listJsonObjectHandler(Handler<AsyncResult<List<JsonObject>>> resultHandler);
+  Future<List<TestDataObject>> listDataObjectHandler() ;
 
-  void listJsonArrayHandler(Handler<AsyncResult<List<JsonArray>>> resultHandler);
+  Future<Set<String>> setStringHandler() ;
 
-  void listDataObjectHandler(Handler<AsyncResult<List<TestDataObject>>> resultHandler);
+  Future<Set<Byte>> setByteHandler() ;
 
-  void setStringHandler(Handler<AsyncResult<Set<String>>> resultHandler);
+  Future<Set<Short>> setShortHandler() ;
 
-  void setByteHandler(Handler<AsyncResult<Set<Byte>>> resultHandler);
+  Future<Set<Integer>> setIntHandler() ;
 
-  void setShortHandler(Handler<AsyncResult<Set<Short>>> resultHandler);
+  Future<Set<Long>> setLongHandler() ;
 
-  void setIntHandler(Handler<AsyncResult<Set<Integer>>> resultHandler);
+  Future<Set<Float>> setFloatHandler() ;
 
-  void setLongHandler(Handler<AsyncResult<Set<Long>>> resultHandler);
+  Future<Set<Double>> setDoubleHandler() ;
 
-  void setFloatHandler(Handler<AsyncResult<Set<Float>>> resultHandler);
+  Future<Set<Character>> setCharHandler() ;
 
-  void setDoubleHandler(Handler<AsyncResult<Set<Double>>> resultHandler);
+  Future<Set<Boolean>> setBoolHandler() ;
 
-  void setCharHandler(Handler<AsyncResult<Set<Character>>> resultHandler);
+  Future<Map<String, String>> mapStringHandler() ;
 
-  void setBoolHandler(Handler<AsyncResult<Set<Boolean>>> resultHandler);
+  Future<Map<String, Byte>> mapByteHandler() ;
 
-  void mapStringHandler(Handler<AsyncResult<Map<String, String>>> resultHandler);
+  Future<Map<String, Short>> mapShortHandler() ;
 
-  void mapByteHandler(Handler<AsyncResult<Map<String, Byte>>> resultHandler);
+  Future<Map<String, Integer>> mapIntHandler() ;
 
-  void mapShortHandler(Handler<AsyncResult<Map<String, Short>>> resultHandler);
+  Future<Map<String, Long>> mapLongHandler() ;
 
-  void mapIntHandler(Handler<AsyncResult<Map<String, Integer>>> resultHandler);
+  Future<Map<String, Float>> mapFloatHandler() ;
 
-  void mapLongHandler(Handler<AsyncResult<Map<String, Long>>> resultHandler);
+  Future<Map<String, Double>> mapDoubleHandler() ;
 
-  void mapFloatHandler(Handler<AsyncResult<Map<String, Float>>> resultHandler);
+  Future<Map<String, Character>> mapCharHandler() ;
 
-  void mapDoubleHandler(Handler<AsyncResult<Map<String, Double>>> resultHandler);
+  Future<Map<String, Boolean>> mapBoolHandler() ;
 
-  void mapCharHandler(Handler<AsyncResult<Map<String, Character>>> resultHandler);
+  Future<Set<JsonObject>> setJsonObjectHandler() ;
 
-  void mapBoolHandler(Handler<AsyncResult<Map<String, Boolean>>> resultHandler);
+  Future<Map<String, JsonObject>> mapJsonObjectHandler() ;
 
-  void setJsonObjectHandler(Handler<AsyncResult<Set<JsonObject>>> resultHandler);
+  Future<Set<JsonArray>> setJsonArrayHandler() ;
 
-  void mapJsonObjectHandler(Handler<AsyncResult<Map<String, JsonObject>>> resultHandler);
+  Future<Map<String, JsonArray>> mapJsonArrayHandler() ;
 
-  void setJsonArrayHandler(Handler<AsyncResult<Set<JsonArray>>> resultHandler);
+  Future<Set<TestDataObject>> setDataObjectHandler() ;
 
-  void mapJsonArrayHandler(Handler<AsyncResult<Map<String, JsonArray>>> resultHandler);
+  Future<Map<String, TestDataObject>> mapDataObject() ;
 
-  void setDataObjectHandler(Handler<AsyncResult<Set<TestDataObject>>> resultHandler);
+  Future<JsonObject> failingCall(String value);
 
-  void mapDataObject(Handler<AsyncResult<Map<String, TestDataObject>>> resultHandler);
+  Future<List<TestDataObject>> listDataObjectContainingNullHandler() ;
 
-  void failingCall(String value, Handler<AsyncResult<JsonObject>> resultHandler);
+  Future<Set<TestDataObject>> setDataObjectContainingNullHandler() ;
 
-  void listDataObjectContainingNullHandler(Handler<AsyncResult<List<TestDataObject>>> resultHandler);
+  Future<ZonedDateTime> zonedDateTimeHandler() ;
 
-  void setDataObjectContainingNullHandler(Handler<AsyncResult<Set<TestDataObject>>> resultHandler);
+  Future<List<ZonedDateTime>> listZonedDateTimeHandler() ;
 
-  void zonedDateTimeHandler(Handler<AsyncResult<ZonedDateTime>> resultHandler);
+  Future<Set<ZonedDateTime>> setZonedDateTimeHandler() ;
 
-  void listZonedDateTimeHandler(Handler<AsyncResult<List<ZonedDateTime>>> resultHandler);
-
-  void setZonedDateTimeHandler(Handler<AsyncResult<Set<ZonedDateTime>>> resultHandler);
-
-  void mapZonedDateTimeHandler(Handler<AsyncResult<Map<String, ZonedDateTime>>> resultHandler);
+  Future<Map<String, ZonedDateTime>> mapZonedDateTimeHandler() ;
 
   @ProxyIgnore
   void ignoredMethod();

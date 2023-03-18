@@ -88,10 +88,6 @@ public class ProxyModel extends ClassModel {
       return;
     }
     if (getModule().getUseFutures()) {
-      if (type.getKind() == ClassKind.FUTURE) {
-        return;
-      }
-      throw new GenException(elem, "Proxy methods must have Future returns");
     } else {
       if (type.isVoid()) {
         return;

@@ -19,106 +19,92 @@ import java.util.List;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 public class ServiceProvider implements Service {
+
   @Override
-  public Service hello(String name, Handler<AsyncResult<String>> result) {
-    result.handle(Future.succeededFuture("hello " + name));
-    return this;
+  public Future<String> hello(String name) {
+    return Future.succeededFuture("hello " + name);
   }
 
   @Override
-  public Service methodUsingEnum(SomeEnum e, Handler<AsyncResult<Boolean>> result) {
+  public Future<Boolean> methodUsingEnum(SomeEnum e) {
     if (e == SomeEnum.WIBBLE) {
-      result.handle(Future.succeededFuture(true));
+      return Future.succeededFuture(true);
     } else {
-      result.handle(Future.succeededFuture(false));
+      return Future.succeededFuture(false);
     }
-    return this;
   }
 
   @Override
-  public Service methodReturningEnum(Handler<AsyncResult<SomeEnum>> result) {
-    result.handle(Future.succeededFuture(SomeEnum.WIBBLE));
-    return this;
+  public Future<SomeEnum> methodReturningEnum() {
+    return Future.succeededFuture(SomeEnum.WIBBLE);
   }
 
   @Override
-  public Service methodReturningVertxEnum(Handler<AsyncResult<SomeVertxEnum>> result) {
-    result.handle(Future.succeededFuture(SomeVertxEnum.BAR));
-    return this;
+  public Future<SomeVertxEnum> methodReturningVertxEnum() {
+    return Future.succeededFuture(SomeVertxEnum.BAR);
   }
 
   @Override
-  public Service methodWithJsonObject(JsonObject json, Handler<AsyncResult<JsonObject>> result) {
-    result.handle(Future.succeededFuture(json));
-    return this;
+  public Future<JsonObject> methodWithJsonObject(JsonObject json) {
+    return Future.succeededFuture(json);
   }
 
   @Override
-  public Service methodWithJsonArray(JsonArray json, Handler<AsyncResult<JsonArray>> result) {
-    result.handle(Future.succeededFuture(json));
-    return this;
+  public Future<JsonArray> methodWithJsonArray(JsonArray json) {
+    return Future.succeededFuture(json);
   }
 
   @Override
-  public Service methodWithList(List<String> list, Handler<AsyncResult<List<String>>> result) {
-    result.handle(Future.succeededFuture(list));
-    return this;
+  public Future<List<String>> methodWithList(List<String> list) {
+    return Future.succeededFuture(list);
   }
 
   @Override
-  public Service methodWithDataObject(TestDataObject data, Handler<AsyncResult<TestDataObject>> result) {
-    result.handle(Future.succeededFuture(data));
-    return this;
+  public Future<TestDataObject> methodWithDataObject(TestDataObject data) {
+    return Future.succeededFuture(data);
   }
 
   @Override
-  public Service methodWithListOfDataObject(List<TestDataObject> list, Handler<AsyncResult<List<TestDataObject>>> result) {
-    result.handle(Future.succeededFuture(list));
-    return this;
+  public Future<List<TestDataObject>> methodWithListOfDataObject(List<TestDataObject> list) {
+    return Future.succeededFuture(list);
   }
 
   @Override
-  public Service methodWithStringDataObject(StringDataObject data, Handler<AsyncResult<StringDataObject>> result) {
-    result.handle(Future.succeededFuture(data));
-    return this;
+  public Future<StringDataObject> methodWithStringDataObject(StringDataObject data) {
+    return Future.succeededFuture(data);
   }
 
   @Override
-  public Service methodWithListOfStringDataObject(List<StringDataObject> list, Handler<AsyncResult<List<StringDataObject>>> result) {
-    result.handle(Future.succeededFuture(list));
-    return this;
+  public Future<List<StringDataObject>> methodWithListOfStringDataObject(List<StringDataObject> list) {
+    return Future.succeededFuture(list);
   }
 
   @Override
-  public Service methodWithListOfJsonObject(List<JsonObject> list, Handler<AsyncResult<List<JsonObject>>> result) {
-    result.handle(Future.succeededFuture(list));
-    return this;
+  public Future<List<JsonObject>> methodWithListOfJsonObject(List<JsonObject> list) {
+    return Future.succeededFuture(list);
   }
 
   @Override
-  public Service methodWthFailingResult(String input, Handler<AsyncResult<JsonObject>> result) {
+  public Future<JsonObject> methodWthFailingResult(String input) {
     if (input.equals("Fail")) {
-      result.handle(ServiceException.fail(30, "failed!", new JsonObject().put("test", "val")));
+      return ServiceException.fail(30, "failed!", new JsonObject().put("test", "val"));
     } else {
-      result.handle(MyServiceException.fail(30, "failed!", "some extra"));
+      return MyServiceException.fail(30, "failed!", "some extra");
     }
-    return this;
   }
 
   @Override
-  public Service methodUsingCustomEnum(SomeEnumWithCustomConstructor e, Handler<AsyncResult<Boolean>> result) {
+  public Future<Boolean> methodUsingCustomEnum(SomeEnumWithCustomConstructor e) {
     if (e == SomeEnumWithCustomConstructor.ITEST) {
-      result.handle(Future.succeededFuture(true));
+      return Future.succeededFuture(true);
     } else {
-      result.handle(Future.succeededFuture(false));
+      return Future.succeededFuture(false);
     }
-  	return this;
   }
 
   @Override
-  public Service methodReturningCustomEnum(Handler<AsyncResult<SomeEnumWithCustomConstructor>> result) {
-    result.handle(Future.succeededFuture(SomeEnumWithCustomConstructor.DEV));
-  	return this;
+  public Future<SomeEnumWithCustomConstructor> methodReturningCustomEnum() {
+    return Future.succeededFuture(SomeEnumWithCustomConstructor.DEV);
   }
 
   /*@Override

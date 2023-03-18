@@ -112,7 +112,7 @@ public class SecureServiceBinderTest extends VertxTestBase {
 
     proxy = serviceProxyBuilder.build(OKService.class);
 
-    proxy.ok(res -> {
+    proxy.ok().onComplete(res -> {
       assertFalse(res.failed());
       testComplete();
     });
@@ -126,7 +126,7 @@ public class SecureServiceBinderTest extends VertxTestBase {
 
     proxy = serviceProxyBuilder.build(OKService.class);
 
-    proxy.ok(this::checkResult);
+    proxy.ok().onComplete(this::checkResult);
     await();
   }
 
@@ -137,7 +137,7 @@ public class SecureServiceBinderTest extends VertxTestBase {
 
     localProxy = localServiceProxyBuilder.build(OKService.class);
 
-    localProxy.ok(res -> {
+    localProxy.ok().onComplete(res -> {
       assertFalse(res.failed());
       testComplete();
     });
@@ -151,7 +151,7 @@ public class SecureServiceBinderTest extends VertxTestBase {
 
     localProxy = localServiceProxyBuilder.build(OKService.class);
 
-    localProxy.ok(this::checkResult);
+    localProxy.ok().onComplete(this::checkResult);
     await();
   }
 
