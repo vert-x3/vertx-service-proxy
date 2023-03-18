@@ -1,5 +1,6 @@
 package io.vertx.serviceproxy.generator;
 
+import io.vertx.codegen.GenException;
 import io.vertx.codegen.Generator;
 import io.vertx.codegen.MethodKind;
 import io.vertx.codegen.ParamInfo;
@@ -7,6 +8,7 @@ import io.vertx.codegen.annotations.ModuleGen;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.type.*;
 import io.vertx.codegen.writer.CodeWriter;
+import io.vertx.core.VertxException;
 import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
 
@@ -63,6 +65,9 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
 
   @Override
   public String render(ProxyModel model, int index, int size, Map<String, Object> session) {
+    if (!model.getModule().getUseFutures()) {
+      throw new VertxException("The module must use futures");
+    }
     StringWriter buffer = new StringWriter();
     CodeWriter writer = new CodeWriter(buffer);
     String className = className(model);
@@ -219,7 +224,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
     	      String valueExtractionStmt = "json.getString(\"" + name + "\")";
     	      return GeneratorUtils.generateDeserializeDataObject(valueExtractionStmt, doType);
     	} else {
-    		return "json.getString(\"" + name + "\") == null ? null : " + param.getType().getName() + ".valueOf(json.getString(\"" + name + "\"))";    		
+    		return "json.getString(\"" + name + "\") == null ? null : " + param.getType().getName() + ".valueOf(json.getString(\"" + name + "\"))";
     	}
     }
     if (type.getKind() == ClassKind.LIST || type.getKind() == ClassKind.SET) {
