@@ -68,12 +68,6 @@ public class ProxyModel extends ClassModel {
       }
       throw new GenException(elem, "Data Object " + typeInfo + " must have a valid serializer and deserializer");
     }
-    if (isLegalHandlerAsyncResultType(typeInfo)) {
-      if (pos != numParams - 1) {
-        throw new GenException(elem, "Handler<AsyncResult<T>> must be the last parameter if present in a proxied method");
-      }
-      return;
-    }
     if (elem.getModifiers().contains(Modifier.STATIC)) {
       // Ignore static methods - we won't use them anyway
       return;

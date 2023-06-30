@@ -11,5 +11,5 @@ import io.vertx.core.Handler;
 @ProxyGen
 public interface InvalidParams4 {
 
-  void someMethod(String str, Handler<AsyncResult<VertxGen>> wrongResultType);
+  void someMethod(String str, Handler<AsyncResult<String>> wrongResultType);
 }
