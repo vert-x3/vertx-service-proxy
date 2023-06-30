@@ -101,8 +101,7 @@ public interface SomeDatabaseService {
   }
 
  // Actual service operations here...
- void save(String collection, JsonObject document,
-   Handler<AsyncResult<Void>> resultHandler);
+ Future<Void> save(String collection, JsonObject document);
 }
 ----
 
@@ -199,57 +198,6 @@ You can also declare that a particular method unregisters the proxy by annotatin
 annotation. The proxy instance is disposed when this method is called.
 
 More constraints on the _service interfaces_ are described below.
-
-== Async interface with callbacks
-
-Until Vert.x 4.1, service async interfaces were defined by callbacks.
-
-You can still create service async interface using callbacks, with this module declaration:
-
-.package-info.java
-[source,java]
-----
-@io.vertx.codegen.annotations.ModuleGen(groupPackage = "io.vertx.example", name = "services", useFutures = false)
-package io.vertx.example;
-----
-
-NOTE: for backward compatibility, the default value of `useFutures` is `false` so you can also omit the declaration
-
-The service async interface with callbacks looks like:
-
-[source,java]
-----
-@ProxyGen
-public interface SomeDatabaseService {
-
-  // A method notifying the completion without a result (void)
-  void save(String collection, JsonObject document,
-   Handler<AsyncResult<Void>> result);
-
-  // A method providing a result (a json object)
-  void findOne(String collection, JsonObject query,
-   Handler<AsyncResult<JsonObject>> result);
-
-  // Create a connection
-  void createConnection(String shoeSize,
-   Handler<AsyncResult<MyDatabaseConnection>> resultHandler);
-
-}
-----
-
-Return types must be one of:
-
-* `void`
-* `@Fluent` and return reference to the service (`this`):
-
-[source,java]
-----
-@Fluent
-SomeDatabaseService doSomething();
-----
-
-This is because methods must not block and it's not possible to return a result immediately without blocking if
-the service is remote.
 
 == Security
 
@@ -547,10 +495,7 @@ Parameters can be any of:
 * Any _Enum_ type
 * Any class annotated with `@DataObject`
 
-Asynchronous results are modelled as
-
-* `Future<R>`
-* `Handler<AsyncResult<R>>` for callback style
+Asynchronous results are modelled as `Future<R>`
 
 `R` can be any of:
 
