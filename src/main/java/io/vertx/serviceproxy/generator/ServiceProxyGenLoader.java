@@ -14,6 +14,6 @@ public class ServiceProxyGenLoader implements GeneratorLoader {
   @Override
   public Stream<Generator<?>> loadGenerators(ProcessingEnvironment processingEnv) {
     GeneratorUtils utils = new GeneratorUtils();
-    return Stream.of(new ServiceProxyHandlerGen(utils), new ServiceProxyGen(utils));
+    return Stream.of(new ServiceProxyHandlerGen(utils), new ServiceProxyGen(utils), new ServiceProxyProto());
   }
 }

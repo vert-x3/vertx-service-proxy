@@ -18,6 +18,7 @@ package io.vertx.serviceproxy.testmodel;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.protobuf.annotations.ProtobufGen;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -27,6 +28,7 @@ import io.vertx.core.json.JsonObject;
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
 @DataObject
+@ProtobufGen
 public class TestDataObject {
 
   @JsonProperty("number")
