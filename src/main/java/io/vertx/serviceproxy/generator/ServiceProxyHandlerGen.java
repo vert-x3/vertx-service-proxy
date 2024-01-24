@@ -65,9 +65,6 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
 
   @Override
   public String render(ProxyModel model, int index, int size, Map<String, Object> session) {
-    if (!model.getModule().getUseFutures()) {
-      throw new VertxException("The module must use futures");
-    }
     StringWriter buffer = new StringWriter();
     CodeWriter writer = new CodeWriter(buffer);
     String className = className(model);
