@@ -100,7 +100,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
       .newLine()
       .code("public "+ className + "(Vertx vertx, " + model.getIfaceSimpleName() + " service, boolean topLevel, long timeoutInSecond){\n")
       .indent()
-      .stmt("this(vertx, service, true, timeoutInSecond, false)")
+      .stmt("this(vertx, service, topLevel, timeoutInSecond, false)")
       .unindent()
       .code("}\n")
       .newLine()
@@ -219,7 +219,7 @@ public class ServiceProxyHandlerGen extends Generator<ProxyModel> {
     	      String valueExtractionStmt = "json.getString(\"" + name + "\")";
     	      return GeneratorUtils.generateDeserializeDataObject(valueExtractionStmt, doType);
     	} else {
-    		return "json.getString(\"" + name + "\") == null ? null : " + param.getType().getName() + ".valueOf(json.getString(\"" + name + "\"))";    		
+    		return "json.getString(\"" + name + "\") == null ? null : " + param.getType().getName() + ".valueOf(json.getString(\"" + name + "\"))";
     	}
     }
     if (type.getKind() == ClassKind.LIST || type.getKind() == ClassKind.SET) {
