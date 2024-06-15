@@ -16,12 +16,12 @@
 
 package io.vertx.serviceproxy.generator.model;
 
-import io.vertx.codegen.*;
+import io.vertx.codegen.processor.*;
 import io.vertx.codegen.annotations.ProxyClose;
 import io.vertx.codegen.annotations.ProxyIgnore;
-import io.vertx.codegen.doc.Doc;
-import io.vertx.codegen.doc.Text;
-import io.vertx.codegen.type.*;
+import io.vertx.codegen.processor.doc.Doc;
+import io.vertx.codegen.processor.doc.Text;
+import io.vertx.codegen.processor.type.*;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;

@@ -16,13 +16,13 @@ package io.vertx.serviceproxy.generator.model;
  * You may elect to redistribute this code under either of these licenses.
  */
 
-import io.vertx.codegen.MethodInfo;
-import io.vertx.codegen.ParamInfo;
-import io.vertx.codegen.TypeParamInfo;
-import io.vertx.codegen.doc.Doc;
-import io.vertx.codegen.doc.Text;
-import io.vertx.codegen.type.ClassTypeInfo;
-import io.vertx.codegen.type.TypeInfo;
+import io.vertx.codegen.processor.MethodInfo;
+import io.vertx.codegen.processor.ParamInfo;
+import io.vertx.codegen.processor.TypeParamInfo;
+import io.vertx.codegen.processor.doc.Doc;
+import io.vertx.codegen.processor.doc.Text;
+import io.vertx.codegen.processor.type.ClassTypeInfo;
+import io.vertx.codegen.processor.type.TypeInfo;
 
 import java.util.List;
 import java.util.Set;

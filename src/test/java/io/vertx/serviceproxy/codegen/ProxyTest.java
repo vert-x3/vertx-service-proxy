@@ -1,17 +1,15 @@
 package io.vertx.serviceproxy.codegen;
 
-import io.vertx.codegen.*;
-import io.vertx.codegen.type.ClassKind;
-import io.vertx.codegen.type.ClassTypeInfo;
-import io.vertx.codegen.type.ParameterizedTypeInfo;
-import io.vertx.codegen.type.TypeInfo;
+import io.vertx.codegen.processor.*;
+import io.vertx.codegen.processor.type.ClassKind;
+import io.vertx.codegen.processor.type.ParameterizedTypeInfo;
+import io.vertx.codegen.processor.type.TypeInfo;
 import io.vertx.serviceproxy.codegen.future.FuturizedProxy;
 import io.vertx.serviceproxy.codegen.proxytestapi.*;
 import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
 import io.vertx.serviceproxy.testmodel.Mappers;
 import io.vertx.test.codegen.GeneratorHelper;
-import io.vertx.test.codegen.TypeInfoTest;
 import org.junit.Test;
 
 import java.time.ZonedDateTime;
