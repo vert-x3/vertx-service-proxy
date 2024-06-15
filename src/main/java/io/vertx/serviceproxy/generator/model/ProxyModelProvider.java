@@ -1,9 +1,9 @@
 package io.vertx.serviceproxy.generator.model;
 
-import io.vertx.codegen.Model;
-import io.vertx.codegen.ModelProvider;
+import io.vertx.codegen.processor.Model;
+import io.vertx.codegen.processor.ModelProvider;
 import io.vertx.codegen.annotations.ProxyGen;
-import io.vertx.codegen.type.TypeMirrorFactory;
+import io.vertx.codegen.processor.type.TypeMirrorFactory;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;

@@ -1,14 +1,14 @@
 package io.vertx.serviceproxy.generator;
 
-import io.vertx.codegen.Generator;
-import io.vertx.codegen.MethodInfo;
-import io.vertx.codegen.MethodKind;
-import io.vertx.codegen.ParamInfo;
-import io.vertx.codegen.TypeParamInfo;
+import io.vertx.codegen.processor.Generator;
+import io.vertx.codegen.processor.MethodInfo;
+import io.vertx.codegen.processor.MethodKind;
+import io.vertx.codegen.processor.ParamInfo;
+import io.vertx.codegen.processor.TypeParamInfo;
 import io.vertx.codegen.annotations.ModuleGen;
 import io.vertx.codegen.annotations.ProxyGen;
-import io.vertx.codegen.type.*;
-import io.vertx.codegen.writer.CodeWriter;
+import io.vertx.codegen.processor.type.*;
+import io.vertx.codegen.processor.writer.CodeWriter;
 import io.vertx.serviceproxy.generator.model.ProxyMethodInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
 
