@@ -3,8 +3,8 @@
 
   <parent>
     <groupId>io.vertx</groupId>
-    <artifactId>vertx-parent</artifactId>
-    <version>19</version>
+    <artifactId>vertx5-parent</artifactId>
+    <version>3</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
@@ -106,24 +106,26 @@
             </execution>
           </executions>
         </plugin>
-        <!-- Configure the execution of the compiler to execute the codegen processor -->
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.13.0</version>
           <executions>
             <execution>
               <id>default-compile</id>
               <configuration>
-                <compilerArgs>
-                  <arg>-proc:none</arg>
-                </compilerArgs>
+                <annotationProcessors>
+                  <annotationProcessor>io.vertx.docgen.JavaDocGenProcessor</annotationProcessor>
+                </annotationProcessors>
               </configuration>
             </execution>
             <execution>
               <id>default-testCompile</id>
               <configuration>
-                <compilerArgs>
-                  <arg>-proc:none</arg>
-                </compilerArgs>
+                <testExcludes>
+                  <testExclude>io/vertx/serviceproxy/clustered/**/*.java</testExclude>
+                  <testExclude>io/vertx/serviceproxy/testmodel/**/*.java</testExclude>
+                  <testExclude>io/vertx/serviceproxy/testmodel2/**/*.java</testExclude>
+                </testExcludes>
               </configuration>
             </execution>
           </executions>
@@ -144,18 +146,24 @@
 
     <plugins>
       <plugin>
-        <groupId>org.asciidoctor</groupId>
-        <artifactId>asciidoctor-maven-plugin</artifactId>
+        <artifactId>maven-compiler-plugin</artifactId>
         <executions>
           <execution>
-            <id>asciidoctor</id>
+            <id>compile-test-proxies</id>
+            <phase>test-compile</phase>
             <goals>
-              <goal>process-asciidoc</goal>
+              <goal>testCompile</goal>
             </goals>
             <configuration>
-              <skip>${doc.skip}</skip>
+              <testIncludes>
+                <testInclude>io/vertx/serviceproxy/clustered/**/*.java</testInclude>
+                <testInclude>io/vertx/serviceproxy/testmodel/**/*.java</testInclude>
+                <testInclude>io/vertx/serviceproxy/testmodel2/**/*.java</testInclude>
+              </testIncludes>
+              <annotationProcessors>
+                <annotationProcessor>io.vertx.codegen.processor.Processor</annotationProcessor>
+              </annotationProcessors>
             </configuration>
-            <phase>prepare-package</phase>
           </execution>
         </executions>
       </plugin>
@@ -163,67 +171,10 @@
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
-            <id>doc</id>
-            <phase>package</phase>
+            <id>package-docs</id>
             <goals>
               <goal>single</goal>
             </goals>
-            <configuration>
-              <attach>true</attach>
-              <descriptors>
-                <descriptor>${basedir}/src/main/assembly/docs.xml</descriptor>
-              </descriptors>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.bsc.maven</groupId>
-        <artifactId>maven-processor-plugin</artifactId>
-        <version>3.1.0</version>
-        <configuration>
-          <systemProperties>
-            <java.util.logging.SimpleFormatter.format>%4$s: %3$s - %5$s %6$s%n</java.util.logging.SimpleFormatter.format>
-          </systemProperties>
-        </configuration>
-        <executions>
-          <execution>
-            <id>generate-sources</id>
-            <goals>
-              <goal>process</goal>
-            </goals>
-            <!-- Run after compilation otherwise it won't find the generator class declared by the SPI -->
-            <phase>process-classes</phase>
-            <configuration>
-              <processors>
-                <processor>io.vertx.codegen.CodeGenProcessor</processor>
-                <processor>io.vertx.docgen.JavaDocGenProcessor</processor>
-                <processor>io.vertx.docgen.DocGenProcessor</processor>
-              </processors>
-              <optionMap>
-                <codegen.output>${project.basedir}/target/generated-for-docs</codegen.output>
-                <docgen.source>${asciidoc.dir}</docgen.source>
-                <docgen.output>${project.build.directory}/asciidoc/java</docgen.output>
-                <maven.groupId>${project.groupId}</maven.groupId>
-                <maven.artifactId>${project.artifactId}</maven.artifactId>
-                <maven.version>${project.version}</maven.version>
-              </optionMap>
-            </configuration>
-          </execution>
-          <execution>
-            <id>generate-test-sources</id>
-            <goals>
-              <goal>process-test</goal>
-            </goals>
-            <phase>generate-test-sources</phase>
-            <configuration>
-              <processors>
-                <processor>io.vertx.codegen.CodeGenProcessor</processor>
-              </processors>
-              <excludes>
-                <exclude>io/vertx/serviceproxy/codegen/**</exclude>
-              </excludes>
-            </configuration>
           </execution>
         </executions>
       </plugin>
