@@ -20,7 +20,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.jose.KeyStoreOptions;
+import io.vertx.ext.auth.KeyStoreOptions;
 import io.vertx.ext.auth.authorization.PermissionBasedAuthorization;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
