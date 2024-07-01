@@ -84,12 +84,6 @@ public class GeneratorUtils {
     }
   }
 
-  public boolean isResultHandler(ParamInfo param) {
-    return param != null &&
-      param.getType().getKind() == ClassKind.HANDLER &&
-      ((ParameterizedTypeInfo)param.getType()).getArg(0).getKind() == ClassKind.ASYNC_RESULT;
-  }
-
   public static String generateDeserializeDataObject(String stmt, ClassTypeInfo doTypeInfo) {
     MapperInfo deserializer = doTypeInfo.getDataObject().getDeserializer();
     String s;

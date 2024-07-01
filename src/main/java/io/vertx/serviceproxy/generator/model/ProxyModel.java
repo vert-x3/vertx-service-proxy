@@ -135,17 +135,6 @@ public class ProxyModel extends ClassModel {
     return false;
   }
 
-  private boolean isLegalHandlerAsyncResultType(TypeInfo type) {
-    if (type.getErased().getKind() == ClassKind.HANDLER) {
-      TypeInfo eventType = ((ParameterizedTypeInfo) type).getArgs().get(0);
-      if (eventType.getErased().getKind() == ClassKind.ASYNC_RESULT) {
-        TypeInfo resultType = ((ParameterizedTypeInfo) eventType).getArgs().get(0);
-        return isLegalAsyncResultType(resultType);
-      }
-    }
-    return false;
-  }
-
   private boolean isLegalContainerParam(TypeInfo type) {
     TypeInfo raw = type.getRaw();
     if (raw.getName().equals(List.class.getName()) || raw.getName().equals(Set.class.getName())) {
