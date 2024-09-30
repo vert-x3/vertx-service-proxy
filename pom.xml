@@ -31,13 +31,26 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.13.2</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
   <dependencies>
     <dependency>
       <groupId>io.vertx</groupId>
-      <artifactId>vertx-codegen</artifactId>
+      <artifactId>vertx-codegen-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-codegen-json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-codegen-processor</artifactId>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -56,14 +69,13 @@
     </dependency>
 
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.1</version>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -79,12 +91,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>com.jayway.awaitility</groupId>
-      <artifactId>awaitility</artifactId>
-      <version>1.7.0</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
@@ -128,11 +134,27 @@
             <execution>
               <id>default-testCompile</id>
               <configuration>
+                <useModulePath>false</useModulePath>
+                <annotationProcessors>
+                  <annotationProcessor>io.vertx.codegen.processor.Processor</annotationProcessor>
+                </annotationProcessors>
                 <testExcludes>
-                  <testExclude>io/vertx/serviceproxy/clustered/**/*.java</testExclude>
-                  <testExclude>io/vertx/serviceproxy/testmodel/**/*.java</testExclude>
-                  <testExclude>io/vertx/serviceproxy/testmodel2/**/*.java</testExclude>
+                  <testExclude>**/InvalidParamsDataObject.java</testExclude>
+                  <testExclude>**/InvalidOverloaded.java</testExclude>
+                  <testExclude>**/InvalidParams1.java</testExclude>
+                  <testExclude>**/InvalidParams2.java</testExclude>
+                  <testExclude>**/InvalidParams3.java</testExclude>
+                  <testExclude>**/InvalidParams4.java</testExclude>
+                  <testExclude>**/InvalidReturn1.java</testExclude>
+                  <testExclude>**/InvalidReturn2.java</testExclude>
+                  <testExclude>**/InvalidReturn3.java</testExclude>
+                  <testExclude>**/InvalidClose1.java</testExclude>
+                  <testExclude>**/InvalidClose2.java</testExclude>
+                  <testExclude>**/InvalidClose3.java</testExclude>
                 </testExcludes>
+                <testCompilerArguments>
+                  <processorpath>${project.build.directory}/classes:${io.vertx:vertx-codegen-api:jar}:${io.vertx:vertx-codegen-processor:jar}</processorpath>
+                </testCompilerArguments>
               </configuration>
             </execution>
           </executions>
@@ -140,37 +162,31 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <configuration>
-            <additionalClasspathElements>
-              <additionalClasspathElement>${project.build.testSourceDirectory}</additionalClasspathElement>
-            </additionalClasspathElements>
-          </configuration>
+          <executions>
+            <execution>
+              <id>default-test</id>
+              <configuration>
+                <useModulePath>false</useModulePath>
+                <additionalClasspathElements>
+                  <additionalClasspathElement>${project.build.testSourceDirectory}</additionalClasspathElement>
+                </additionalClasspathElements>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
-
       </plugins>
-
     </pluginManagement>
 
     <plugins>
       <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
-            <id>compile-test-proxies</id>
-            <phase>test-compile</phase>
+            <phase>initialize</phase>
             <goals>
-              <goal>testCompile</goal>
+              <goal>properties</goal>
             </goals>
-            <configuration>
-              <testIncludes>
-                <testInclude>io/vertx/serviceproxy/clustered/**/*.java</testInclude>
-                <testInclude>io/vertx/serviceproxy/testmodel/**/*.java</testInclude>
-                <testInclude>io/vertx/serviceproxy/testmodel2/**/*.java</testInclude>
-              </testIncludes>
-              <annotationProcessors>
-                <annotationProcessor>io.vertx.codegen.processor.Processor</annotationProcessor>
-              </annotationProcessors>
-            </configuration>
           </execution>
         </executions>
       </plugin>
