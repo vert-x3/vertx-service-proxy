@@ -20,6 +20,7 @@
 
   <properties>
     <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
+    <vertx.surefire.useModulePath>false</vertx.surefire.useModulePath>
     <s>${path.separator}</s>
   </properties>
 
@@ -167,7 +168,6 @@
             <execution>
               <id>default-test</id>
               <configuration>
-                <useModulePath>false</useModulePath>
                 <additionalClasspathElements>
                   <additionalClasspathElement>${project.build.testSourceDirectory}</additionalClasspathElement>
                 </additionalClasspathElements>
