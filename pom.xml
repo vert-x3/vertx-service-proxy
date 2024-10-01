@@ -20,6 +20,7 @@
 
   <properties>
     <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
+    <s>${path.separator}</s>
   </properties>
 
   <dependencyManagement>
@@ -153,7 +154,7 @@
                   <testExclude>**/InvalidClose3.java</testExclude>
                 </testExcludes>
                 <testCompilerArguments>
-                  <processorpath>${project.build.directory}/classes:${io.vertx:vertx-codegen-api:jar}:${io.vertx:vertx-codegen-processor:jar}</processorpath>
+                  <processorpath>${project.build.directory}/classes${s}${io.vertx:vertx-codegen-api:jar}${s}${io.vertx:vertx-codegen-processor:jar}</processorpath>
                 </testCompilerArguments>
               </configuration>
             </execution>
