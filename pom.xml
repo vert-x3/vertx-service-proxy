@@ -1,436 +1,233 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-      
-    <parent>
-            
-        <groupId>io.vertx</groupId>
-            
-        <artifactId>vertx-parent</artifactId>
-            
-        <version>19</version>
-          
-    </parent>
-      
-    <modelVersion>4.0.0</modelVersion>
-      
-    <artifactId>vertx-service-proxy</artifactId>
-      
-    <version>4.5.11-SNAPSHOT</version>
-      
-    <properties>
-            
-        <stack.version>4.5.11-SNAPSHOT</stack.version>
-            
-        <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
-          
-    </properties>
-      
-    <dependencyManagement>
-            
-        <dependencies>
-                  
-            <dependency>
-                        
-                <groupId>io.vertx</groupId>
-                        
-                <artifactId>vertx-dependencies</artifactId>
-                        
-                <version>${stack.version}</version>
-                        
-                <type>pom</type>
-                        
-                <scope>import</scope>
-                      
-            </dependency>
-                
-        </dependencies>
-          
-    </dependencyManagement>
-      
+
+  <parent>
+    <groupId>io.vertx</groupId>
+    <artifactId>vertx-parent</artifactId>
+    <version>19</version>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>vertx-service-proxy</artifactId>
+  <version>4.5.11-SNAPSHOT</version>
+
+  <properties>
+    <stack.version>4.5.11-SNAPSHOT</stack.version>
+    <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
+  </properties>
+
+  <dependencyManagement>
     <dependencies>
-            
-        <dependency>
-                  
-            <groupId>io.vertx</groupId>
-                  
-            <artifactId>vertx-codegen</artifactId>
-                  
-            <scope>provided</scope>
-                
-        </dependency>
-            
-        <dependency>
-                  
-            <groupId>io.vertx</groupId>
-                  
-            <artifactId>vertx-core</artifactId>
-                
-        </dependency>
-            
-        <dependency>
-                  
-            <groupId>io.vertx</groupId>
-                  
-            <artifactId>vertx-auth-jwt</artifactId>
-                  
-            <optional>true</optional>
-                
-        </dependency>
-            
-        <dependency>
-                  
-            <groupId>io.vertx</groupId>
-                  
-            <artifactId>vertx-docgen</artifactId>
-                  
-            <optional>true</optional>
-                
-        </dependency>
-            
-        <dependency>
-                  
-            <groupId>com.fasterxml.jackson.core</groupId>
-                  
-            <artifactId>jackson-databind</artifactId>
-                  
-            <scope>test</scope>
-                
-        </dependency>
-            
-        <dependency>
-                  
-            <groupId>junit</groupId>
-                  
-            <artifactId>junit</artifactId>
-                  
-            <version>4.13.1</version>
-                  
-            <scope>test</scope>
-                
-        </dependency>
-            
-        <dependency>
-                  
-            <groupId>io.vertx</groupId>
-                  
-            <artifactId>vertx-core</artifactId>
-                  
-            <type>test-jar</type>
-                  
-            <scope>test</scope>
-                
-        </dependency>
-            
-        <dependency>
-                  
-            <groupId>io.vertx</groupId>
-                  
-            <artifactId>vertx-codegen</artifactId>
-                  
-            <type>test-jar</type>
-                  
-            <scope>test</scope>
-                
-        </dependency>
-            
-        <dependency>
-                  
-            <groupId>com.jayway.awaitility</groupId>
-                  
-            <artifactId>awaitility</artifactId>
-                  
-            <version>1.7.0</version>
-                  
-            <scope>test</scope>
-                
-        </dependency>
-            
-        <dependency>
-                  
-            <groupId>org.assertj</groupId>
-                  
-            <artifactId>assertj-core</artifactId>
-                  
-            <version>3.3.0</version>
-                  
-            <scope>test</scope>
-                
-        </dependency>
-          
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-dependencies</artifactId>
+        <version>${stack.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
-      
-    <build>
-            
-        <pluginManagement>
-                  
-            <plugins>
-                        
-                <plugin>
-                              
-                    <artifactId>maven-jar-plugin</artifactId>
-                              
-                    <executions>
-                                    
-                        <execution>
-                                          
-                            <id>default-jar</id>
-                                          
-                            <configuration>
-                                                
-                                <excludes>
-                                                      
-                                    <exclude>META-INF/services/javax.annotation.processing.Processor</exclude>
-                                                      
-                                    <exclude>examples/**</exclude>
-                                                    
-                                </excludes>
-                                              
-                            </configuration>
-                                        
-                        </execution>
-                                  
-                    </executions>
-                            
-                </plugin>
-                        
-                <!-- Configure the execution of the compiler to execute the codegen processor -->
-                        
-                <plugin>
-                              
-                    <artifactId>maven-compiler-plugin</artifactId>
-                              
-                    <executions>
-                                    
-                        <execution>
-                                          
-                            <id>default-compile</id>
-                                          
-                            <configuration>
-                                                
-                                <compilerArgs>
-                                                      
-                                    <arg>-proc:none</arg>
-                                                    
-                                </compilerArgs>
-                                              
-                            </configuration>
-                                        
-                        </execution>
-                                    
-                        <execution>
-                                          
-                            <id>default-testCompile</id>
-                                          
-                            <configuration>
-                                                
-                                <compilerArgs>
-                                                      
-                                    <arg>-proc:none</arg>
-                                                    
-                                </compilerArgs>
-                                              
-                            </configuration>
-                                        
-                        </execution>
-                                  
-                    </executions>
-                            
-                </plugin>
-                        
-                <plugin>
-                              
-                    <groupId>org.apache.maven.plugins</groupId>
-                              
-                    <artifactId>maven-surefire-plugin</artifactId>
-                              
-                    <configuration>
-                                    
-                        <additionalClasspathElements>
-                                          
-                            <additionalClasspathElement>${project.build.testSourceDirectory}</additionalClasspathElement>
-                                        
-                        </additionalClasspathElements>
-                                  
-                    </configuration>
-                            
-                </plugin>
-                      
-            </plugins>
-                
-        </pluginManagement>
-            
-        <plugins>
-                  
-            <plugin>
-                        
-                <groupId>org.asciidoctor</groupId>
-                        
-                <artifactId>asciidoctor-maven-plugin</artifactId>
-                        
-                <executions>
-                              
-                    <execution>
-                                    
-                        <id>asciidoctor</id>
-                                    
-                        <goals>
-                                          
-                            <goal>process-asciidoc</goal>
-                                        
-                        </goals>
-                                    
-                        <configuration>
-                                          
-                            <skip>${doc.skip}</skip>
-                                        
-                        </configuration>
-                                    
-                        <phase>prepare-package</phase>
-                                  
-                    </execution>
-                            
-                </executions>
-                      
-            </plugin>
-                  
-            <plugin>
-                        
-                <artifactId>maven-assembly-plugin</artifactId>
-                        
-                <executions>
-                              
-                    <execution>
-                                    
-                        <id>doc</id>
-                                    
-                        <phase>package</phase>
-                                    
-                        <goals>
-                                          
-                            <goal>single</goal>
-                                        
-                        </goals>
-                                    
-                        <configuration>
-                                          
-                            <attach>true</attach>
-                                          
-                            <descriptors>
-                                                
-                                <descriptor>${basedir}/src/main/assembly/docs.xml</descriptor>
-                                              
-                            </descriptors>
-                                        
-                        </configuration>
-                                  
-                    </execution>
-                            
-                </executions>
-                      
-            </plugin>
-                  
-            <plugin>
-                        
-                <groupId>org.bsc.maven</groupId>
-                        
-                <artifactId>maven-processor-plugin</artifactId>
-                        
-                <version>3.1.0</version>
-                        
-                <configuration>
-                              
-                    <systemProperties>
-                                    
-                        <java.util.logging.SimpleFormatter.format>%4$s: %3$s - %5$s %6$s%n</java.util.logging.SimpleFormatter.format>
-                                  
-                    </systemProperties>
-                            
-                </configuration>
-                        
-                <executions>
-                              
-                    <execution>
-                                    
-                        <id>generate-sources</id>
-                                    
-                        <goals>
-                                          
-                            <goal>process</goal>
-                                        
-                        </goals>
-                                    
-                        <!-- Run after compilation otherwise it won't find the generator class declared by the SPI -->
-                                    
-                        <phase>process-classes</phase>
-                                    
-                        <configuration>
-                                          
-                            <processors>
-                                                
-                                <processor>io.vertx.codegen.CodeGenProcessor</processor>
-                                                
-                                <processor>io.vertx.docgen.JavaDocGenProcessor</processor>
-                                                
-                                <processor>io.vertx.docgen.DocGenProcessor</processor>
-                                              
-                            </processors>
-                                          
-                            <optionMap>
-                                                
-                                <codegen.output>${project.basedir}/target/generated-for-docs</codegen.output>
-                                                
-                                <docgen.source>${asciidoc.dir}</docgen.source>
-                                                
-                                <docgen.output>${project.build.directory}/asciidoc/java</docgen.output>
-                                                
-                                <maven.groupId>${project.groupId}</maven.groupId>
-                                                
-                                <maven.artifactId>${project.artifactId}</maven.artifactId>
-                                                
-                                <maven.version>${project.version}</maven.version>
-                                              
-                            </optionMap>
-                                        
-                        </configuration>
-                                  
-                    </execution>
-                              
-                    <execution>
-                                    
-                        <id>generate-test-sources</id>
-                                    
-                        <goals>
-                                          
-                            <goal>process-test</goal>
-                                        
-                        </goals>
-                                    
-                        <phase>generate-test-sources</phase>
-                                    
-                        <configuration>
-                                          
-                            <processors>
-                                                
-                                <processor>io.vertx.codegen.CodeGenProcessor</processor>
-                                              
-                            </processors>
-                                          
-                            <excludes>
-                                                
-                                <exclude>io/vertx/serviceproxy/codegen/**</exclude>
-                                              
-                            </excludes>
-                                        
-                        </configuration>
-                                  
-                    </execution>
-                            
-                </executions>
-                      
-            </plugin>
-                
-        </plugins>
-          
-    </build>
-    
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-codegen</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-auth-jwt</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-docgen</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.13.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-core</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-codegen</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.jayway.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
+      <version>1.7.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>3.3.0</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>default-jar</id>
+              <configuration>
+                <excludes>
+                  <exclude>META-INF/services/javax.annotation.processing.Processor</exclude>
+                  <exclude>examples/**</exclude>
+                </excludes>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <!-- Configure the execution of the compiler to execute the codegen processor -->
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>default-compile</id>
+              <configuration>
+                <compilerArgs>
+                  <arg>-proc:none</arg>
+                </compilerArgs>
+              </configuration>
+            </execution>
+            <execution>
+              <id>default-testCompile</id>
+              <configuration>
+                <compilerArgs>
+                  <arg>-proc:none</arg>
+                </compilerArgs>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <additionalClasspathElements>
+              <additionalClasspathElement>${project.build.testSourceDirectory}</additionalClasspathElement>
+            </additionalClasspathElements>
+          </configuration>
+        </plugin>
+
+      </plugins>
+
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.asciidoctor</groupId>
+        <artifactId>asciidoctor-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>asciidoctor</id>
+            <goals>
+              <goal>process-asciidoc</goal>
+            </goals>
+            <configuration>
+              <skip>${doc.skip}</skip>
+            </configuration>
+            <phase>prepare-package</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>doc</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <attach>true</attach>
+              <descriptors>
+                <descriptor>${basedir}/src/main/assembly/docs.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.bsc.maven</groupId>
+        <artifactId>maven-processor-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <systemProperties>
+            <java.util.logging.SimpleFormatter.format>%4$s: %3$s - %5$s %6$s%n</java.util.logging.SimpleFormatter.format>
+          </systemProperties>
+        </configuration>
+        <executions>
+          <execution>
+            <id>generate-sources</id>
+            <goals>
+              <goal>process</goal>
+            </goals>
+            <!-- Run after compilation otherwise it won't find the generator class declared by the SPI -->
+            <phase>process-classes</phase>
+            <configuration>
+              <processors>
+                <processor>io.vertx.codegen.CodeGenProcessor</processor>
+                <processor>io.vertx.docgen.JavaDocGenProcessor</processor>
+                <processor>io.vertx.docgen.DocGenProcessor</processor>
+              </processors>
+              <optionMap>
+                <codegen.output>${project.basedir}/target/generated-for-docs</codegen.output>
+                <docgen.source>${asciidoc.dir}</docgen.source>
+                <docgen.output>${project.build.directory}/asciidoc/java</docgen.output>
+                <maven.groupId>${project.groupId}</maven.groupId>
+                <maven.artifactId>${project.artifactId}</maven.artifactId>
+                <maven.version>${project.version}</maven.version>
+              </optionMap>
+            </configuration>
+          </execution>
+          <execution>
+            <id>generate-test-sources</id>
+            <goals>
+              <goal>process-test</goal>
+            </goals>
+            <phase>generate-test-sources</phase>
+            <configuration>
+              <processors>
+                <processor>io.vertx.codegen.CodeGenProcessor</processor>
+              </processors>
+              <excludes>
+                <exclude>io/vertx/serviceproxy/codegen/**</exclude>
+              </excludes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>
