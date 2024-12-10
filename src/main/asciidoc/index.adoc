@@ -112,7 +112,7 @@ the appropriate EventBus proxy code.
 .package-info.java
 [source,java]
 ----
-@io.vertx.codegen.annotations.ModuleGen(groupPackage = "io.vertx.example", name = "services", useFutures = true)
+@io.vertx.codegen.annotations.ModuleGen(groupPackage = "io.vertx.example", name = "services")
 package io.vertx.example;
 ----
 
