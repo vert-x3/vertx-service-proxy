@@ -108,33 +108,6 @@ public class ServiceBinder {
     return this;
   }
 
-  /**
-   * Wrapper method, remove when old interceptors will be removed
-   *
-   * @param interceptor interceptor to add
-   * @return self
-   */
-  @Deprecated
-  public ServiceBinder addInterceptor(Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
-    ServiceInterceptor serviceInterceptor = (vertx, context, msg) -> interceptor.apply(msg);
-    checkAndAddInterceptor(serviceInterceptor);
-    return this;
-  }
-
-  /**
-   * Wrapper method, remove when old interceptors will be removed
-   *
-   * @param interceptor interceptor to add
-   * @return self
-   */
-  @Deprecated
-  public ServiceBinder addInterceptor(String action,
-                                      Function<Message<JsonObject>, Future<Message<JsonObject>>> interceptor) {
-    ServiceInterceptor serviceInterceptor = (vertx, context, msg) -> interceptor.apply(msg);
-    checkAndAddInterceptor(action, serviceInterceptor);
-    return this;
-  }
-
   public ServiceBinder addInterceptor(ServiceInterceptor interceptor) {
     checkAndAddInterceptor(interceptor);
     return this;
