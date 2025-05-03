@@ -121,7 +121,7 @@ public class ServiceBinder {
    * @param <T>     the type of the service interface
    * @return the consumer used to unregister the service
    */
-  public <T> MessageConsumer<JsonObject> register(Class<T> clazz, T service) {
+  public <T> MessageConsumer<JsonObject> register(Class<? extends T> clazz, T service) {
     Objects.requireNonNull(address);
     // register
     return getProxyHandler(clazz, service).register(vertx, address, getInterceptorHolders());
@@ -136,7 +136,7 @@ public class ServiceBinder {
    * @param <T>     the type of the service interface
    * @return the consumer used to unregister the service
    */
-  public <T> MessageConsumer<JsonObject> registerLocal(Class<T> clazz, T service) {
+  public <T> MessageConsumer<JsonObject> registerLocal(Class<? extends T> clazz, T service) {
     Objects.requireNonNull(address);
     // register
     return getProxyHandler(clazz, service).registerLocal(vertx, address, getInterceptorHolders());
@@ -182,7 +182,7 @@ public class ServiceBinder {
     currentInterceptorHolders.add(new InterceptorHolder(interceptor));
   }
 
-  private <T> ProxyHandler getProxyHandler(Class<T> clazz, T service) {
+  private <T> ProxyHandler getProxyHandler(Class<? extends T> clazz, T service) {
     String handlerClassName = clazz.getName() + "VertxProxyHandler";
     Class<?> handlerClass = loadClass(handlerClassName, clazz);
     Constructor<?> constructor = getConstructor(
