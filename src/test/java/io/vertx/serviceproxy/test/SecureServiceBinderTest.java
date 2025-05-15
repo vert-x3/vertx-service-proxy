@@ -34,16 +34,21 @@ import io.vertx.serviceproxy.testmodel.OKServiceImpl;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
 public class SecureServiceBinderTest extends VertxTestBase {
 
   private final static String SERVICE_ADDRESS = "someaddress";
   private final static String SERVICE_LOCAL_ADDRESS = "someaddress.local";
-  // {"sub":"Paulo","exp":1747055313,"iat":1431695313,"permissions":["read","write","execute"],"roles":["admin","developer","user"]}
-  private static final String JWT_VALID_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJQYXVsbyIsImV4cCI6MTc0NzA1NTMxMywiaWF0IjoxNDMxNjk1MzEzLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiLCJleGVjdXRlIl0sInJvbGVzIjpbImFkbWluIiwiZGV2ZWxvcGVyIiwidXNlciJdfQ.UdA6oYDn9s_k7uogFFg8jvKmq9RgITBnlq4xV6JGsCY";
+
+  private static final String JWT_CLAIMS = "{\"sub\":\"Paulo\",\"exp\":1747055313,\"iat\":1431695313,\"permissions\":[\"read\",\"write\",\"execute\"],\"roles\":[\"admin\",\"developer\",\"user\"]}";
 
   private ServiceProxyBuilder serviceProxyBuilder, localServiceProxyBuilder;
   private MessageConsumer<JsonObject> consumer, localConsumer;
   private OKService proxy, localProxy;
+  private final long exp = LocalDateTime.now().plusDays(1).toEpochSecond(ZoneOffset.UTC);
+  private String jwtValidToken;
 
   private JWTAuthOptions getJWTConfig() {
     return new JWTAuthOptions()
@@ -56,12 +61,16 @@ public class SecureServiceBinderTest extends VertxTestBase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
+
+    JWTAuth authProvider = JWTAuth.create(vertx, getJWTConfig());
+    jwtValidToken = authProvider.generateToken(new JsonObject(JWT_CLAIMS).put("exp", exp));
+
     OKService service = new OKServiceImpl();
 
     ServiceBinder serviceBinder = new ServiceBinder(vertx)
       .setAddress(SERVICE_ADDRESS)
       .addInterceptor(
-        AuthenticationInterceptor.create(JWTAuth.create(vertx, getJWTConfig())))
+        AuthenticationInterceptor.create(authProvider))
       .addInterceptor(
         AuthorizationInterceptor.create(JWTAuthorization.create("roles"))
           // an admin
@@ -76,7 +85,7 @@ public class SecureServiceBinderTest extends VertxTestBase {
     ServiceBinder localServiceBinder = new ServiceBinder(vertx)
       .setAddress(SERVICE_LOCAL_ADDRESS)
       .addInterceptor(
-        AuthenticationInterceptor.create(JWTAuth.create(vertx, getJWTConfig())))
+        AuthenticationInterceptor.create(authProvider))
       .addInterceptor(
         AuthorizationInterceptor.create(JWTAuthorization.create("roles"))
           // an admin
@@ -108,7 +117,7 @@ public class SecureServiceBinderTest extends VertxTestBase {
   @Test
   public void testWithToken() {
 
-    serviceProxyBuilder.setToken(JWT_VALID_TOKEN);
+    serviceProxyBuilder.setToken(jwtValidToken);
 
     proxy = serviceProxyBuilder.build(OKService.class);
 
@@ -133,7 +142,7 @@ public class SecureServiceBinderTest extends VertxTestBase {
   @Test
   public void testLocalWithToken() {
 
-    localServiceProxyBuilder.setToken(JWT_VALID_TOKEN);
+    localServiceProxyBuilder.setToken(jwtValidToken);
 
     localProxy = localServiceProxyBuilder.build(OKService.class);
 
