@@ -22,6 +22,8 @@
   <properties>
     <vertx.surefire.useModulePath>false</vertx.surefire.useModulePath>
     <s>${path.separator}</s>
+    <protobuf.version>4.29.3</protobuf.version>
+    <protobuf.maven.plugin.version>3.10.2</protobuf.maven.plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -97,6 +99,27 @@
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
       <version>3.3.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-unit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-grpc-eventbus</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-grpc-client</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-grpc-server</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -198,6 +221,31 @@
             <id>package-docs</id>
             <goals>
               <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>io.github.ascopes</groupId>
+        <artifactId>protobuf-maven-plugin</artifactId>
+        <version>${protobuf.maven.plugin.version}</version>
+        <configuration>
+          <protocVersion>${protobuf.version}</protocVersion>
+          <jvmMavenPlugins>
+            <jvmMavenPlugin>
+              <groupId>io.vertx</groupId>
+              <artifactId>vertx-grpc-protoc-plugin2</artifactId>
+              <version>${project.version}</version>
+              <mainClass>io.vertx.grpc.plugin.VertxGrpcGenerator</mainClass>
+              <options>grpc-client=true,grpc-service=true</options>
+            </jvmMavenPlugin>
+          </jvmMavenPlugins>
+        </configuration>
+        <executions>
+          <execution>
+            <id>generate-test</id>
+            <goals>
+              <goal>generate-test</goal>
             </goals>
           </execution>
         </executions>
