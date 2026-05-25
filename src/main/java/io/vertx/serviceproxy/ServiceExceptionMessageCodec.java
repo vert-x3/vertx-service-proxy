@@ -78,4 +78,3 @@ public class ServiceExceptionMessageCodec implements MessageCodec<ServiceExcepti
     return -1;
   }
 }
-

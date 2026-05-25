@@ -1,10 +1,7 @@
 package io.vertx.serviceproxy.generator;
 
-import io.vertx.codegen.processor.ParamInfo;
-import io.vertx.codegen.processor.type.ClassKind;
 import io.vertx.codegen.processor.type.ClassTypeInfo;
 import io.vertx.codegen.processor.type.MapperInfo;
-import io.vertx.codegen.processor.type.ParameterizedTypeInfo;
 import io.vertx.serviceproxy.generator.model.ProxyModel;
 
 import java.io.InputStream;

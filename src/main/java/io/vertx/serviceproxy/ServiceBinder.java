@@ -15,9 +15,7 @@
  */
 package io.vertx.serviceproxy;
 
-import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.impl.InterceptorHolder;
@@ -26,7 +24,6 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 
 import static io.vertx.serviceproxy.impl.utils.InterceptorUtils.checkInterceptorOrder;
 
