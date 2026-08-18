@@ -44,7 +44,7 @@ public class EventBusServiceProxyInteropTest {
 
   @Test
   public void testProxyClientCallsGrpcServer() throws Exception {
-    EventBusGrpcServer server = EventBusGrpcServer.server(vertx);
+    EventBusGrpcServer server = EventBusGrpcServer.server(vertx).await(10, TimeUnit.SECONDS);
     server.addService(GreeterGrpcService.of(new GreeterService() {
       @Override
       public Future<HelloReply> sayHello(HelloRequest request) {
@@ -91,7 +91,7 @@ public class EventBusServiceProxyInteropTest {
       .register(GreeterProxy.class, impl);
 
     try {
-      EventBusGrpcClient client = EventBusGrpcClient.client(vertx);
+      EventBusGrpcClient client = EventBusGrpcClient.client(vertx).await(10, TimeUnit.SECONDS);
       GreeterClient greeter = GreeterGrpcClient.create(client, WireFormat.JSON);
 
       HelloReply reply = greeter
@@ -109,8 +109,8 @@ public class EventBusServiceProxyInteropTest {
   }
 
   @Test
-  public void testProxyClientReceivesGrpcServerFailure() {
-    EventBusGrpcServer server = EventBusGrpcServer.server(vertx);
+  public void testProxyClientReceivesGrpcServerFailure() throws Exception {
+    EventBusGrpcServer server = EventBusGrpcServer.server(vertx).await(10, TimeUnit.SECONDS);
     server.addService(GreeterGrpcService.of(new GreeterService() {
       @Override
       public Future<HelloReply> sayHello(HelloRequest request) {
@@ -145,7 +145,7 @@ public class EventBusServiceProxyInteropTest {
       .register(GreeterProxy.class, impl);
 
     try {
-      EventBusGrpcClient client = EventBusGrpcClient.client(vertx);
+      EventBusGrpcClient client = EventBusGrpcClient.client(vertx).await(10, TimeUnit.SECONDS);
       GreeterClient greeter = GreeterGrpcClient.create(client, WireFormat.JSON);
 
       InvalidStatusException expected = assertThrows(
@@ -175,7 +175,7 @@ public class EventBusServiceProxyInteropTest {
       .register(GreeterProxy.class, impl);
 
     try {
-      EventBusGrpcClient client = EventBusGrpcClient.client(vertx);
+      EventBusGrpcClient client = EventBusGrpcClient.client(vertx).await(10, TimeUnit.SECONDS);
       GreeterClient greeter = GreeterGrpcClient.create(client, WireFormat.JSON);
 
       InvalidStatusException expected = assertThrows(
@@ -188,8 +188,8 @@ public class EventBusServiceProxyInteropTest {
   }
 
   @Test
-  public void testProxyClientWithoutWireFormatHeaderFails() {
-    EventBusGrpcServer server = EventBusGrpcServer.server(vertx);
+  public void testProxyClientWithoutWireFormatHeaderFails() throws Exception {
+    EventBusGrpcServer server = EventBusGrpcServer.server(vertx).await(10, TimeUnit.SECONDS);
     server.addService(GreeterGrpcService.of(new GreeterService() {
       @Override
       public Future<HelloReply> sayHello(HelloRequest request) {
