@@ -2,7 +2,6 @@ package io.vertx.serviceproxy.tests.grpcinterop;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonObject;
@@ -63,7 +62,6 @@ public class EventBusServiceProxyInteropTest {
 
     GreeterProxy proxy = new ServiceProxyBuilder(vertx)
       .setAddress(ADDRESS)
-      .setOptions(new DeliveryOptions().addHeader("grpc-wire-format", WireFormat.JSON.name()))
       .build(GreeterProxy.class);
 
     HelloJavaReply reply = proxy.SayHello("Julien").await(10, TimeUnit.SECONDS);
@@ -120,7 +118,6 @@ public class EventBusServiceProxyInteropTest {
 
     GreeterProxy proxy = new ServiceProxyBuilder(vertx)
       .setAddress(ADDRESS)
-      .setOptions(new DeliveryOptions().addHeader("grpc-wire-format", WireFormat.JSON.name()))
       .build(GreeterProxy.class);
 
     ReplyException expected = assertThrows(ReplyException.class, () -> proxy.SayHello("Julien").await(10, TimeUnit.SECONDS));
@@ -185,27 +182,5 @@ public class EventBusServiceProxyInteropTest {
     } finally {
       consumer.unregister().await(10, TimeUnit.SECONDS);
     }
-  }
-
-  @Test
-  public void testProxyClientWithoutWireFormatHeaderFails() throws Exception {
-    EventBusGrpcServer server = EventBusGrpcServer.server(vertx).await(10, TimeUnit.SECONDS);
-    server.addService(GreeterGrpcService.of(new GreeterService() {
-      @Override
-      public Future<HelloReply> sayHello(HelloRequest request) {
-        return Future.succeededFuture(HelloReply.newBuilder()
-          .setMessage("Hello " + request.getName())
-          .build());
-      }
-    }));
-
-    GreeterProxy proxy = new ServiceProxyBuilder(vertx)
-      .setAddress(ADDRESS)
-      .build(GreeterProxy.class);
-
-    ReplyException expected = assertThrows(ReplyException.class, () -> proxy.SayHello("Julien").await(10, TimeUnit.SECONDS));
-    assertEquals(GrpcStatus.INVALID_ARGUMENT.code, expected.failureCode());
-    assertNotNull(expected.getMessage());
-    assertTrue("expected message to mention grpc-wire-format, got: " + expected.getMessage(), expected.getMessage().contains("grpc-wire-format"));
   }
 }
