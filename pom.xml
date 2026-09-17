@@ -122,6 +122,12 @@
       <artifactId>vertx-grpc-server</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- This dependency is needed for the release to ensure build order is correct -->
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-grpc-protoc-plugin2</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
